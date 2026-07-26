@@ -1,0 +1,263 @@
+-- Run this in the Supabase SQL Editor (Project > SQL Editor > New query).
+-- Safe to re-run: uses if-not-exists / on-conflict guards throughout.
+--
+-- Bootstrapping the first SAdmin (there's no self-registration, so this one
+-- account has to be created by hand):
+--   1. Supabase Dashboard > Authentication > Users > Add user. Set an email
+--      and password directly (skip "send invite" unless email is configured).
+--   2. Copy the new user's UUID, then run:
+--       insert into public.users (id, email, full_name, role)
+--       values ('<uuid-from-step-1>', '<email-from-step-1>', 'Super Admin', 'SAdmin');
+--   Every user after this one can be created from the app's admin panel.
+
+create extension if not exists "pgcrypto";
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'user_role') then
+    create type user_role as enum ('SAdmin', 'Admin', 'Manager', 'Agent');
+  end if;
+end $$;
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- users — one row per auth.users account. Role lives here, not in Supabase
+-- Auth metadata, so it can be joined/filtered/audited with plain SQL.
+-- ---------------------------------------------------------------------------
+create table if not exists public.users (
+  id uuid primary key references auth.users (id) on delete cascade,
+  email text not null,
+  full_name text not null default '',
+  role user_role not null default 'Agent',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists users_role_idx on public.users (role);
+create unique index if not exists users_email_idx on public.users (email) where deleted_at is null;
+
+alter table public.users enable row level security;
+-- Deny-by-default: no policies means anon/authenticated get zero access except
+-- the one below. Listing/creating/editing/deleting *other* users all go through
+-- Server Actions using the service role key (bypasses RLS), gated by the
+-- app-level permission check — the trust boundary is the Server Action, not
+-- Postgres RLS. This policy only covers a signed-in user reading their own row
+-- (needed for the sidebar profile display and the permission check itself).
+drop policy if exists "users can read own row" on public.users;
+create policy "users can read own row" on public.users
+  for select
+  to authenticated
+  using (auth.uid() = id and deleted_at is null);
+
+drop trigger if exists set_users_updated_at on public.users;
+create trigger set_users_updated_at
+  before update on public.users
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- user_info — 1:1 profile detail, split from `users` so the auth/admin table
+-- stays lean and this can hold public-facing fields (phone, bio, avatar) that
+-- vary a lot by role (an Agent needs a public bio; a Manager may not).
+-- ---------------------------------------------------------------------------
+create table if not exists public.user_info (
+  user_id uuid primary key references public.users (id) on delete cascade,
+  phone text,
+  avatar_url text,
+  bio text,
+  address_line text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_info enable row level security;
+drop policy if exists "users can read own info" on public.user_info;
+create policy "users can read own info" on public.user_info
+  for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+drop trigger if exists set_user_info_updated_at on public.user_info;
+create trigger set_user_info_updated_at
+  before update on public.user_info
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- permissions — role x page capability matrix, editable by SAdmin from a
+-- Settings screen so RBAC changes don't require a deploy.
+-- ---------------------------------------------------------------------------
+create table if not exists public.permissions (
+  id uuid primary key default gen_random_uuid(),
+  role user_role not null,
+  page text not null,
+  can_view boolean not null default false,
+  can_create boolean not null default false,
+  can_edit boolean not null default false,
+  can_delete boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (role, page)
+);
+
+alter table public.permissions enable row level security;
+-- Any signed-in user can read the permission matrix (needed to check their own
+-- role's access — the data itself isn't sensitive, it's just capability flags).
+-- Writes are not exposed here: they go through a Server Action gated to SAdmin.
+drop policy if exists "authenticated can read permissions" on public.permissions;
+create policy "authenticated can read permissions" on public.permissions
+  for select
+  to authenticated
+  using (true);
+
+-- Seed sensible defaults. SAdmin also gets a hardcoded bypass in application code
+-- so a misconfigured or emptied permissions table can never lock SAdmin out.
+insert into public.permissions (role, page, can_view, can_create, can_edit, can_delete)
+values
+  ('SAdmin', 'dashboard', true, true, true, true),
+  ('SAdmin', 'users', true, true, true, true),
+  ('SAdmin', 'blogs', true, true, true, true),
+  ('SAdmin', 'properties', true, true, true, true),
+  ('SAdmin', 'settings', true, true, true, true),
+  ('Admin', 'dashboard', true, true, true, true),
+  ('Admin', 'users', true, true, true, false),
+  ('Admin', 'blogs', true, true, true, true),
+  ('Admin', 'properties', true, true, true, true),
+  ('Admin', 'settings', true, false, false, false),
+  ('Manager', 'dashboard', true, false, false, false),
+  ('Manager', 'users', false, false, false, false),
+  ('Manager', 'blogs', true, true, true, false),
+  ('Manager', 'properties', true, true, true, false),
+  ('Manager', 'settings', false, false, false, false),
+  ('Agent', 'dashboard', true, false, false, false),
+  ('Agent', 'users', false, false, false, false),
+  ('Agent', 'blogs', true, false, false, false),
+  ('Agent', 'properties', true, false, false, false),
+  ('Agent', 'settings', false, false, false, false)
+on conflict (role, page) do nothing;
+
+drop trigger if exists set_permissions_updated_at on public.permissions;
+create trigger set_permissions_updated_at
+  before update on public.permissions
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- properties — the listings themselves. custom_fields holds attributes that
+-- vary by property_type (beds/baths for a House, acreage for Land, etc.)
+-- rather than a column per possible attribute.
+-- ---------------------------------------------------------------------------
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'property_type') then
+    create type property_type as enum ('House', 'Apartment', 'Villa', 'Condo', 'Land');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'property_status') then
+    create type property_status as enum ('draft', 'published', 'sold', 'archived');
+  end if;
+end $$;
+
+create table if not exists public.properties (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  slug text not null,
+  property_type property_type not null,
+  status property_status not null default 'draft',
+  price numeric(14, 2),
+  -- Full street address is intentionally separate from the public display
+  -- label — the homepage never shows an exact address, only city/state.
+  address_line text,
+  city_state text,
+  lat double precision,
+  lng double precision,
+  custom_fields jsonb not null default '{}'::jsonb,
+  created_by uuid references public.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists properties_status_idx on public.properties (status);
+create index if not exists properties_type_idx on public.properties (property_type);
+create unique index if not exists properties_slug_idx on public.properties (slug) where deleted_at is null;
+
+alter table public.properties enable row level security;
+-- Admin CRUD goes through Server Actions with the service role key (deny-by-
+-- default covers that). This policy is the public-facing read: anyone,
+-- including signed-out visitors, can read published/non-deleted listings —
+-- that's the whole point of the draft/published split.
+drop policy if exists "public can read published properties" on public.properties;
+create policy "public can read published properties" on public.properties
+  for select
+  to anon, authenticated
+  using (status = 'published' and deleted_at is null);
+
+drop trigger if exists set_properties_updated_at on public.properties;
+create trigger set_properties_updated_at
+  before update on public.properties
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- user_property — which agent(s) are assigned to which property. Many-to-
+-- many: a property can have more than one agent, an agent can have many
+-- properties.
+-- ---------------------------------------------------------------------------
+create table if not exists public.user_property (
+  user_id uuid not null references public.users (id) on delete cascade,
+  property_id uuid not null references public.properties (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, property_id)
+);
+
+create index if not exists user_property_property_idx on public.user_property (property_id);
+
+alter table public.user_property enable row level security;
+-- Deny-by-default, no policies: assignments are managed through Server
+-- Actions (service role) alongside property/user CRUD, never queried directly
+-- by the client.
+
+-- ---------------------------------------------------------------------------
+-- blogs — content marketing posts, optionally tied to a specific listing.
+-- ---------------------------------------------------------------------------
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'blog_status') then
+    create type blog_status as enum ('draft', 'published');
+  end if;
+end $$;
+
+create table if not exists public.blogs (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid references public.properties (id) on delete set null,
+  author_id uuid references public.users (id) on delete set null,
+  title text not null,
+  slug text not null,
+  excerpt text,
+  content text,
+  status blog_status not null default 'draft',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists blogs_status_idx on public.blogs (status);
+create unique index if not exists blogs_slug_idx on public.blogs (slug) where deleted_at is null;
+
+alter table public.blogs enable row level security;
+drop policy if exists "public can read published blogs" on public.blogs;
+create policy "public can read published blogs" on public.blogs
+  for select
+  to anon, authenticated
+  using (status = 'published' and deleted_at is null);
+
+drop trigger if exists set_blogs_updated_at on public.blogs;
+create trigger set_blogs_updated_at
+  before update on public.blogs
+  for each row execute function public.set_updated_at();
