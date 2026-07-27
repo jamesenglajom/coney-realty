@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { getPublishedBlogBySlug, estimateReadMinutes } from "@/features/blogs/publicQueries";
-import { formatPostDate } from "@/features/homepage/data";
+import { formatPostDate, getBlogCoverForSeed } from "@/features/homepage/data";
 
 export async function generateMetadata({ params }) {
 	const { slug } = await params;
@@ -53,6 +54,17 @@ export default async function BlogPostPage({ params }) {
 					<time dateTime={post.created_at}>{formatPostDate(post.created_at)}</time>
 					<span aria-hidden="true">·</span>
 					<span>{readMins} min read</span>
+				</div>
+
+				<div className="relative mt-8 aspect-video overflow-hidden rounded-2xl">
+					<Image
+						src={post.cover_image_url || getBlogCoverForSeed(post.slug)}
+						alt=""
+						fill
+						sizes="(min-width: 672px) 672px, 100vw"
+						className="object-cover"
+						priority
+					/>
 				</div>
 
 				<div className="mt-10 space-y-5 text-base leading-relaxed text-txt-secondary dark:text-txt-secondary-dark">

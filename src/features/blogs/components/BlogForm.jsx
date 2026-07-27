@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { createBlogSchema, updateBlogSchema, BLOG_STATUSES } from "../schemas";
 import { createBlogAction, updateBlogAction } from "../actions";
@@ -12,6 +14,10 @@ import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
+
+function isHttpUrl(value) {
+	return /^https?:\/\//.test(value ?? "");
+}
 
 function slugify(value) {
 	return value
@@ -28,6 +34,7 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [serverError, setServerError] = useState("");
+	const [coverLoadFailed, setCoverLoadFailed] = useState(false);
 	const isEdit = mode === "edit";
 
 	const {
@@ -46,6 +53,7 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 					status: blog.status,
 					excerpt: blog.excerpt ?? "",
 					content: blog.content ?? "",
+					coverImageUrl: blog.cover_image_url ?? "",
 					authorId: blog.author_id ?? currentUserId,
 					propertyId: blog.property_id ?? "",
 				}
@@ -55,10 +63,14 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 					status: BLOG_STATUSES[0],
 					excerpt: "",
 					content: "",
+					coverImageUrl: "",
 					authorId: currentUserId,
 					propertyId: "",
 				},
 	});
+
+	const coverImageUrlValue = watch("coverImageUrl");
+	const showCoverPreview = isHttpUrl(coverImageUrlValue) && !coverLoadFailed;
 
 	// Auto-derive the slug from the title as the user types, until they
 	// manually edit the slug field themselves — then it's theirs to control.
@@ -149,6 +161,42 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 					))}
 				</Select>
 				<FieldError>{errors.propertyId?.message}</FieldError>
+			</div>
+
+			<div>
+				<Label htmlFor="coverImageUrl">Cover image URL</Label>
+				<div className="flex items-start gap-3">
+					<div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-theme-gray/10 dark:bg-white/5">
+						{showCoverPreview ? (
+							<Image
+								src={coverImageUrlValue}
+								alt=""
+								fill
+								unoptimized
+								sizes="96px"
+								className="object-cover"
+								onError={() => setCoverLoadFailed(true)}
+								onLoad={() => setCoverLoadFailed(false)}
+							/>
+						) : (
+							<div className="flex h-full w-full items-center justify-center text-txt-muted dark:text-txt-muted-dark">
+								<ImageOff className="h-5 w-5" aria-hidden="true" />
+							</div>
+						)}
+					</div>
+					<div className="flex-1">
+						<Input
+							id="coverImageUrl"
+							type="text"
+							placeholder="https://…"
+							{...register("coverImageUrl", { onChange: () => setCoverLoadFailed(false) })}
+						/>
+						{coverLoadFailed ? (
+							<p className="mt-1.5 text-xs text-red-600 dark:text-red-400">Couldn&apos;t load an image from that URL.</p>
+						) : null}
+						<FieldError>{errors.coverImageUrl?.message}</FieldError>
+					</div>
+				</div>
 			</div>
 
 			<div>

@@ -20,7 +20,7 @@ export async function listPublishedBlogs(limit) {
 	const supabase = createAdminClient();
 	let query = supabase
 		.from("blogs")
-		.select("id, title, slug, excerpt, content, created_at, author:author_id(full_name)")
+		.select("id, title, slug, excerpt, content, cover_image_url, created_at, author:author_id(full_name)")
 		.eq("status", "published")
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
@@ -38,7 +38,7 @@ export const getPublishedBlogBySlug = cache(async function getPublishedBlogBySlu
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("blogs")
-		.select("id, title, slug, excerpt, content, created_at, author:author_id(full_name)")
+		.select("id, title, slug, excerpt, content, cover_image_url, created_at, author:author_id(full_name)")
 		.eq("slug", slug)
 		.eq("status", "published")
 		.is("deleted_at", null)

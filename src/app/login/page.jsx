@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import LoginForm from "@/features/auth/components/LoginForm";
 
 export const metadata = {
@@ -12,12 +13,13 @@ export default function LoginPage() {
 		<main className="flex min-h-screen items-center justify-center bg-theme-gold-light px-4 dark:bg-black">
 			<div className="w-full max-w-sm rounded-2xl border border-theme-gray/15 bg-white p-8 shadow-xl dark:border-white/10 dark:bg-white/[0.03]">
 				<div className="flex items-center gap-2 text-lg font-semibold text-theme-blue dark:text-white">
-					<span
-						className="grid h-8 w-8 place-items-center rounded-lg bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue"
-						aria-hidden="true"
-					>
-						C
-					</span>
+					<Image
+						src="/logo/conyrealty-logo.jpg"
+						alt="ConeyRealty"
+						width={32}
+						height={32}
+						className="rounded-lg"
+					/>
 					ConeyRealty Admin
 				</div>
 				<p className="mt-4 text-sm text-txt-muted dark:text-txt-muted-dark">

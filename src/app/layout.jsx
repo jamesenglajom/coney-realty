@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
-				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+				<link rel="icon" href="/logo/conyrealty-logo.jpg" type="image/jpeg" />
 				<script dangerouslySetInnerHTML={{ __html: noFlashThemeScript }} />
 			</head>
 			<body

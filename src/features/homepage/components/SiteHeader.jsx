@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import StickyHeaderShell from "./StickyHeaderShell";
 import MobileMenu from "./MobileMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -19,12 +20,13 @@ export default function SiteHeader() {
 					href="/#top"
 					className="flex items-center gap-2 font-display text-xl font-semibold text-theme-blue dark:text-white"
 				>
-					<span
-						className="grid h-7 w-7 place-items-center rounded-lg bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue"
-						aria-hidden="true"
-					>
-						C
-					</span>
+					<Image
+						src="/logo/conyrealty-logo.jpg"
+						alt="ConeyRealty"
+						width={28}
+						height={28}
+						className="rounded-lg"
+					/>
 					ConeyRealty
 				</Link>
 

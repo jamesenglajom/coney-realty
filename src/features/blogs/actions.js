@@ -12,6 +12,7 @@ function toColumns(data) {
 		status: data.status,
 		excerpt: data.excerpt || null,
 		content: data.content || null,
+		cover_image_url: data.coverImageUrl || null,
 		author_id: data.authorId,
 		property_id: data.propertyId || null,
 	};

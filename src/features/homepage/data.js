@@ -10,13 +10,6 @@ export const PRICE_BANDS = [
 	{ label: "₱150M+", min: 150000000, max: Infinity },
 ];
 
-export const STATS = [
-	{ value: "$2.4B", label: "Sold in 2025" },
-	{ value: "3,100+", label: "Families placed" },
-	{ value: "38", label: "Cities covered" },
-	{ value: "4.9/5", label: "Client rating" },
-];
-
 export const AGENTS = [
 	{ id: "a1", name: "Maya Okonkwo", title: "Principal Broker", photo: "https://randomuser.me/api/portraits/women/68.jpg", phone: "+1-512-555-0142", email: "maya@coneyrealty.example", rating: 4.9, deals: 214, volume: "$182M", regions: ["Austin, TX", "Nashville, TN"], types: ["House", "Villa", "Condo"], band: { min: 600000, max: 3500000 }, blurb: "Luxury & new-build specialist with a 12-year track record in Central Texas." },
 	{ id: "a2", name: "Daniel Reyes", title: "Senior Agent", photo: "https://randomuser.me/api/portraits/men/32.jpg", phone: "+1-303-555-0188", email: "daniel@coneyrealty.example", rating: 4.8, deals: 176, volume: "$121M", regions: ["Denver, CO", "Boise, ID"], types: ["House", "Condo", "Apartment"], band: { min: 250000, max: 1200000 }, blurb: "First-time buyers and relocation moves across the Mountain West." },
@@ -38,10 +31,11 @@ export const FEATURED_PROPERTIES = [
 ];
 
 export const TESTIMONIAL = {
-	quote: "They didn't send me a wall of listings. They sent me one agent who already knew three homes in my range — one wasn't even public yet. We closed in five weeks.",
-	name: "Sajib Rahman",
-	role: "first-time buyer, Denver",
-	photo: "https://randomuser.me/api/portraits/men/41.jpg",
+	quote:
+		"We don't hand buyers a wall of listings and disappear. Every client gets a real agent who already knows the property — the zoning, the title history, the neighborhood — before the first viewing. That's the whole idea behind ConeyRealty.",
+	name: "Coney Marie Lajom",
+	role: "Principal Agent, ConeyRealty",
+	email: "coneylajom@dvorealty.com",
 };
 
 // Real agents (from Supabase) and real blog posts don't have photo/cover

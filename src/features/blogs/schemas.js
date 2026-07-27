@@ -18,6 +18,7 @@ const blogBaseSchema = z.object({
 	status: z.enum(BLOG_STATUSES),
 	excerpt: z.string().trim().optional(),
 	content: z.string().trim().optional(),
+	coverImageUrl: z.string().trim().optional(),
 	authorId: z.string().trim().min(1, "Author is required"),
 	propertyId: propertyIdField,
 });

@@ -10,7 +10,7 @@ export default function BlogPostCard({ post }) {
 		<article className="relative flex flex-col overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]">
 			<div className="relative aspect-[16/10]">
 				<Image
-					src={getBlogCoverForSeed(post.slug)}
+					src={post.cover_image_url || getBlogCoverForSeed(post.slug)}
 					alt=""
 					fill
 					sizes="(min-width: 768px) 33vw, 100vw"

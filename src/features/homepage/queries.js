@@ -1,13 +1,23 @@
 import "server-only";
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRICE_BANDS } from "./data";
 
-// Properties already have a public-read RLS policy for published rows, so
-// the regular (anon/session) client is the right trust boundary here.
-export async function listPublishedCityStates() {
-	const supabase = await createClient();
+// Public property data (PLP-equivalent: homepage search/featured sections)
+// cached for a day to cut repeat-request load on Supabase, since this is the
+// site's highest-traffic, anonymous-access surface. Property mutations
+// (properties/actions.js) call revalidateTag(PUBLIC_PROPERTIES_TAG) so
+// edits/sold-status changes don't sit stale for the full window.
+export const PUBLIC_PROPERTIES_TAG = "public-properties";
+const ONE_DAY_SECONDS = 60 * 60 * 24;
+
+// Uses the admin client (not the session-bound one) for two reasons: it
+// avoids opening a public RLS policy just for this narrow read, and —
+// unlike the session client — it doesn't call the dynamic cookies() API,
+// which unstable_cache doesn't allow inside the function it wraps.
+async function _listPublishedCityStates() {
+	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("properties")
 		.select("city_state")
@@ -21,11 +31,16 @@ export async function listPublishedCityStates() {
 	return unique.sort((a, b) => a.localeCompare(b));
 }
 
+export const listPublishedCityStates = unstable_cache(_listPublishedCityStates, ["list-published-city-states"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
+
 // Uses the admin client rather than opening up a public RLS policy on
 // `users`/`user_info` — those tables hold more than we want exposed by a
 // row-level policy, so the trust boundary here is this function's explicit
 // column list rather than a correlated RLS rule.
-export async function matchListedAgents({ location, type, price } = {}) {
+async function _matchListedAgents({ location, type, price } = {}) {
 	const supabase = createAdminClient();
 
 	let query = supabase
@@ -71,6 +86,11 @@ export async function matchListedAgents({ location, type, price } = {}) {
 
 	return Array.from(agentsById.values()).sort((a, b) => b.listingsCount - a.listingsCount);
 }
+
+export const matchListedAgents = unstable_cache(_matchListedAgents, ["match-listed-agents"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
 
 // One agent's public profile: contact details plus their currently published,
 // non-deleted listings. Powers /agents/[id]. Cached per-request so
@@ -126,7 +146,7 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 // "Top agents" for the homepage leaderboard, ranked by real closed-listing
 // volume/count instead of the old hardcoded rating — there's no reviews
 // table yet, so rating isn't a thing we can compute honestly.
-export async function listTopAgents(limit = 8) {
+async function _listTopAgents(limit = 8) {
 	const supabase = createAdminClient();
 
 	const { data, error } = await supabase
@@ -171,10 +191,15 @@ export async function listTopAgents(limit = 8) {
 		.slice(0, limit);
 }
 
+export const listTopAgents = unstable_cache(_listTopAgents, ["list-top-agents"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
+
 // Featured listings for the homepage, with whichever agent (if any) is
 // assigned first. Uses the admin client to cross into user_property/users,
 // same trust boundary reasoning as matchListedAgents/listTopAgents above.
-export async function listFeaturedProperties(limit = 6) {
+async function _listFeaturedProperties(limit = 6) {
 	const supabase = createAdminClient();
 
 	const { data, error } = await supabase
@@ -202,4 +227,58 @@ export async function listFeaturedProperties(limit = 6) {
 			agent: agent ? { id: agent.id, name: agent.full_name } : null,
 		};
 	});
+}
+
+export const listFeaturedProperties = unstable_cache(_listFeaturedProperties, ["list-featured-properties"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
+
+// Real counts for the homepage stats band — replaces the old hardcoded
+// marketing numbers (which included a "client rating" with no reviews
+// system behind it at all) with what the properties/users tables actually
+// contain.
+async function _getPublicPropertyStats() {
+	const supabase = createAdminClient();
+
+	const [{ data: properties, error: propertiesError }, { count: agentCount, error: agentError }] = await Promise.all([
+		supabase.from("properties").select("price, district").eq("status", "published").is("deleted_at", null),
+		supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "Agent").is("deleted_at", null),
+	]);
+
+	if (propertiesError) throw new Error(propertiesError.message);
+	if (agentError) throw new Error(agentError.message);
+
+	const totalValue = (properties ?? []).reduce((sum, property) => sum + (Number(property.price) || 0), 0);
+	const districts = new Set((properties ?? []).map((property) => property.district).filter(Boolean));
+
+	return {
+		totalListings: properties?.length ?? 0,
+		totalValue,
+		totalAgents: agentCount ?? 0,
+		districtsCovered: districts.size,
+	};
+}
+
+export const getPublicPropertyStats = unstable_cache(_getPublicPropertyStats, ["public-property-stats"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
+
+// For the homepage Testimonial section — looks up the quoted agent's current
+// name/avatar live, so if they add a real photo later (Settings > Profile)
+// it shows up automatically; the quote copy itself stays authored content.
+export async function getAgentByEmail(email) {
+	const supabase = createAdminClient();
+	const { data, error } = await supabase
+		.from("users")
+		.select("full_name, user_info(avatar_url)")
+		.ilike("email", email)
+		.is("deleted_at", null)
+		.maybeSingle();
+
+	if (error) throw new Error(error.message);
+	if (!data) return null;
+
+	return { name: data.full_name, avatarUrl: data.user_info?.avatar_url ?? null };
 }
