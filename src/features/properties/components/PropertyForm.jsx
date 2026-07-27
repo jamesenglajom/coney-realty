@@ -162,7 +162,7 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 			</div>
 
 			<div>
-				<Label htmlFor="price">Price (USD)</Label>
+				<Label htmlFor="price">Price (PHP)</Label>
 				<Input id="price" type="number" min="0" step="1" {...register("price")} />
 				<FieldError>{errors.price?.message}</FieldError>
 			</div>
