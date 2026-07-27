@@ -139,7 +139,7 @@ values
   ('Manager', 'settings', false, false, false, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
-  ('Agent', 'blogs', true, false, false, false),
+  ('Agent', 'blogs', false, false, false, false),
   ('Agent', 'properties', true, false, false, false),
   ('Agent', 'settings', false, false, false, false)
 on conflict (role, page) do nothing;
@@ -189,6 +189,10 @@ create table if not exists public.properties (
   lat double precision,
   lng double precision,
   custom_fields jsonb not null default '{}'::jsonb,
+  -- Set (and cleared) by the app whenever status transitions into/out of
+  -- 'sold' — see updatePropertyAction — so agent dashboards can compute
+  -- "this month's sales" without guessing off updated_at.
+  sold_at timestamptz,
   created_by uuid references public.users (id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -204,6 +208,7 @@ alter table public.properties add column if not exists district text;
 alter table public.properties add column if not exists zone_type text;
 alter table public.properties add column if not exists payment_type property_payment_type;
 alter table public.properties add column if not exists payment_terms text;
+alter table public.properties add column if not exists sold_at timestamptz;
 
 create index if not exists properties_status_idx on public.properties (status);
 create index if not exists properties_type_idx on public.properties (property_type);
@@ -263,11 +268,16 @@ create table if not exists public.blogs (
   slug text not null,
   excerpt text,
   content text,
+  cover_image_url text,
   status blog_status not null default 'draft',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
 );
+
+-- Table already exists in the deployed DB — see the properties table's
+-- identical note above for why this is needed alongside the column def.
+alter table public.blogs add column if not exists cover_image_url text;
 
 create index if not exists blogs_status_idx on public.blogs (status);
 create unique index if not exists blogs_slug_idx on public.blogs (slug) where deleted_at is null;
