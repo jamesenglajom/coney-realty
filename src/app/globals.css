@@ -23,6 +23,39 @@
   --color-txt-secondary-dark: #a0a0a0;
   --color-txt-muted-dark: #666666;
 
+  /* Chart palette: validated categorical order (see dataviz skill palette.md),
+     used for nominal breakdowns (property type, user role). Each slot has an
+     explicit -dark pair rather than relying on a media query, matching the
+     txt-primary-dark pattern above, since this app's dark mode is class-based. */
+  --color-chart-1: #2a78d6;
+  --color-chart-1-dark: #3987e5;
+  --color-chart-2: #eb6834;
+  --color-chart-2-dark: #d95926;
+  --color-chart-3: #1baf7a;
+  --color-chart-3-dark: #199e70;
+  --color-chart-4: #eda100;
+  --color-chart-4-dark: #c98500;
+  --color-chart-5: #e87ba4;
+  --color-chart-5-dark: #d55181;
+
+  /* Status-flavored slots for the property-status chart, mirroring the badge
+     colors already used in PropertiesTable so the chart reads consistently
+     with the rest of the admin UI. Status hexes are mode-invariant. */
+  --color-chart-status-draft: #6b7280;
+  --color-chart-status-draft-dark: #9ca3af;
+  --color-chart-status-published: #0ca30c;
+  --color-chart-status-published-dark: #0ca30c;
+  --color-chart-status-sold: #b6aa84;
+  --color-chart-status-sold-dark: #b6aa84;
+  --color-chart-status-archived: #d03b3b;
+  --color-chart-status-archived-dark: #e66767;
+
+  /* Chart chrome */
+  --color-chart-grid: #e1e0d9;
+  --color-chart-grid-dark: #2c2c2a;
+  --color-chart-axis: #c3c2b7;
+  --color-chart-axis-dark: #383835;
+
   /* Public site fonts (Montserrat headings / Inter body) */
   --font-display: var(--font-montserrat);
   --font-body: var(--font-inter);

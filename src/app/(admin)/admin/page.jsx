@@ -1,86 +1,68 @@
-import React from "react";
+import { requireUser } from "@/features/auth/permissions";
+import { getAgentPropertyStats } from "@/features/properties/queries";
+import AdminDashboard from "@/features/dashboard/components/AdminDashboard";
 
-import StatCard from "@/app/components/admin/dashboard/StatCard";
-import Table1 from "@/app/components/admin/table/Table1";
-import SampleTable from "@/app/components/admin/table/SampleTable";
+const priceFormatter = new Intl.NumberFormat("en-PH", {
+	style: "currency",
+	currency: "PHP",
+	maximumFractionDigits: 0,
+});
 
-function page() {
-  const dashboardStats = [
-    {
-      id: 1,
-      title: "Total Active Users",
-      value: "12,842",
-      change: 12.5, // Percentage increase
-      trend: "up",
-    },
-    {
-      id: 2,
-      title: "Monthly Revenue",
-      value: "$45,200",
-      change: 8.2,
-      trend: "up",
-    },
-    {
-      id: 3,
-      title: "Product Stock Alerts",
-      value: "14",
-      change: -2.4, // Indicates a decrease in alerts
-      trend: "down",
-    },
-    {
-      id: 4,
-      title: "Pending Blog Reviews",
-      value: "29",
-      change: 5.0,
-      trend: "up",
-    },
-  ];
+async function AgentDashboard({ userId }) {
+	const stats = await getAgentPropertyStats(userId);
 
-  const userColumns = ["User Name", "Status", "Role", "Actions"];
+	return (
+		<div>
+			<h1 className="mb-1 text-2xl font-bold text-theme-blue dark:text-white">My dashboard</h1>
+			<p className="mb-6 text-txt-secondary dark:text-txt-secondary-dark">
+				Stats for the properties assigned to you.
+			</p>
 
-  const userData = [
-    {
-      id: "u1",
-      name: "Alex Thompson",
-      email: "alex.t@company.com",
-      status: "Active", // Trigger: Green Badge
-      role: "Super Admin",
-      lastLogin: "2 mins ago",
-    },
-    {
-      id: "u2",
-      name: "Sarah Jenkins",
-      email: "s.jenkins@design.io",
-      status: "Pending", // Trigger: Gold/Yellow Badge
-      role: "Editor",
-      lastLogin: "5 hours ago",
-    },
-    {
-      id: "u3",
-      name: "Michael Chen",
-      email: "m.chen@tech.com",
-      status: "Inactive", // Trigger: Gray/Muted Badge
-      role: "Viewer",
-      lastLogin: "3 days ago",
-    },
-    {
-      id: "u4",
-      name: "Elena Rodriguez",
-      email: "elena.rod@market.es",
-      status: "Suspended", // Trigger: Red Badge
-      role: "Product Manager",
-      lastLogin: "1 week ago",
-    },
-  ];
+			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+				<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+					<p className="text-sm font-medium text-txt-secondary dark:text-txt-secondary-dark">Assigned listings</p>
+					<h3 className="mt-2 text-2xl font-bold text-theme-blue dark:text-white">{stats.totalAssigned}</h3>
+				</div>
+				<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+					<p className="text-sm font-medium text-txt-secondary dark:text-txt-secondary-dark">Published</p>
+					<h3 className="mt-2 text-2xl font-bold text-theme-blue dark:text-white">{stats.byStatus.published}</h3>
+				</div>
+				<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+					<p className="text-sm font-medium text-txt-secondary dark:text-txt-secondary-dark">Sold (this month)</p>
+					<h3 className="mt-2 text-2xl font-bold text-theme-blue dark:text-white">{stats.thisMonth.count}</h3>
+					<p className="mt-1 text-xs text-txt-muted dark:text-txt-muted-dark">
+						{priceFormatter.format(stats.thisMonth.volume)}
+					</p>
+				</div>
+				<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+					<p className="text-sm font-medium text-txt-secondary dark:text-txt-secondary-dark">Sold (lifetime)</p>
+					<h3 className="mt-2 text-2xl font-bold text-theme-blue dark:text-white">{stats.lifetime.count}</h3>
+					<p className="mt-1 text-xs text-txt-muted dark:text-txt-muted-dark">
+						{priceFormatter.format(stats.lifetime.volume)}
+					</p>
+				</div>
+			</div>
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatCard title="Total Users" value="12,482" trend={12} />
-      <StatCard title="Active Blogs" value="156" trend={-2} />
-      <StatCard title="Revenue" value="$45,200" trend={8} />
-      <StatCard title="Pending Orders" value="43" trend={24} />
-    </div>
-  );
+			<div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+				{Object.entries(stats.byStatus).map(([status, count]) => (
+					<div key={status} className="rounded-xl border border-theme-gold-light p-4 text-center dark:border-[#333]">
+						<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+							{status}
+						</p>
+						<p className="mt-1 text-lg font-bold text-theme-blue dark:text-white">{count}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	);
 }
 
-export default page;
+export default async function DashboardPage() {
+	const user = await requireUser();
+
+	if (user.role === "Agent") {
+		return <AgentDashboard userId={user.id} />;
+	}
+
+	return <AdminDashboard />;
+}
