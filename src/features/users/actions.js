@@ -13,7 +13,7 @@ export async function createUserAction(values) {
 		return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
 	}
 
-	const { email, fullName, role, password } = parsed.data;
+	const { email, fullName, role, password, phone, bio, avatarUrl } = parsed.data;
 
 	if (role === "SAdmin" && currentUser.role !== "SAdmin") {
 		return { error: "Only a super admin can assign the SAdmin role." };
@@ -44,6 +44,14 @@ export async function createUserAction(values) {
 		return { error: insertError.message };
 	}
 
+	const { error: infoError } = await supabase.from("user_info").insert({
+		user_id: created.user.id,
+		phone: phone || null,
+		bio: bio || null,
+		avatar_url: avatarUrl || null,
+	});
+	if (infoError) return { error: infoError.message };
+
 	revalidatePath("/admin/users");
 	return { success: true };
 }
@@ -56,7 +64,7 @@ export async function updateUserAction(values) {
 		return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
 	}
 
-	const { id, fullName, role } = parsed.data;
+	const { id, fullName, role, phone, bio, avatarUrl } = parsed.data;
 
 	if (role === "SAdmin" && currentUser.role !== "SAdmin") {
 		return { error: "Only a super admin can assign the SAdmin role." };
@@ -68,6 +76,11 @@ export async function updateUserAction(values) {
 	if (error) {
 		return { error: error.message };
 	}
+
+	const { error: infoError } = await supabase
+		.from("user_info")
+		.upsert({ user_id: id, phone: phone || null, bio: bio || null, avatar_url: avatarUrl || null });
+	if (infoError) return { error: infoError.message };
 
 	revalidatePath("/admin/users");
 	return { success: true };

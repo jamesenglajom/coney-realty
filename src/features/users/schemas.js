@@ -7,10 +7,16 @@ export const createUserSchema = z.object({
 	fullName: z.string().trim().min(1, "Full name is required"),
 	role: z.enum(USER_ROLES),
 	password: z.string().min(8, "Password must be at least 8 characters"),
+	phone: z.string().trim().optional(),
+	bio: z.string().trim().optional(),
+	avatarUrl: z.string().trim().optional(),
 });
 
 export const updateUserSchema = z.object({
 	id: z.string().uuid(),
 	fullName: z.string().trim().min(1, "Full name is required"),
 	role: z.enum(USER_ROLES),
+	phone: z.string().trim().optional(),
+	bio: z.string().trim().optional(),
+	avatarUrl: z.string().trim().optional(),
 });

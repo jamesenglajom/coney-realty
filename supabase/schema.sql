@@ -162,6 +162,9 @@ begin
   if not exists (select 1 from pg_type where typname = 'property_status') then
     create type property_status as enum ('draft', 'published', 'sold', 'archived');
   end if;
+  if not exists (select 1 from pg_type where typname = 'property_payment_type') then
+    create type property_payment_type as enum ('buy', 'rent', 'rent-to-own');
+  end if;
 end $$;
 
 create table if not exists public.properties (
@@ -175,6 +178,14 @@ create table if not exists public.properties (
   -- label — the homepage never shows an exact address, only city/state.
   address_line text,
   city_state text,
+  -- Structured location fields, kept alongside the freeform city_state
+  -- display label above rather than replacing it.
+  city text,
+  region text,
+  district text,
+  zone_type text,
+  payment_type property_payment_type,
+  payment_terms text,
   lat double precision,
   lng double precision,
   custom_fields jsonb not null default '{}'::jsonb,
@@ -184,8 +195,19 @@ create table if not exists public.properties (
   deleted_at timestamptz
 );
 
+-- Table already exists in the deployed DB, so the columns above only apply
+-- on a fresh `create table`. These `add column if not exists` cover the
+-- already-existing table when this file is re-run against it.
+alter table public.properties add column if not exists city text;
+alter table public.properties add column if not exists region text;
+alter table public.properties add column if not exists district text;
+alter table public.properties add column if not exists zone_type text;
+alter table public.properties add column if not exists payment_type property_payment_type;
+alter table public.properties add column if not exists payment_terms text;
+
 create index if not exists properties_status_idx on public.properties (status);
 create index if not exists properties_type_idx on public.properties (property_type);
+create index if not exists properties_payment_type_idx on public.properties (payment_type);
 create unique index if not exists properties_slug_idx on public.properties (slug) where deleted_at is null;
 
 alter table public.properties enable row level security;

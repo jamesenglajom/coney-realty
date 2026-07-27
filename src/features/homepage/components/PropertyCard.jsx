@@ -1,16 +1,17 @@
 import Image from "next/image";
-import { Bed, Bath } from "lucide-react";
-import { getAgentById } from "@/features/homepage/data";
+import Link from "next/link";
+import { Bed, Bath, Ruler } from "lucide-react";
+import { getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
 
 export default function PropertyCard({ property }) {
-	const agent = getAgentById(property.agentId);
+	const hasBedsBaths = property.beds != null || property.baths != null;
 
 	return (
 		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]">
 			<div className="relative aspect-[4/3]">
 				<Image
-					src={property.image}
-					alt={`${property.name} in ${property.city}`}
+					src={getPropertyImageForSeed(property.id)}
+					alt={`${property.name}${property.city ? ` in ${property.city}` : ""}`}
 					fill
 					sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
 					className="object-cover"
@@ -23,30 +24,53 @@ export default function PropertyCard({ property }) {
 				<div className="flex items-baseline justify-between gap-3">
 					<h3 className="text-lg font-semibold text-theme-blue dark:text-white">{property.name}</h3>
 					<span className="whitespace-nowrap font-semibold text-theme-blue dark:text-theme-gold">
-						{property.priceLabel}
+						{formatPrice(property.price)}
 					</span>
 				</div>
-				<p className="mt-1 text-sm text-txt-muted dark:text-txt-muted-dark">{property.city}</p>
-				<div className="mt-4 flex gap-5 text-sm text-txt-secondary dark:text-txt-secondary-dark">
-					<span className="inline-flex items-center gap-1.5">
-						<Bed className="h-4 w-4" aria-hidden="true" />
-						{property.beds} bd
-					</span>
-					<span className="inline-flex items-center gap-1.5">
-						<Bath className="h-4 w-4" aria-hidden="true" />
-						{property.baths} ba
-					</span>
-				</div>
+				{property.city ? <p className="mt-1 text-sm text-txt-muted dark:text-txt-muted-dark">{property.city}</p> : null}
+				{hasBedsBaths ? (
+					<div className="mt-4 flex gap-5 text-sm text-txt-secondary dark:text-txt-secondary-dark">
+						{property.beds != null ? (
+							<span className="inline-flex items-center gap-1.5">
+								<Bed className="h-4 w-4" aria-hidden="true" />
+								{property.beds} bd
+							</span>
+						) : null}
+						{property.baths != null ? (
+							<span className="inline-flex items-center gap-1.5">
+								<Bath className="h-4 w-4" aria-hidden="true" />
+								{property.baths} ba
+							</span>
+						) : null}
+					</div>
+				) : property.lotAreaSqm != null ? (
+					<div className="mt-4 flex gap-5 text-sm text-txt-secondary dark:text-txt-secondary-dark">
+						<span className="inline-flex items-center gap-1.5">
+							<Ruler className="h-4 w-4" aria-hidden="true" />
+							{property.lotAreaSqm.toLocaleString()} sqm lot
+						</span>
+					</div>
+				) : null}
 				<div className="mt-5 flex items-center justify-between gap-2 border-t border-theme-gray/15 pt-4 text-xs text-txt-muted dark:border-white/10 dark:text-txt-muted-dark">
 					<span>
-						Listed by <strong className="font-semibold text-theme-blue dark:text-white">{agent.name}</strong>
+						Listed by{" "}
+						{property.agent ? (
+							<Link
+								href={`/agents/${property.agent.id}`}
+								className="font-semibold text-theme-blue hover:underline dark:text-white"
+							>
+								{property.agent.name}
+							</Link>
+						) : (
+							<strong className="font-semibold text-theme-blue dark:text-white">ConeyRealty Team</strong>
+						)}
 					</span>
-					<a
-						href={`tel:${agent.phone}`}
+					<Link
+						href={property.agent ? `/agents/${property.agent.id}` : "/#search"}
 						className="text-sm font-semibold text-theme-blue hover:underline dark:text-theme-gold"
 					>
 						Contact for details →
-					</a>
+					</Link>
 				</div>
 			</div>
 		</li>

@@ -1,4 +1,4 @@
-import { PROPERTY_TYPES, PROPERTY_STATUSES } from "../schemas";
+import { PROPERTY_TYPES, PROPERTY_STATUSES, PAYMENT_TYPES } from "../schemas";
 
 export const TEMPLATE_HEADERS = [
 	"slug",
@@ -8,6 +8,12 @@ export const TEMPLATE_HEADERS = [
 	"price",
 	"address_line",
 	"city_state",
+	"city",
+	"region",
+	"district",
+	"zone_type",
+	"payment_type",
+	"payment_terms",
 	"lat",
 	"lng",
 	"beds",
@@ -25,6 +31,12 @@ export const TEMPLATE_EXAMPLE_ROW = [
 	1250000,
 	"123 Cedar Ridge Rd",
 	"Austin, TX",
+	"Austin",
+	"Texas",
+	"Downtown",
+	"Residential",
+	"buy",
+	"20% down, balance in 24 months",
 	30.2672,
 	-97.7431,
 	4,
@@ -86,6 +98,11 @@ export function validateImportRow(rawRow, rowNumber) {
 		errors.push(`status must be one of ${PROPERTY_STATUSES.join(", ")}`);
 	}
 
+	const paymentType = String(row.payment_type ?? "").trim().toLowerCase();
+	if (paymentType && !PAYMENT_TYPES.includes(paymentType)) {
+		errors.push(`payment_type must be one of ${PAYMENT_TYPES.join(", ")}`);
+	}
+
 	let customFields = {};
 	const customFieldsRaw = String(row.custom_fields ?? "").trim();
 	if (customFieldsRaw) {
@@ -129,6 +146,12 @@ export function validateImportRow(rawRow, rowNumber) {
 			price: toNumberOrNull(row.price),
 			address_line: String(row.address_line ?? "").trim() || null,
 			city_state: String(row.city_state ?? "").trim() || null,
+			city: String(row.city ?? "").trim() || null,
+			region: String(row.region ?? "").trim() || null,
+			district: String(row.district ?? "").trim() || null,
+			zone_type: String(row.zone_type ?? "").trim() || null,
+			payment_type: paymentType || null,
+			payment_terms: String(row.payment_terms ?? "").trim() || null,
 			lat: toNumberOrNull(row.lat),
 			lng: toNumberOrNull(row.lng),
 			custom_fields: customFields,

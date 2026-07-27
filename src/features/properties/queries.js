@@ -5,7 +5,9 @@ export async function listProperties() {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("properties")
-		.select("id, title, slug, property_type, status, price, city_state, created_at")
+		.select(
+			"id, title, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at",
+		)
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
 

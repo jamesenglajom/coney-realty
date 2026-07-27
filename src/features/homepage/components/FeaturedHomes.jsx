@@ -1,9 +1,13 @@
-import { FEATURED_PROPERTIES } from "@/features/homepage/data";
+import { listFeaturedProperties } from "@/features/homepage/queries";
 import SectionHeading from "./ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import PropertyCard from "./PropertyCard";
 
-export default function FeaturedHomes() {
+export default async function FeaturedHomes() {
+	const properties = await listFeaturedProperties(6);
+
+	if (properties.length === 0) return null;
+
 	return (
 		<section id="featured" className="py-20 sm:py-28">
 			<div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -18,8 +22,8 @@ export default function FeaturedHomes() {
 					</Button>
 				</div>
 				<ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-					{FEATURED_PROPERTIES.map((property) => (
-						<PropertyCard key={property.name} property={property} />
+					{properties.map((property) => (
+						<PropertyCard key={property.id} property={property} />
 					))}
 				</ul>
 			</div>

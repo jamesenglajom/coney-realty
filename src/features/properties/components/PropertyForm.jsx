@@ -5,7 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createPropertySchema, updatePropertySchema, PROPERTY_TYPES, PROPERTY_STATUSES } from "../schemas";
+import {
+	createPropertySchema,
+	updatePropertySchema,
+	PROPERTY_TYPES,
+	PROPERTY_STATUSES,
+	PAYMENT_TYPES,
+} from "../schemas";
 import { createPropertyAction, updatePropertyAction } from "../actions";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -45,6 +51,12 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					price: property.price != null ? String(property.price) : "",
 					addressLine: property.address_line ?? "",
 					cityState: property.city_state ?? "",
+					city: property.city ?? "",
+					region: property.region ?? "",
+					district: property.district ?? "",
+					zoneType: property.zone_type ?? "",
+					paymentType: property.payment_type ?? "",
+					paymentTerms: property.payment_terms ?? "",
 					lat: property.lat != null ? String(property.lat) : "",
 					lng: property.lng != null ? String(property.lng) : "",
 					customFields: JSON.stringify(property.custom_fields ?? {}, null, 2),
@@ -58,6 +70,12 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					price: "",
 					addressLine: "",
 					cityState: "",
+					city: "",
+					region: "",
+					district: "",
+					zoneType: "",
+					paymentType: "",
+					paymentTerms: "",
 					lat: "",
 					lng: "",
 					customFields: "{}",
@@ -160,6 +178,55 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					<Input id="cityState" type="text" placeholder="Austin, TX" {...register("cityState")} />
 					<FieldError>{errors.cityState?.message}</FieldError>
 				</div>
+			</div>
+
+			<div className="grid gap-4 sm:grid-cols-3">
+				<div>
+					<Label htmlFor="city">City</Label>
+					<Input id="city" type="text" {...register("city")} />
+					<FieldError>{errors.city?.message}</FieldError>
+				</div>
+				<div>
+					<Label htmlFor="region">Region</Label>
+					<Input id="region" type="text" {...register("region")} />
+					<FieldError>{errors.region?.message}</FieldError>
+				</div>
+				<div>
+					<Label htmlFor="district">District</Label>
+					<Input id="district" type="text" {...register("district")} />
+					<FieldError>{errors.district?.message}</FieldError>
+				</div>
+			</div>
+
+			<div className="grid gap-4 sm:grid-cols-2">
+				<div>
+					<Label htmlFor="zoneType">Zone type</Label>
+					<Input id="zoneType" type="text" placeholder="Residential, Commercial, Mixed-use…" {...register("zoneType")} />
+					<FieldError>{errors.zoneType?.message}</FieldError>
+				</div>
+				<div>
+					<Label htmlFor="paymentType">Payment type</Label>
+					<Select id="paymentType" {...register("paymentType")}>
+						<option value="">—</option>
+						{PAYMENT_TYPES.map((type) => (
+							<option key={type} value={type} className="capitalize">
+								{type}
+							</option>
+						))}
+					</Select>
+					<FieldError>{errors.paymentType?.message}</FieldError>
+				</div>
+			</div>
+
+			<div>
+				<Label htmlFor="paymentTerms">Payment terms</Label>
+				<Input
+					id="paymentTerms"
+					type="text"
+					placeholder="20% down, balance in 24 months"
+					{...register("paymentTerms")}
+				/>
+				<FieldError>{errors.paymentTerms?.message}</FieldError>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">

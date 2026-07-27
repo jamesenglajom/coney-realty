@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Condo", "Land"];
 export const PROPERTY_STATUSES = ["draft", "published", "sold", "archived"];
+export const PAYMENT_TYPES = ["buy", "rent", "rent-to-own"];
 
 const jsonObjectString = z
 	.string()
@@ -28,6 +29,12 @@ const propertyBaseSchema = z.object({
 	price: z.string().trim().optional(),
 	addressLine: z.string().trim().optional(),
 	cityState: z.string().trim().optional(),
+	city: z.string().trim().optional(),
+	region: z.string().trim().optional(),
+	district: z.string().trim().optional(),
+	zoneType: z.string().trim().optional(),
+	paymentType: z.enum(PAYMENT_TYPES).optional().or(z.literal("")),
+	paymentTerms: z.string().trim().optional(),
 	lat: z.string().trim().optional(),
 	lng: z.string().trim().optional(),
 	customFields: jsonObjectString,

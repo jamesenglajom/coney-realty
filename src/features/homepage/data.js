@@ -3,11 +3,11 @@ export const HERO_IMAGE =
 
 export const PRICE_BANDS = [
 	{ label: "Any price", min: 0, max: Infinity },
-	{ label: "Under $300k", min: 0, max: 300000 },
-	{ label: "$300k – $600k", min: 300000, max: 600000 },
-	{ label: "$600k – $1M", min: 600000, max: 1000000 },
-	{ label: "$1M – $2M", min: 1000000, max: 2000000 },
-	{ label: "$2M+", min: 2000000, max: Infinity },
+	{ label: "Under ₱5M", min: 0, max: 5000000 },
+	{ label: "₱5M – ₱15M", min: 5000000, max: 15000000 },
+	{ label: "₱15M – ₱50M", min: 15000000, max: 50000000 },
+	{ label: "₱50M – ₱150M", min: 50000000, max: 150000000 },
+	{ label: "₱150M+", min: 150000000, max: Infinity },
 ];
 
 export const STATS = [
@@ -66,6 +66,18 @@ const BLOG_COVER_POOL = [
 	"https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=70",
 ];
 
+// Real properties don't have a photo/gallery column in the schema yet, so
+// this pool gives listing cards a populated look — same deterministic-by-id
+// approach as the avatar/blog-cover pools above.
+const PROPERTY_IMAGE_POOL = [
+	"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+	"https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=70",
+	"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=70",
+	"https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70",
+	"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70",
+	"https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=70",
+];
+
 function hashSeed(seed) {
 	let hash = 0;
 	for (let i = 0; i < seed.length; i += 1) {
@@ -80,6 +92,20 @@ export function getAvatarForSeed(seed) {
 
 export function getBlogCoverForSeed(seed) {
 	return BLOG_COVER_POOL[hashSeed(String(seed)) % BLOG_COVER_POOL.length];
+}
+
+export function getPropertyImageForSeed(seed) {
+	return PROPERTY_IMAGE_POOL[hashSeed(String(seed)) % PROPERTY_IMAGE_POOL.length];
+}
+
+const priceFormatter = new Intl.NumberFormat("en-PH", {
+	style: "currency",
+	currency: "PHP",
+	maximumFractionDigits: 0,
+});
+
+export function formatPrice(price) {
+	return price != null ? priceFormatter.format(price) : "Price on request";
 }
 
 const agentById = Object.fromEntries(AGENTS.map((agent) => [agent.id, agent]));

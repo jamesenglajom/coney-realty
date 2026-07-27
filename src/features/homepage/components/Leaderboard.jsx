@@ -1,15 +1,20 @@
 import Image from "next/image";
-import { getLeaderboard } from "@/features/homepage/data";
+import Link from "next/link";
+import { getAvatarForSeed, formatPrice } from "@/features/homepage/data";
+import { listTopAgents } from "@/features/homepage/queries";
 import SectionHeading from "./ui/SectionHeading";
 
-export default function Leaderboard() {
-	const ranked = getLeaderboard(8);
+export default async function Leaderboard() {
+	const ranked = await listTopAgents(8);
+
+	if (ranked.length === 0) return null;
+
 	const [first, second, third, ...rest] = ranked;
 	const podium = [
 		{ agent: second, rank: 2 },
 		{ agent: first, rank: 1 },
 		{ agent: third, rank: 3 },
-	];
+	].filter((slot) => slot.agent);
 
 	return (
 		<section id="leaderboard" className="bg-theme-blue text-white">
@@ -17,7 +22,7 @@ export default function Leaderboard() {
 				<SectionHeading
 					eyebrow="This quarter"
 					title="The agents topping the board"
-					description="Ranked by client rating and closings — the people you actually want in your corner."
+					description="Ranked by real closed-listing volume — the people you actually want in your corner."
 					tone="on-dark"
 					className="max-w-xl"
 				/>
@@ -28,13 +33,13 @@ export default function Leaderboard() {
 						const size = isLead ? "h-28 w-28 sm:h-36 sm:w-36" : "h-20 w-20 sm:h-24 sm:w-24";
 
 						return (
-							<div key={agent.id} className="flex flex-col items-center text-center">
+							<Link key={agent.id} href={`/agents/${agent.id}`} className="flex flex-col items-center text-center">
 								<div className="relative">
 									<div
 										className={`relative overflow-hidden rounded-full ${size} ${isLead ? "ring-4 ring-theme-gold" : "ring-4 ring-white/30"}`}
 									>
 										<Image
-											src={agent.photo}
+											src={agent.avatarUrl || getAvatarForSeed(agent.id)}
 											alt={agent.name}
 											fill
 											sizes="144px"
@@ -49,34 +54,46 @@ export default function Leaderboard() {
 										{rank}
 									</span>
 								</div>
-								<p className={`mt-5 font-semibold ${isLead ? "text-lg" : ""}`}>{agent.name}</p>
-								<p className="text-xs text-white/65">{agent.title}</p>
+								<p className={`mt-5 font-semibold hover:underline ${isLead ? "text-lg" : ""}`}>{agent.name}</p>
 								<p className="mt-1 text-xs font-medium text-theme-gold">
-									{agent.volume} · {agent.deals} deals
+									{formatPrice(agent.volume)} · {agent.deals} deal{agent.deals === 1 ? "" : "s"}
 								</p>
-							</div>
+							</Link>
 						);
 					})}
 				</div>
 
-				<ol className="mt-14 grid gap-3 sm:grid-cols-2">
-					{rest.map((agent, index) => (
-						<li key={agent.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3">
-							<span className="w-6 text-center font-display text-lg font-semibold text-white/50">{index + 4}</span>
-							<div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
-								<Image src={agent.photo} alt={agent.name} fill sizes="44px" className="object-cover" />
-							</div>
-							<div className="min-w-0 flex-1">
-								<p className="truncate font-medium">{agent.name}</p>
-								<p className="truncate text-xs text-white/60">{agent.regions.join(" · ")}</p>
-							</div>
-							<div className="text-right">
-								<p className="text-sm font-semibold text-theme-gold">{agent.rating.toFixed(1)}★</p>
-								<p className="text-xs text-white/60">{agent.deals} deals</p>
-							</div>
-						</li>
-					))}
-				</ol>
+				{rest.length > 0 ? (
+					<ol className="mt-14 grid gap-3 sm:grid-cols-2">
+						{rest.map((agent, index) => (
+							<li key={agent.id}>
+								<Link
+									href={`/agents/${agent.id}`}
+									className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3 hover:bg-white/10"
+								>
+									<span className="w-6 text-center font-display text-lg font-semibold text-white/50">{index + 4}</span>
+									<div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+										<Image
+											src={agent.avatarUrl || getAvatarForSeed(agent.id)}
+											alt={agent.name}
+											fill
+											sizes="44px"
+											className="object-cover"
+										/>
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="truncate font-medium">{agent.name}</p>
+										<p className="truncate text-xs text-white/60">{agent.regions.join(" · ") || "—"}</p>
+									</div>
+									<div className="text-right">
+										<p className="text-sm font-semibold text-theme-gold">{formatPrice(agent.volume)}</p>
+										<p className="text-xs text-white/60">{agent.deals} deal{agent.deals === 1 ? "" : "s"}</p>
+									</div>
+								</Link>
+							</li>
+						))}
+					</ol>
+				) : null}
 			</div>
 		</section>
 	);

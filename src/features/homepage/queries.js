@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRICE_BANDS } from "./data";
@@ -21,15 +22,15 @@ export async function listPublishedCityStates() {
 }
 
 // Uses the admin client rather than opening up a public RLS policy on
-// `users` — that table holds more than we want exposed by a row-level
-// policy, so the trust boundary here is this function's explicit column
-// list (id, email, full_name only) rather than a correlated RLS rule.
+// `users`/`user_info` — those tables hold more than we want exposed by a
+// row-level policy, so the trust boundary here is this function's explicit
+// column list rather than a correlated RLS rule.
 export async function matchListedAgents({ location, type, price } = {}) {
 	const supabase = createAdminClient();
 
 	let query = supabase
 		.from("properties")
-		.select("id, price, user_property(user_id, users(id, email, full_name))")
+		.select("id, price, user_property(user_id, users(id, email, full_name, user_info(phone, bio, avatar_url)))")
 		.eq("status", "published")
 		.is("deleted_at", null);
 
@@ -59,6 +60,9 @@ export async function matchListedAgents({ location, type, price } = {}) {
 					id: user.id,
 					name: user.full_name || user.email,
 					email: user.email,
+					phone: user.user_info?.phone ?? null,
+					bio: user.user_info?.bio ?? null,
+					avatarUrl: user.user_info?.avatar_url ?? null,
 					listingsCount: 1,
 				});
 			}
@@ -66,4 +70,136 @@ export async function matchListedAgents({ location, type, price } = {}) {
 	}
 
 	return Array.from(agentsById.values()).sort((a, b) => b.listingsCount - a.listingsCount);
+}
+
+// One agent's public profile: contact details plus their currently published,
+// non-deleted listings. Powers /agents/[id]. Cached per-request so
+// generateMetadata() and the page component don't double-query.
+export const getAgentProfile = cache(async function getAgentProfile(id) {
+	const supabase = createAdminClient();
+
+	const { data: user, error: userError } = await supabase
+		.from("users")
+		.select("id, email, full_name, role, user_info(phone, bio, avatar_url)")
+		.eq("id", id)
+		.is("deleted_at", null)
+		.maybeSingle();
+
+	if (userError) throw new Error(userError.message);
+	if (!user) return null;
+
+	const { data: links, error: linksError } = await supabase
+		.from("user_property")
+		.select(
+			"properties(id, slug, title, property_type, price, city_state, city, region, district, custom_fields, status, deleted_at)",
+		)
+		.eq("user_id", id);
+
+	if (linksError) throw new Error(linksError.message);
+
+	const listings = (links ?? [])
+		.map((link) => link.properties)
+		.filter((property) => property && property.status === "published" && !property.deleted_at)
+		.map((property) => ({
+			id: property.id,
+			slug: property.slug,
+			name: property.title,
+			city: property.city_state,
+			price: property.price,
+			type: property.property_type,
+			beds: property.custom_fields?.beds ?? null,
+			baths: property.custom_fields?.baths ?? null,
+			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
+		}));
+
+	return {
+		id: user.id,
+		name: user.full_name || user.email,
+		email: user.email,
+		phone: user.user_info?.phone ?? null,
+		bio: user.user_info?.bio ?? null,
+		avatarUrl: user.user_info?.avatar_url ?? null,
+		listings,
+	};
+});
+
+// "Top agents" for the homepage leaderboard, ranked by real closed-listing
+// volume/count instead of the old hardcoded rating — there's no reviews
+// table yet, so rating isn't a thing we can compute honestly.
+export async function listTopAgents(limit = 8) {
+	const supabase = createAdminClient();
+
+	const { data, error } = await supabase
+		.from("user_property")
+		.select(
+			"user_id, users(id, email, full_name, user_info(phone, bio, avatar_url)), properties(price, city_state, status, deleted_at)",
+		);
+
+	if (error) throw new Error(error.message);
+
+	const byAgent = new Map();
+	for (const row of data ?? []) {
+		const property = row.properties;
+		if (!property || property.status !== "published" || property.deleted_at) continue;
+
+		const user = row.users;
+		if (!user) continue;
+
+		const price = Number(property.price) || 0;
+		const existing = byAgent.get(user.id);
+		if (existing) {
+			existing.deals += 1;
+			existing.volume += price;
+			if (property.city_state) existing.regions.add(property.city_state);
+		} else {
+			byAgent.set(user.id, {
+				id: user.id,
+				name: user.full_name || user.email,
+				phone: user.user_info?.phone ?? null,
+				bio: user.user_info?.bio ?? null,
+				avatarUrl: user.user_info?.avatar_url ?? null,
+				deals: 1,
+				volume: price,
+				regions: new Set(property.city_state ? [property.city_state] : []),
+			});
+		}
+	}
+
+	return Array.from(byAgent.values())
+		.map((agent) => ({ ...agent, regions: Array.from(agent.regions) }))
+		.sort((a, b) => b.volume - a.volume || b.deals - a.deals)
+		.slice(0, limit);
+}
+
+// Featured listings for the homepage, with whichever agent (if any) is
+// assigned first. Uses the admin client to cross into user_property/users,
+// same trust boundary reasoning as matchListedAgents/listTopAgents above.
+export async function listFeaturedProperties(limit = 6) {
+	const supabase = createAdminClient();
+
+	const { data, error } = await supabase
+		.from("properties")
+		.select("id, slug, title, property_type, price, city_state, custom_fields, user_property(users(id, full_name))")
+		.eq("status", "published")
+		.is("deleted_at", null)
+		.order("price", { ascending: false })
+		.limit(limit);
+
+	if (error) throw new Error(error.message);
+
+	return (data ?? []).map((property) => {
+		const agent = property.user_property?.[0]?.users ?? null;
+		return {
+			id: property.id,
+			slug: property.slug,
+			name: property.title,
+			city: property.city_state,
+			price: property.price,
+			type: property.property_type,
+			beds: property.custom_fields?.beds ?? null,
+			baths: property.custom_fields?.baths ?? null,
+			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
+			agent: agent ? { id: agent.id, name: agent.full_name } : null,
+		};
+	});
 }

@@ -41,6 +41,9 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 							Status
 						</th>
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+							Payment
+						</th>
+						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Price
 						</th>
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
@@ -65,10 +68,15 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 									{property.status}
 								</span>
 							</td>
+							<td className="p-4 text-sm capitalize text-txt-secondary dark:text-txt-secondary-dark">
+								{property.payment_type || "—"}
+							</td>
 							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 								{property.price != null ? priceFormatter.format(property.price) : "—"}
 							</td>
-							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{property.city_state || "—"}</td>
+							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">
+								{property.city_state || [property.city, property.region, property.district].filter(Boolean).join(", ") || "—"}
+							</td>
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">
 									<div className="flex justify-end gap-2">

@@ -26,8 +26,15 @@ export default function UserForm({ mode, user, assignableRoles }) {
 	} = useForm({
 		resolver: zodResolver(isEdit ? updateUserSchema : createUserSchema),
 		defaultValues: isEdit
-			? { id: user.id, fullName: user.full_name, role: user.role }
-			: { email: "", fullName: "", role: "Agent", password: "" },
+			? {
+					id: user.id,
+					fullName: user.full_name,
+					role: user.role,
+					phone: user.phone ?? "",
+					bio: user.bio ?? "",
+					avatarUrl: user.avatarUrl ?? "",
+				}
+			: { email: "", fullName: "", role: "Agent", password: "", phone: "", bio: "", avatarUrl: "" },
 	});
 
 	function onSubmit(values) {
@@ -83,6 +90,33 @@ export default function UserForm({ mode, user, assignableRoles }) {
 					<FieldError>{errors.password?.message}</FieldError>
 				</div>
 			) : null}
+
+			<div className="grid gap-4 sm:grid-cols-2">
+				<div>
+					<Label htmlFor="phone">Phone (public)</Label>
+					<Input id="phone" type="tel" placeholder="+63 912 345 6789" {...register("phone")} />
+					<FieldError>{errors.phone?.message}</FieldError>
+				</div>
+				<div>
+					<Label htmlFor="avatarUrl">Avatar URL</Label>
+					<Input id="avatarUrl" type="text" placeholder="https://…" {...register("avatarUrl")} />
+					<FieldError>{errors.avatarUrl?.message}</FieldError>
+				</div>
+			</div>
+
+			<div>
+				<Label htmlFor="bio">Bio (public)</Label>
+				<textarea
+					id="bio"
+					rows={4}
+					{...register("bio")}
+					className="w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold"
+				/>
+				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Shown on this agent&apos;s public profile page.
+				</p>
+				<FieldError>{errors.bio?.message}</FieldError>
+			</div>
 
 			{serverError ? <FieldError>{serverError}</FieldError> : null}
 
