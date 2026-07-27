@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { MapPin } from "lucide-react";
 import {
 	createPropertySchema,
 	updatePropertySchema,
@@ -12,7 +13,7 @@ import {
 	PROPERTY_STATUSES,
 	PAYMENT_TYPES,
 } from "../schemas";
-import { createPropertyAction, updatePropertyAction } from "../actions";
+import { createPropertyAction, updatePropertyAction, reverseGeocodeAction } from "../actions";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
@@ -94,6 +95,37 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 	}, [titleValue, setValue]);
 
 	const { onChange: onSlugChange, ...slugField } = register("slug");
+
+	const [isGeocoding, startGeocode] = useTransition();
+
+	function handleAutofillFromCoordinates() {
+		const lat = watch("lat");
+		const lng = watch("lng");
+
+		if (!lat || !lng) {
+			toast.error("Enter latitude and longitude first.");
+			return;
+		}
+
+		startGeocode(async () => {
+			const result = await reverseGeocodeAction(lat, lng);
+
+			if (result?.error) {
+				toast.error(result.error);
+				return;
+			}
+
+			if (result.addressLine) setValue("addressLine", result.addressLine, { shouldValidate: true });
+			if (result.city) {
+				setValue("city", result.city, { shouldValidate: true });
+				setValue("cityState", result.city, { shouldValidate: true });
+			}
+			if (result.region) setValue("region", result.region, { shouldValidate: true });
+			if (result.district) setValue("district", result.district, { shouldValidate: true });
+
+			toast.success("Address filled in from coordinates — double-check before saving.");
+		});
+	}
 
 	function onSubmit(values) {
 		setServerError("");
@@ -240,6 +272,17 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					<Input id="lng" type="text" inputMode="decimal" {...register("lng")} />
 					<FieldError>{errors.lng?.message}</FieldError>
 				</div>
+			</div>
+
+			<div>
+				<Button type="button" variant="ghost" size="sm" disabled={isGeocoding} onClick={handleAutofillFromCoordinates}>
+					<MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+					{isGeocoding ? "Looking up address…" : "Autofill address from coordinates"}
+				</Button>
+				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Fills in full address, city, region, and district from the lat/lng above using OpenStreetMap — always
+					double-check before saving.
+				</p>
 			</div>
 
 			<div>
