@@ -10,6 +10,7 @@ import {
   Search,
   Bell,
   ChevronRight,
+  Contact,
 } from "lucide-react";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -54,6 +55,14 @@ export const navigationGroups = [
         icon: Building2,
         href: `${BASE_URL}/admin/properties`,
         pageKey: "properties",
+      },
+      {
+        name: "Leads",
+        title: "Agent Contact Requests",
+        sub: "Visitors who reached out to an agent from the public site.",
+        icon: Contact,
+        href: `${BASE_URL}/admin/leads`,
+        pageKey: "leads",
       },
     ],
   },

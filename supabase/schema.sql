@@ -127,21 +127,25 @@ values
   ('SAdmin', 'blogs', true, true, true, true),
   ('SAdmin', 'properties', true, true, true, true),
   ('SAdmin', 'settings', true, true, true, true),
+  ('SAdmin', 'leads', true, true, true, true),
   ('Admin', 'dashboard', true, true, true, true),
   ('Admin', 'users', true, true, true, false),
   ('Admin', 'blogs', true, true, true, true),
   ('Admin', 'properties', true, true, true, true),
   ('Admin', 'settings', true, false, false, false),
+  ('Admin', 'leads', true, false, false, false),
   ('Manager', 'dashboard', true, false, false, false),
   ('Manager', 'users', false, false, false, false),
   ('Manager', 'blogs', true, true, true, false),
   ('Manager', 'properties', true, true, true, false),
   ('Manager', 'settings', false, false, false, false),
+  ('Manager', 'leads', false, false, false, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
   ('Agent', 'blogs', false, false, false, false),
   ('Agent', 'properties', true, false, false, false),
-  ('Agent', 'settings', false, false, false, false)
+  ('Agent', 'settings', false, false, false, false),
+  ('Agent', 'leads', false, false, false, false)
 on conflict (role, page) do nothing;
 
 drop trigger if exists set_permissions_updated_at on public.permissions;
