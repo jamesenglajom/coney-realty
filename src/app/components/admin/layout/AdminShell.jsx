@@ -77,7 +77,7 @@ const AdminShell = ({ user, permissions, children }) => {
 							height={32}
 							className="w-8 h-8 shrink-0 rounded-md"
 						/>
-						<span className={`text-white font-bold tracking-tight text-lg ${hideWhenCollapsed}`}>SUPER ADMIN</span>
+						<span className={`text-white font-bold tracking-tight text-lg ${hideWhenCollapsed}`}>ConeyRealty</span>
 					</div>
 
 					{/* Collapse toggle — desktop only */}

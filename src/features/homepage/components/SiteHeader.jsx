@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import StickyHeaderShell from "./StickyHeaderShell";
 import MobileMenu from "./MobileMenu";
-import ThemeToggle from "./ThemeToggle";
 import Button from "@/components/ui/Button";
 
 const NAV_LINKS = [
@@ -44,8 +43,7 @@ export default function SiteHeader() {
 				</ul>
 
 				<div className="flex items-center gap-2">
-					<ThemeToggle />
-					<Button href="/#search" variant="primary" className="hidden sm:inline-flex">
+					<Button href="/#search" variant="primary" className="hidden md:inline-flex">
 						Get matched
 					</Button>
 					<MobileMenu>
