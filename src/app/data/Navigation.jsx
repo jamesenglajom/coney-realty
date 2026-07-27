@@ -24,6 +24,7 @@ export const navigationGroups = [
         sub: "Welcome back, here is what changed today.",
         icon: LayoutDashboardIcon,
         href: `${BASE_URL}/admin`,
+        pageKey: "dashboard",
       },
     ],
   },
@@ -36,6 +37,7 @@ export const navigationGroups = [
         sub: "View, manage, and audit your registered members.",
         icon: Users,
         href: `${BASE_URL}/admin/users`,
+        pageKey: "users",
       },
       {
         name: "Blogs",
@@ -43,6 +45,7 @@ export const navigationGroups = [
         sub: "Draft, edit, and publish your latest articles.",
         icon: FileText,
         href: `${BASE_URL}/admin/blogs`,
+        pageKey: "blogs",
       },
       {
         name: "Properties",
@@ -50,6 +53,7 @@ export const navigationGroups = [
         sub: "Keep your property listings and details up to date.",
         icon: Building2,
         href: `${BASE_URL}/admin/properties`,
+        pageKey: "properties",
       },
     ],
   },
@@ -62,6 +66,10 @@ export const navigationGroups = [
         sub: "Configure your preferences and system parameters.",
         icon: Settings,
         href: `${BASE_URL}/admin/settings`,
+        // Settings now doubles as everyone's personal account page (change
+        // email/password/profile), not just the SAdmin permissions matrix —
+        // always shown regardless of the "settings" page's view permission.
+        alwaysVisible: true,
       },
     ],
   },

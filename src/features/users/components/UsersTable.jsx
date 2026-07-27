@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import DeleteUserButton from "./DeleteUserButton";
+import ResetPasswordButton from "./ResetPasswordButton";
 
 const ROLE_BADGE_CLASSES = {
 	SAdmin: "bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue",
@@ -66,6 +67,9 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 												<Pencil className="h-3.5 w-3.5" aria-hidden="true" />
 												Edit
 											</Link>
+										) : null}
+										{canEdit ? (
+											<ResetPasswordButton userId={user.id} userName={user.full_name || user.email} />
 										) : null}
 										{canDelete ? <DeleteUserButton userId={user.id} userName={user.full_name || user.email} /> : null}
 									</div>

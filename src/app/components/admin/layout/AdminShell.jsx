@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { X, LogOut, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { navigationGroups, BASE_URL } from "@/app/data/Navigation";
@@ -17,11 +18,22 @@ function isItemActive(href, pathname) {
 	return pathname === relativeHref || pathname.startsWith(`${relativeHref}/`);
 }
 
-const AdminShell = ({ user, children }) => {
+const AdminShell = ({ user, permissions, children }) => {
 	const pathname = usePathname();
 	const [isSidebarOpen, setSidebarOpen] = useState(false);
 	const [isCollapsed, setCollapsed] = useState(false);
 	const [isLoggingOut, startLogout] = useTransition();
+
+	// Nav items are gated by the role's actual page permissions, not
+	// hardcoded per-role exceptions — a page with no can_view for this role
+	// (e.g. Agent on Users/Blogs) just doesn't render, and an empty group
+	// (all its items filtered out) doesn't render its header either.
+	const visibleGroups = navigationGroups
+		.map((group) => ({
+			...group,
+			items: group.items.filter((item) => item.alwaysVisible || permissions?.[item.pageKey]?.can_view),
+		}))
+		.filter((group) => group.items.length > 0);
 
 	useEffect(() => {
 		setCollapsed(localStorage.getItem(COLLAPSE_STORAGE_KEY) === "true");
@@ -58,9 +70,13 @@ const AdminShell = ({ user, children }) => {
 						>
 							<X size={24} strokeWidth={2.5} />
 						</button>
-						<div className="w-8 h-8 shrink-0 bg-theme-gold rounded-md flex items-center justify-center font-bold text-theme-blue">
-							S
-						</div>
+						<Image
+							src="/logo/conyrealty-logo.jpg"
+							alt="ConeyRealty"
+							width={32}
+							height={32}
+							className="w-8 h-8 shrink-0 rounded-md"
+						/>
 						<span className={`text-white font-bold tracking-tight text-lg ${hideWhenCollapsed}`}>SUPER ADMIN</span>
 					</div>
 
@@ -79,7 +95,7 @@ const AdminShell = ({ user, children }) => {
 
 					{/* Nav Links */}
 					<nav className="flex-1 px-4 space-y-5 overflow-y-auto">
-						{navigationGroups.map((group) => (
+						{visibleGroups.map((group) => (
 							<div key={group.label}>
 								<p
 									className={`px-4 mb-1 text-[11px] font-semibold uppercase tracking-wider text-theme-gold-light/40 ${hideWhenCollapsed}`}
@@ -119,13 +135,19 @@ const AdminShell = ({ user, children }) => {
 					{/* User Profile Mini */}
 					<div className="p-4 border-t border-white/10">
 						<div className={`flex items-center gap-3 p-2 ${isCollapsed ? "lg:flex-col lg:gap-2" : ""}`}>
-							<div className="w-10 h-10 shrink-0 rounded-full bg-theme-gold flex items-center justify-center font-bold text-theme-blue">
-								{(user.full_name || user.email)[0]?.toUpperCase()}
-							</div>
-							<div className={`overflow-hidden flex-1 min-w-0 ${hideWhenCollapsed}`}>
-								<p className="text-white text-sm font-medium truncate">{user.full_name || user.email}</p>
-								<p className="text-theme-gold-light/50 text-xs truncate">{user.role}</p>
-							</div>
+							<Link
+								href="/admin/settings"
+								title="My profile"
+								className="flex flex-1 min-w-0 items-center gap-3 rounded-lg transition-colors hover:bg-white/5"
+							>
+								<div className="w-10 h-10 shrink-0 rounded-full bg-theme-gold flex items-center justify-center font-bold text-theme-blue">
+									{(user.full_name || user.email)[0]?.toUpperCase()}
+								</div>
+								<div className={`overflow-hidden flex-1 min-w-0 ${hideWhenCollapsed}`}>
+									<p className="text-white text-sm font-medium truncate">{user.full_name || user.email}</p>
+									<p className="text-theme-gold-light/50 text-xs truncate">{user.role}</p>
+								</div>
+							</Link>
 							<button
 								type="button"
 								onClick={() => startLogout(() => logoutAction())}

@@ -18,7 +18,8 @@ export async function loginAction({ email, password, next }) {
 		return { error: "Incorrect email or password." };
 	}
 
-	const safeNext = typeof next === "string" && next.startsWith("/admin") ? next : "/admin";
+	const safeNext =
+		typeof next === "string" && (next.startsWith("/admin") || next.startsWith("/property/")) ? next : "/admin";
 	redirect(safeNext);
 }
 

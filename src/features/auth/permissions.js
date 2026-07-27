@@ -69,3 +69,35 @@ export async function requirePermission(page, action = "view") {
 
 	return user;
 }
+
+// All pages' permissions for a role in one query — used to filter the
+// sidebar nav, where checking each item one page at a time would mean one
+// round-trip per nav item on every admin render.
+export async function getRolePermissions(role) {
+	if (role === "SAdmin") {
+		const supabase = await createClient();
+		const { data } = await supabase.from("permissions").select("page").eq("role", role);
+		const pages = new Set((data ?? []).map((row) => row.page));
+		// Cover pages that might not have a seeded row yet — SAdmin is always
+		// fully-allowed regardless of what the table contains.
+		["dashboard", "users", "blogs", "properties", "settings"].forEach((page) => pages.add(page));
+		return Object.fromEntries([...pages].map((page) => [page, SADMIN_ALL_ALLOWED]));
+	}
+
+	const supabase = await createClient();
+	const { data } = await supabase
+		.from("permissions")
+		.select("page, can_view, can_create, can_edit, can_delete")
+		.eq("role", role);
+
+	const map = {};
+	for (const row of data ?? []) {
+		map[row.page] = {
+			can_view: Boolean(row.can_view),
+			can_create: Boolean(row.can_create),
+			can_edit: Boolean(row.can_edit),
+			can_delete: Boolean(row.can_delete),
+		};
+	}
+	return map;
+}
