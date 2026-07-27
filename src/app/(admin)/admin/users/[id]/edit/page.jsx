@@ -13,7 +13,10 @@ export default async function EditUserPage({ params }) {
 	const currentUser = await requirePermission("users", "edit");
 	const user = await getUserById(id);
 
-	if (!user) notFound();
+	// SAdmin accounts are never editable through this flow (see actions.js) —
+	// not found here rather than rendering a form that will always reject on
+	// submit.
+	if (!user || user.role === "SAdmin") notFound();
 
 	const assignableRoles = currentUser.role === "SAdmin" ? USER_ROLES : USER_ROLES.filter((role) => role !== "SAdmin");
 

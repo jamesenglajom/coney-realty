@@ -99,6 +99,18 @@ export async function updateUserAction(values) {
 	}
 
 	const supabase = createAdminClient();
+
+	// A SAdmin account is never editable through this admin flow (by anyone,
+	// including another SAdmin) — self-service for that account happens via
+	// Settings instead. Checked server-side too, not just hidden in the UI.
+	const { data: target, error: targetError } = await supabase
+		.from("users")
+		.select("role")
+		.eq("id", id)
+		.maybeSingle();
+	if (targetError) return { error: targetError.message };
+	if (target?.role === "SAdmin") return { error: "SAdmin accounts can't be edited here." };
+
 	const { error } = await supabase.from("users").update({ full_name: fullName, role }).eq("id", id);
 
 	if (error) {
@@ -191,13 +203,14 @@ export async function resetUserPasswordAction(userId) {
 	const supabase = createAdminClient();
 	const { data: targetUser, error: fetchError } = await supabase
 		.from("users")
-		.select("email")
+		.select("email, role")
 		.eq("id", userId)
 		.is("deleted_at", null)
 		.maybeSingle();
 
 	if (fetchError) return { error: fetchError.message };
 	if (!targetUser) return { error: "User not found." };
+	if (targetUser.role === "SAdmin") return { error: "SAdmin accounts can't be reset here." };
 
 	const password = computeDefaultPassword(targetUser.email);
 	const { error } = await supabase.auth.admin.updateUserById(userId, { password });
@@ -239,6 +252,11 @@ export async function softDeleteUserAction(id) {
 	}
 
 	const supabase = createAdminClient();
+
+	const { data: target, error: targetError } = await supabase.from("users").select("role").eq("id", id).maybeSingle();
+	if (targetError) return { error: targetError.message };
+	if (target?.role === "SAdmin") return { error: "SAdmin accounts can't be removed." };
+
 	const { error } = await supabase.from("users").update({ deleted_at: new Date().toISOString() }).eq("id", id);
 
 	if (error) {

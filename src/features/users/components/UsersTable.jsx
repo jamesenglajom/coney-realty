@@ -58,21 +58,25 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 							</td>
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">
-									<div className="flex justify-end gap-2">
-										{canEdit ? (
-											<Link
-												href={`/admin/users/${user.id}/edit`}
-												className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5"
-											>
-												<Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-												Edit
-											</Link>
-										) : null}
-										{canEdit ? (
-											<ResetPasswordButton userId={user.id} userName={user.full_name || user.email} />
-										) : null}
-										{canDelete ? <DeleteUserButton userId={user.id} userName={user.full_name || user.email} /> : null}
-									</div>
+									{user.role === "SAdmin" ? (
+										<span className="text-xs text-txt-muted dark:text-txt-muted-dark">Not editable</span>
+									) : (
+										<div className="flex justify-end gap-2">
+											{canEdit ? (
+												<Link
+													href={`/admin/users/${user.id}/edit`}
+													className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5"
+												>
+													<Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+													Edit
+												</Link>
+											) : null}
+											{canEdit ? (
+												<ResetPasswordButton userId={user.id} userName={user.full_name || user.email} />
+											) : null}
+											{canDelete ? <DeleteUserButton userId={user.id} userName={user.full_name || user.email} /> : null}
+										</div>
+									)}
 								</td>
 							) : null}
 						</tr>
