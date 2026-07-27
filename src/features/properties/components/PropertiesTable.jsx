@@ -72,7 +72,8 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 
 	return (
 		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
-			<table className="w-full text-left border-collapse">
+			<div className="overflow-x-auto">
+				<table className="w-full min-w-[960px] text-left border-collapse">
 				<thead>
 					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
@@ -131,7 +132,8 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 						</tr>
 					))}
 				</tbody>
-			</table>
+				</table>
+			</div>
 		</div>
 	);
 }
