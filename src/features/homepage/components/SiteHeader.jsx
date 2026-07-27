@@ -26,7 +26,7 @@ export default function SiteHeader() {
 						height={28}
 						className="rounded-lg"
 					/>
-					ConeyRealty
+					<span className="hidden md:inline">ConeyRealty</span>
 				</Link>
 
 				<ul className="hidden items-center gap-7 md:flex">
