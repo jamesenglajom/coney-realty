@@ -293,3 +293,34 @@ drop trigger if exists set_blogs_updated_at on public.blogs;
 create trigger set_blogs_updated_at
   before update on public.blogs
   for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- agent_contact_requests — leads from the public "Find agents" search: the
+-- visitor's email (captured once, before results are shown) plus which
+-- agent they actually reached out to and how. Insert-only from a public
+-- Server Action (no session), so RLS stays deny-by-default and the action
+-- itself is the trust boundary — same convention as user_property writes.
+-- ---------------------------------------------------------------------------
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'contact_method') then
+    create type contact_method as enum ('email', 'call');
+  end if;
+end $$;
+
+create table if not exists public.agent_contact_requests (
+  id uuid primary key default gen_random_uuid(),
+  visitor_email text not null,
+  agent_id uuid references public.users (id) on delete set null,
+  contact_method contact_method not null default 'email',
+  search_location text,
+  search_property_type text,
+  search_price_band text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists agent_contact_requests_agent_idx on public.agent_contact_requests (agent_id);
+
+alter table public.agent_contact_requests enable row level security;
+-- No policies: deny-by-default. Both the insert (public Server Action) and
+-- any future admin read go through the service-role client.

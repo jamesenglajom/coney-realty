@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getAvatarForSeed } from "@/features/homepage/data";
-import Button from "@/components/ui/Button";
+import ContactAgentButton from "./ContactAgentButton";
 
-export default function AgentCard({ agent }) {
+export default function AgentCard({ agent, searchContext }) {
 	const firstName = agent.name.split(" ")[0];
 
 	return (
@@ -29,13 +29,27 @@ export default function AgentCard({ agent }) {
 				<p className="mt-3 line-clamp-2 text-xs text-txt-secondary dark:text-txt-secondary-dark">{agent.bio}</p>
 			) : null}
 			<div className="mt-4 flex gap-2">
-				<Button href={`mailto:${agent.email}?subject=ConeyRealty%20enquiry`} variant="primary" className="flex-1 px-3 py-2 text-xs">
+				<ContactAgentButton
+					href={`mailto:${agent.email}?subject=ConeyRealty%20enquiry`}
+					agentId={agent.id}
+					method="email"
+					searchContext={searchContext}
+					variant="primary"
+					className="flex-1 px-3 py-2 text-xs"
+				>
 					Email {firstName}
-				</Button>
+				</ContactAgentButton>
 				{agent.phone ? (
-					<Button href={`tel:${agent.phone}`} variant="ghost" className="px-3 py-2 text-xs">
+					<ContactAgentButton
+						href={`tel:${agent.phone}`}
+						agentId={agent.id}
+						method="call"
+						searchContext={searchContext}
+						variant="ghost"
+						className="px-3 py-2 text-xs"
+					>
 						Call
-					</Button>
+					</ContactAgentButton>
 				) : null}
 			</div>
 		</li>

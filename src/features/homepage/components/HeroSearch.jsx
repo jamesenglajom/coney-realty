@@ -1,14 +1,9 @@
 import Image from "next/image";
-import { Search } from "lucide-react";
-import { PRICE_BANDS, HERO_IMAGE } from "@/features/homepage/data";
+import { HERO_IMAGE } from "@/features/homepage/data";
 import { listPublishedCityStates } from "@/features/homepage/queries";
-import { PROPERTY_TYPES } from "@/features/properties/schemas";
 import Eyebrow from "./ui/Eyebrow";
+import FindAgentsForm from "./FindAgentsForm";
 import AgentResults from "./AgentResults";
-
-const FIELD_CLASSES =
-	"w-full rounded-xl border border-white/20 bg-white/90 px-3.5 py-3 text-sm text-txt-primary outline-none focus:border-theme-gold dark:bg-white/10 dark:text-white";
-const LABEL_CLASSES = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70";
 
 export default async function HeroSearch({ searchParams }) {
 	const hasSearched =
@@ -47,57 +42,12 @@ export default async function HeroSearch({ searchParams }) {
 				</div>
 
 				<div id="search">
-					<form
-						method="GET"
-						action="/"
-						className="grid gap-3 rounded-3xl border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-md md:grid-cols-[1fr_1fr_1fr_auto] md:items-end"
-					>
-						<div>
-							<label htmlFor="loc" className={LABEL_CLASSES}>
-								Location
-							</label>
-							<select id="loc" name="location" defaultValue={location} className={FIELD_CLASSES}>
-								<option value="">Anywhere</option>
-								{cityStates.map((city) => (
-									<option key={city} value={city}>
-										{city}
-									</option>
-								))}
-							</select>
-						</div>
-						<div>
-							<label htmlFor="type" className={LABEL_CLASSES}>
-								Property type
-							</label>
-							<select id="type" name="type" defaultValue={type} className={FIELD_CLASSES}>
-								<option value="">Any type</option>
-								{PROPERTY_TYPES.map((propertyType) => (
-									<option key={propertyType} value={propertyType}>
-										{propertyType}
-									</option>
-								))}
-							</select>
-						</div>
-						<div>
-							<label htmlFor="price" className={LABEL_CLASSES}>
-								Budget
-							</label>
-							<select id="price" name="price" defaultValue={price} className={FIELD_CLASSES}>
-								{PRICE_BANDS.map((band, index) => (
-									<option key={band.label} value={index}>
-										{band.label}
-									</option>
-								))}
-							</select>
-						</div>
-						<button
-							type="submit"
-							className="inline-flex h-[46px] items-center justify-center gap-2 rounded-xl bg-theme-gold px-6 text-sm font-semibold text-theme-blue transition-colors hover:brightness-105"
-						>
-							<Search className="h-4 w-4" aria-hidden="true" />
-							Find agents
-						</button>
-					</form>
+					<FindAgentsForm
+						cityStates={cityStates}
+						defaultLocation={location}
+						defaultType={type}
+						defaultPrice={price}
+					/>
 					<p className="mt-3 text-xs text-white/70">
 						Search returns agents, not addresses. Full details come from the person who knows the home.
 					</p>

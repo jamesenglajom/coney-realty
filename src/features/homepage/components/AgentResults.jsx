@@ -20,7 +20,7 @@ export default async function AgentResults({ location, type, price }) {
 			</p>
 			<ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{matches.map((agent) => (
-					<AgentCard key={agent.id} agent={agent} />
+					<AgentCard key={agent.id} agent={agent} searchContext={{ location, type, price }} />
 				))}
 			</ul>
 		</div>
