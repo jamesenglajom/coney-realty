@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { PRICE_BANDS } from "@/features/homepage/data";
 import { PROPERTY_TYPES } from "@/features/properties/schemas";
-import { getStoredVisitorEmail, setStoredVisitorEmail } from "@/features/homepage/visitorEmail";
+import {
+	getStoredVisitorEmail,
+	setStoredVisitorEmail,
+	getStoredVisitorName,
+	setStoredVisitorName,
+} from "@/features/homepage/visitorEmail";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -22,6 +27,8 @@ export default function FindAgentsForm({ cityStates, defaultLocation, defaultTyp
 	const router = useRouter();
 	const formRef = useRef(null);
 	const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+	const [nameInput, setNameInput] = useState("");
+	const [nameError, setNameError] = useState("");
 	const [emailInput, setEmailInput] = useState("");
 	const [emailError, setEmailError] = useState("");
 
@@ -37,9 +44,9 @@ export default function FindAgentsForm({ cityStates, defaultLocation, defaultTyp
 	function handleSubmit(event) {
 		event.preventDefault();
 
-		// Already have their email from an earlier search this browser — don't
-		// ask again, just run the search.
-		if (getStoredVisitorEmail()) {
+		// Already have their name + email from an earlier search this browser —
+		// don't ask again, just run the search.
+		if (getStoredVisitorEmail() && getStoredVisitorName()) {
 			navigateWithSearchParams();
 			return;
 		}
@@ -47,16 +54,25 @@ export default function FindAgentsForm({ cityStates, defaultLocation, defaultTyp
 		setIsEmailModalOpen(true);
 	}
 
-	function handleEmailSubmit(event) {
+	function handleVisitorInfoSubmit(event) {
 		event.preventDefault();
 
-		const trimmed = emailInput.trim();
-		if (!EMAIL_REGEX.test(trimmed)) {
-			setEmailError("Enter a valid email address.");
-			return;
-		}
+		const trimmedName = nameInput.trim();
+		const trimmedEmail = emailInput.trim();
+		let hasError = false;
 
-		setStoredVisitorEmail(trimmed);
+		if (!trimmedName) {
+			setNameError("Enter your first name.");
+			hasError = true;
+		}
+		if (!EMAIL_REGEX.test(trimmedEmail)) {
+			setEmailError("Enter a valid email address.");
+			hasError = true;
+		}
+		if (hasError) return;
+
+		setStoredVisitorName(trimmedName);
+		setStoredVisitorEmail(trimmedEmail);
 		setIsEmailModalOpen(false);
 		navigateWithSearchParams();
 	}
@@ -117,15 +133,30 @@ export default function FindAgentsForm({ cityStates, defaultLocation, defaultTyp
 
 			<Modal open={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} title="One quick thing">
 				<p className="mb-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">
-					Share your email so the agent you reach out to can follow up with you directly. We&apos;ll only ask once.
+					Share your name and email so the agent you reach out to knows who they&apos;re talking to and can follow
+					up directly. We&apos;ll only ask once.
 				</p>
-				<form onSubmit={handleEmailSubmit} className="space-y-4">
+				<form onSubmit={handleVisitorInfoSubmit} className="space-y-4">
+					<div>
+						<Label htmlFor="visitorName">Your first name</Label>
+						<Input
+							id="visitorName"
+							type="text"
+							autoFocus
+							placeholder="Juan"
+							value={nameInput}
+							onChange={(event) => {
+								setNameInput(event.target.value);
+								setNameError("");
+							}}
+						/>
+						<FieldError>{nameError}</FieldError>
+					</div>
 					<div>
 						<Label htmlFor="visitorEmail">Your email</Label>
 						<Input
 							id="visitorEmail"
 							type="email"
-							autoFocus
 							placeholder="you@example.com"
 							value={emailInput}
 							onChange={(event) => {

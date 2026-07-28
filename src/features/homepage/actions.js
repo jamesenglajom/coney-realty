@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 const recordContactSchema = z.object({
 	visitorEmail: z.string().trim().min(1).email(),
+	visitorName: z.string().trim().optional(),
 	agentId: z.string().uuid(),
 	contactMethod: z.enum(["email", "call"]),
 	searchLocation: z.string().trim().optional(),
@@ -22,6 +23,7 @@ export async function recordAgentContactAction(values) {
 	const supabase = createAdminClient();
 	const { error } = await supabase.from("agent_contact_requests").insert({
 		visitor_email: parsed.data.visitorEmail,
+		visitor_name: parsed.data.visitorName || null,
 		agent_id: parsed.data.agentId,
 		contact_method: parsed.data.contactMethod,
 		search_location: parsed.data.searchLocation || null,

@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import Button from "@/components/ui/Button";
 import { recordAgentContactAction } from "@/features/homepage/actions";
-import { getStoredVisitorEmail } from "@/features/homepage/visitorEmail";
+import { getStoredVisitorEmail, getStoredVisitorName } from "@/features/homepage/visitorEmail";
 
 // Fires a background log of "this visitor contacted this agent" — doesn't
 // block or delay the mailto:/tel: action itself (that's a same-tab, no-unload
@@ -15,10 +15,12 @@ export default function ContactAgentButton({ href, agentId, method, searchContex
 	function handleClick() {
 		const visitorEmail = getStoredVisitorEmail();
 		if (!visitorEmail) return;
+		const visitorName = getStoredVisitorName();
 
 		startTransition(async () => {
 			await recordAgentContactAction({
 				visitorEmail,
+				visitorName: visitorName || undefined,
 				agentId,
 				contactMethod: method,
 				searchLocation: searchContext?.location || undefined,

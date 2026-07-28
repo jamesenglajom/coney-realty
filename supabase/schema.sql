@@ -315,6 +315,7 @@ end $$;
 create table if not exists public.agent_contact_requests (
   id uuid primary key default gen_random_uuid(),
   visitor_email text not null,
+  visitor_name text,
   agent_id uuid references public.users (id) on delete set null,
   contact_method contact_method not null default 'email',
   search_location text,
@@ -322,6 +323,10 @@ create table if not exists public.agent_contact_requests (
   search_price_band text,
   created_at timestamptz not null default now()
 );
+
+-- Table already exists in the deployed DB — see the properties table's
+-- identical note above for why this is needed alongside the column def.
+alter table public.agent_contact_requests add column if not exists visitor_name text;
 
 create index if not exists agent_contact_requests_agent_idx on public.agent_contact_requests (agent_id);
 

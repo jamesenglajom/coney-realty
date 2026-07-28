@@ -62,7 +62,10 @@ export default function LeadsTable({ leads }) {
 
 						return (
 							<tr key={lead.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
-								<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{lead.visitor_email}</td>
+								<td className="p-4">
+									<p className="text-sm font-semibold text-theme-blue dark:text-white">{lead.visitor_name || "—"}</p>
+									<p className="text-xs text-txt-secondary dark:text-txt-secondary-dark">{lead.visitor_email}</p>
+								</td>
 								<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">
 									{lead.agent?.full_name || lead.agent?.email || "—"}
 								</td>
