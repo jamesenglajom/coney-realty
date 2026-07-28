@@ -1,6 +1,28 @@
 import { z } from "zod";
+import { ALLOWED_AVATAR_HOSTS } from "@/lib/allowed-avatar-hosts";
 
 export const USER_ROLES = ["SAdmin", "Admin", "Manager", "Agent"];
+
+// Rejects the URL at save time if it's from a host next/image isn't
+// configured to fetch (next.config.ts) — otherwise it saves fine here and
+// throws wherever it's later rendered (agent cards, leaderboard, property
+// tables, the public agent profile page, ...).
+const avatarUrlField = z
+	.string()
+	.trim()
+	.optional()
+	.refine(
+		(value) => {
+			if (!value) return true;
+			try {
+				const url = new URL(value);
+				return url.protocol === "https:" && ALLOWED_AVATAR_HOSTS.includes(url.hostname);
+			} catch {
+				return false;
+			}
+		},
+		{ message: `Must be an https:// image URL from one of: ${ALLOWED_AVATAR_HOSTS.join(", ")}` },
+	);
 
 // New accounts (and password resets) get a deterministic default rather than
 // an admin-typed temp password: email local-part + "12345". Communicated to
@@ -18,7 +40,7 @@ export const createUserSchema = z.object({
 	role: z.enum(USER_ROLES),
 	phone: z.string().trim().optional(),
 	bio: z.string().trim().optional(),
-	avatarUrl: z.string().trim().optional(),
+	avatarUrl: avatarUrlField,
 });
 
 export const updateUserSchema = z.object({
@@ -27,7 +49,7 @@ export const updateUserSchema = z.object({
 	role: z.enum(USER_ROLES),
 	phone: z.string().trim().optional(),
 	bio: z.string().trim().optional(),
-	avatarUrl: z.string().trim().optional(),
+	avatarUrl: avatarUrlField,
 });
 
 // Self-service profile edit — deliberately no `id`, `role`, or `email` field.
@@ -40,7 +62,7 @@ export const updateOwnProfileSchema = z.object({
 	fullName: z.string().trim().min(1, "Full name is required"),
 	phone: z.string().trim().optional(),
 	bio: z.string().trim().optional(),
-	avatarUrl: z.string().trim().optional(),
+	avatarUrl: avatarUrlField,
 });
 
 export const changePasswordSchema = z.object({
