@@ -9,7 +9,7 @@ function Header({ isOpen, setOpen }) {
 	const [isLoggingOut, startLogout] = useTransition();
 
 	return (
-		<header className="h-16 bg-white dark:bg-[#1a1a1a] border-b border-[#f4f2eb] dark:border-[#333] flex items-center justify-between gap-4 px-4 lg:px-8">
+		<header className="sticky top-0 z-30 h-16 bg-white dark:bg-[#1a1a1a] border-b border-[#f4f2eb] dark:border-[#333] flex items-center justify-between gap-4 px-4 lg:px-8">
 			<div className="flex min-w-0 items-center gap-3">
 				<button
 					onClick={() => setOpen(!isOpen)}
