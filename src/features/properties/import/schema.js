@@ -3,6 +3,7 @@ import { PROPERTY_TYPES, PROPERTY_STATUSES, PAYMENT_TYPES } from "../schemas";
 export const TEMPLATE_HEADERS = [
 	"slug",
 	"title",
+	"screen_name",
 	"property_type",
 	"status",
 	"price",
@@ -26,6 +27,7 @@ export const TEMPLATE_HEADERS = [
 export const TEMPLATE_EXAMPLE_ROW = [
 	"cedar-ridge-residence",
 	"Cedar Ridge Residence",
+	"Cedar Ridge — 4BR Family Home",
 	"Villa",
 	"published",
 	1250000,
@@ -86,6 +88,8 @@ export function validateImportRow(rawRow, rowNumber) {
 	const title = String(row.title ?? "").trim();
 	if (!title) errors.push("title is required");
 
+	const screenName = String(row.screen_name ?? "").trim();
+
 	const propertyType = String(row.property_type ?? "").trim();
 	if (!PROPERTY_TYPES.includes(propertyType)) {
 		errors.push(`property_type must be one of ${PROPERTY_TYPES.join(", ")}`);
@@ -140,6 +144,7 @@ export function validateImportRow(rawRow, rowNumber) {
 		errors: [],
 		data: {
 			title,
+			screen_name: screenName || null,
 			slug,
 			property_type: propertyType,
 			status,

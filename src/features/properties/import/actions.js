@@ -73,6 +73,7 @@ export async function importPropertiesAction(formData) {
 
 		const columns = {
 			title: data.title,
+			screen_name: data.screen_name,
 			slug: data.slug,
 			property_type: data.property_type,
 			status: data.status,

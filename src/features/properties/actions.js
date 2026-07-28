@@ -110,6 +110,7 @@ function toCustomFields(value) {
 function toColumns(data) {
 	return {
 		title: data.title,
+		screen_name: data.screenName || null,
 		slug: data.slug,
 		property_type: data.propertyType,
 		status: data.status,

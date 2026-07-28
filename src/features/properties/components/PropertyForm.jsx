@@ -46,6 +46,7 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 			? {
 					id: property.id,
 					title: property.title,
+					screenName: property.screen_name ?? "",
 					slug: property.slug,
 					propertyType: property.property_type,
 					status: property.status,
@@ -65,6 +66,7 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 				}
 			: {
 					title: "",
+					screenName: "",
 					slug: "",
 					propertyType: PROPERTY_TYPES[0],
 					status: PROPERTY_STATUSES[0],
@@ -166,6 +168,16 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					/>
 					<FieldError>{errors.slug?.message}</FieldError>
 				</div>
+			</div>
+
+			<div>
+				<Label htmlFor="screenName">Screen name (public)</Label>
+				<Input id="screenName" type="text" placeholder="Defaults to Title if left blank" {...register("screenName")} />
+				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Shown on the public site instead of Title when set — lets you post it under a different name than the
+					internal listing title.
+				</p>
+				<FieldError>{errors.screenName?.message}</FieldError>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">

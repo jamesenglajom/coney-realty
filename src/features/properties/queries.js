@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const LIST_COLUMNS =
-	"id, title, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at";
+	"id, title, screen_name, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at";
 const AGENT_JOIN = "users(id, full_name, user_info(avatar_url))";
 
 // Agents only ever see their own assigned properties — pass their id to

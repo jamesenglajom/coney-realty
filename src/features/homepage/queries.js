@@ -111,7 +111,7 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 	const { data: links, error: linksError } = await supabase
 		.from("user_property")
 		.select(
-			"properties(id, slug, title, property_type, price, city_state, city, region, district, custom_fields, status, deleted_at)",
+			"properties(id, slug, title, screen_name, property_type, price, city_state, city, region, district, custom_fields, status, deleted_at)",
 		)
 		.eq("user_id", id);
 
@@ -123,7 +123,7 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 		.map((property) => ({
 			id: property.id,
 			slug: property.slug,
-			name: property.title,
+			name: property.screen_name || property.title,
 			city: property.city_state,
 			price: property.price,
 			type: property.property_type,
@@ -204,7 +204,9 @@ async function _listFeaturedProperties(limit = 6) {
 
 	const { data, error } = await supabase
 		.from("properties")
-		.select("id, slug, title, property_type, price, city_state, custom_fields, user_property(users(id, full_name))")
+		.select(
+			"id, slug, title, screen_name, property_type, price, city_state, custom_fields, user_property(users(id, full_name))",
+		)
 		.eq("status", "published")
 		.is("deleted_at", null)
 		.order("price", { ascending: false })
@@ -217,7 +219,7 @@ async function _listFeaturedProperties(limit = 6) {
 		return {
 			id: property.id,
 			slug: property.slug,
-			name: property.title,
+			name: property.screen_name || property.title,
 			city: property.city_state,
 			price: property.price,
 			type: property.property_type,

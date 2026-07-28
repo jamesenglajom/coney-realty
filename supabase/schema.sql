@@ -174,6 +174,10 @@ end $$;
 create table if not exists public.properties (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  -- Public-facing display name, shown on the marketing site in place of
+  -- `title` when set (falls back to `title` when null) — lets the internal
+  -- listing title differ from what's posted publicly.
+  screen_name text,
   slug text not null,
   property_type property_type not null,
   status property_status not null default 'draft',
@@ -206,6 +210,7 @@ create table if not exists public.properties (
 -- Table already exists in the deployed DB, so the columns above only apply
 -- on a fresh `create table`. These `add column if not exists` cover the
 -- already-existing table when this file is re-run against it.
+alter table public.properties add column if not exists screen_name text;
 alter table public.properties add column if not exists city text;
 alter table public.properties add column if not exists region text;
 alter table public.properties add column if not exists district text;
