@@ -11,9 +11,11 @@ export const metadata = {
 };
 
 function pageHref(params, page) {
-	const next = new URLSearchParams(params);
+	const next = new URLSearchParams();
+	for (const [key, value] of Object.entries(params)) {
+		if (value) next.set(key, String(value));
+	}
 	if (page > 1) next.set("page", String(page));
-	else next.delete("page");
 	const qs = next.toString();
 	return qs ? `/properties?${qs}` : "/properties";
 }
