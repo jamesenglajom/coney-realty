@@ -11,6 +11,7 @@ import {
   Bell,
   ChevronRight,
   Contact,
+  ListChecks,
 } from "lucide-react";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -63,6 +64,14 @@ export const navigationGroups = [
         icon: Contact,
         href: `${BASE_URL}/admin/leads`,
         pageKey: "leads",
+      },
+      {
+        name: "Property Types",
+        title: "Standard Fields",
+        sub: "Set the standard fields each property type should collect.",
+        icon: ListChecks,
+        href: `${BASE_URL}/admin/property-types`,
+        pageKey: "propertyTypes",
       },
     ],
   },

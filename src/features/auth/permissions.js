@@ -80,7 +80,7 @@ export async function getRolePermissions(role) {
 		const pages = new Set((data ?? []).map((row) => row.page));
 		// Cover pages that might not have a seeded row yet — SAdmin is always
 		// fully-allowed regardless of what the table contains.
-		["dashboard", "users", "blogs", "properties", "settings"].forEach((page) => pages.add(page));
+		["dashboard", "users", "blogs", "properties", "settings", "leads", "propertyTypes"].forEach((page) => pages.add(page));
 		return Object.fromEntries([...pages].map((page) => [page, SADMIN_ALL_ALLOWED]));
 	}
 

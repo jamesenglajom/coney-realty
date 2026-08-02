@@ -14,11 +14,13 @@ import {
 	PAYMENT_TYPES,
 } from "../schemas";
 import { createPropertyAction, updatePropertyAction, reverseGeocodeAction } from "../actions";
+import { omitPaths, pickPaths, deepMerge, flattenToPairs, buildFromPairs } from "@/features/propertyTypes/fieldPaths";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
+import AdditionalFieldsEditor from "./AdditionalFieldsEditor";
 
 function slugify(value) {
 	return value
@@ -28,14 +30,24 @@ function slugify(value) {
 		.replace(/(^-|-$)/g, "");
 }
 
-export default function PropertyForm({ mode, property, assignableUsers }) {
+// The property form still submits one `customFields` JSON string, matching
+// createPropertySchema/updatePropertySchema server-side exactly as before —
+// standardFields (structured, per property type — see Admin > Property
+// Types) and additionalFieldPairs (freeform key/value rows, everything
+// else) are purely client-side UI concepts that get merged into that one
+// string right before the action call.
+export default function PropertyForm({ mode, property, assignableUsers, fieldSetsByType = {} }) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [serverError, setServerError] = useState("");
 	const isEdit = mode === "edit";
 
+	const initialCustomFields = property?.custom_fields ?? {};
+	const initialActiveFields = fieldSetsByType[isEdit ? property.property_type : PROPERTY_TYPES[0]] ?? [];
+
 	const {
 		register,
+		control,
 		handleSubmit,
 		watch,
 		setValue,
@@ -61,7 +73,17 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					paymentTerms: property.payment_terms ?? "",
 					lat: property.lat != null ? String(property.lat) : "",
 					lng: property.lng != null ? String(property.lng) : "",
-					customFields: JSON.stringify(property.custom_fields ?? {}, null, 2),
+					// Overwritten from standardFields + additionalFields on submit —
+					// this default just needs to be *some* valid JSON string so the
+					// zod resolver's shape check trivially passes.
+					customFields: "{}",
+					standardFields: initialCustomFields,
+					additionalFieldPairs: flattenToPairs(
+						omitPaths(
+							initialCustomFields,
+							initialActiveFields.map((field) => field.key),
+						),
+					),
 					assignedUserIds: property.assignedUserIds ?? [],
 				}
 			: {
@@ -82,6 +104,8 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 					lat: "",
 					lng: "",
 					customFields: "{}",
+					standardFields: {},
+					additionalFieldPairs: [],
 					assignedUserIds: [],
 				},
 	});
@@ -129,11 +153,22 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 		});
 	}
 
+	const selectedPropertyType = watch("propertyType");
+	const activeFields = fieldSetsByType[selectedPropertyType] ?? [];
+
 	function onSubmit(values) {
 		setServerError("");
+
+		const additionalFields = buildFromPairs(values.additionalFieldPairs);
+		const standardValues = pickPaths(
+			values.standardFields ?? {},
+			activeFields.map((field) => field.key),
+		);
+		const customFields = deepMerge(additionalFields, standardValues);
+
 		startTransition(async () => {
 			const action = isEdit ? updatePropertyAction : createPropertyAction;
-			const result = await action(values);
+			const result = await action({ ...values, customFields: JSON.stringify(customFields) });
 
 			if (result?.error) {
 				setServerError(result.error);
@@ -297,19 +332,34 @@ export default function PropertyForm({ mode, property, assignableUsers }) {
 				</p>
 			</div>
 
-			<div>
-				<Label htmlFor="customFields">Custom fields (JSON)</Label>
-				<textarea
-					id="customFields"
-					rows={5}
-					{...register("customFields")}
-					className="w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 font-mono text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold"
-				/>
-				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-					e.g. {"{"}"beds": 3, "baths": 2, "sqft": 1800{"}"} — attributes that vary by property type.
-				</p>
-				<FieldError>{errors.customFields?.message}</FieldError>
-			</div>
+			{activeFields.length > 0 ? (
+				<div>
+					<Label className="mb-0">Standard fields for {selectedPropertyType}</Label>
+					<p className="mb-2 mt-1 text-xs text-txt-muted dark:text-txt-muted-dark">
+						Configured in Admin &gt; Property Types.
+					</p>
+					<div className="grid gap-4 sm:grid-cols-2">
+						{activeFields.map((field) => (
+							<div key={field.key}>
+								<Label htmlFor={`standardFields.${field.key}`}>
+									{field.label}
+									{field.required ? <span className="text-red-600 dark:text-red-400"> *</span> : null}
+									{field.unit ? (
+										<span className="font-normal normal-case text-txt-muted dark:text-txt-muted-dark"> ({field.unit})</span>
+									) : null}
+								</Label>
+								<Input
+									id={`standardFields.${field.key}`}
+									type={field.type === "number" ? "number" : "text"}
+									{...register(`standardFields.${field.key}`, field.type === "number" ? { valueAsNumber: true } : {})}
+								/>
+							</div>
+						))}
+					</div>
+				</div>
+			) : null}
+
+			<AdditionalFieldsEditor control={control} register={register} />
 
 			<div>
 				<Label htmlFor="assignedUserIds">Assigned agents</Label>

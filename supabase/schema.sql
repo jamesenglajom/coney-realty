@@ -128,24 +128,28 @@ values
   ('SAdmin', 'properties', true, true, true, true),
   ('SAdmin', 'settings', true, true, true, true),
   ('SAdmin', 'leads', true, true, true, true),
+  ('SAdmin', 'propertyTypes', true, true, true, true),
   ('Admin', 'dashboard', true, true, true, true),
   ('Admin', 'users', true, true, true, false),
   ('Admin', 'blogs', true, true, true, true),
   ('Admin', 'properties', true, true, true, true),
   ('Admin', 'settings', true, false, false, false),
   ('Admin', 'leads', true, false, false, false),
+  ('Admin', 'propertyTypes', true, true, true, true),
   ('Manager', 'dashboard', true, false, false, false),
   ('Manager', 'users', false, false, false, false),
   ('Manager', 'blogs', true, true, true, false),
   ('Manager', 'properties', true, true, true, false),
   ('Manager', 'settings', false, false, false, false),
   ('Manager', 'leads', false, false, false, false),
+  ('Manager', 'propertyTypes', true, true, true, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
   ('Agent', 'blogs', false, false, false, false),
   ('Agent', 'properties', true, false, false, false),
   ('Agent', 'settings', false, false, false, false),
-  ('Agent', 'leads', false, false, false, false)
+  ('Agent', 'leads', false, false, false, false),
+  ('Agent', 'propertyTypes', false, false, false, false)
 on conflict (role, page) do nothing;
 
 drop trigger if exists set_permissions_updated_at on public.permissions;
@@ -238,6 +242,40 @@ create policy "public can read published properties" on public.properties
 drop trigger if exists set_properties_updated_at on public.properties;
 create trigger set_properties_updated_at
   before update on public.properties
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- property_type_field_sets — per-property-type standard custom field
+-- definitions (Admin > Property Types), so the property form can render
+-- structured inputs (e.g. "Lot area (sqm)") for the attributes every
+-- listing of that type is expected to have, instead of always falling back
+-- to a raw JSON textarea. Fields not covered by a type's set stay editable
+-- via the property form's freeform "Additional fields (JSON)" textarea —
+-- this never replaces that escape hatch, just narrows what needs it. `key`
+-- values may be dot-paths (e.g. "lot.lot_area_sqm") to match how
+-- custom_fields is already nested for existing data.
+-- ---------------------------------------------------------------------------
+create table if not exists public.property_type_field_sets (
+  id uuid primary key default gen_random_uuid(),
+  property_type property_type not null,
+  fields jsonb not null default '[]'::jsonb,
+  created_by uuid references public.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create unique index if not exists property_type_field_sets_type_idx
+  on public.property_type_field_sets (property_type) where deleted_at is null;
+
+alter table public.property_type_field_sets enable row level security;
+-- Deny-by-default, no policies: admin-only CRUD goes through Server Actions
+-- (service role). The public site never reads this table — it only shapes
+-- the admin property form, not how already-saved data is displayed.
+
+drop trigger if exists set_property_type_field_sets_updated_at on public.property_type_field_sets;
+create trigger set_property_type_field_sets_updated_at
+  before update on public.property_type_field_sets
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------

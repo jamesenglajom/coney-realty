@@ -39,6 +39,13 @@ function buildCrumbs(pathname) {
 		return crumbs;
 	}
 
+	if (pathname.startsWith("/admin/property-types")) {
+		const crumbs = [{ label: "Property Types", href: "/admin/property-types" }];
+		if (pathname === "/admin/property-types/new") crumbs.push({ label: "New" });
+		else if (pathname.endsWith("/edit")) crumbs.push({ label: "Edit" });
+		return crumbs;
+	}
+
 	if (pathname.startsWith("/admin/property/")) {
 		const slug = pathname.split("/")[3] ?? "";
 		return [{ label: "Properties", href: "/admin/properties" }, { label: humanize(slug) }];
