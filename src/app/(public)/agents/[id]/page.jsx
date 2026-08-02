@@ -3,8 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bed, Bath, Ruler } from "lucide-react";
 import { getAgentProfile } from "@/features/homepage/queries";
-import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
+import { getAvatarForSeed, formatPrice } from "@/features/homepage/data";
 import Button from "@/components/ui/Button";
+import PropertyCoverImage from "@/features/properties/components/PropertyCoverImage";
 
 export async function generateMetadata({ params }) {
 	const { id } = await params;
@@ -74,21 +75,16 @@ export default async function AgentProfilePage({ params }) {
 									key={listing.id}
 									className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]"
 								>
-									<div className="relative aspect-[4/3]">
-										<Image
-											src={getPropertyImageForSeed(listing.id)}
-											alt={listing.name}
-											fill
-											sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-											className="object-cover"
-										/>
-										<span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
-											{listing.type}
-										</span>
-									</div>
+									<Link href={`/property/${listing.slug}`}>
+										<PropertyCoverImage slug={listing.slug} seed={listing.id} alt={listing.name} badge={listing.type} />
+									</Link>
 									<div className="p-5">
 										<div className="flex items-baseline justify-between gap-3">
-											<h3 className="text-lg font-semibold text-theme-blue dark:text-white">{listing.name}</h3>
+											<h3 className="text-lg font-semibold text-theme-blue dark:text-white">
+												<Link href={`/property/${listing.slug}`} className="hover:underline">
+													{listing.name}
+												</Link>
+											</h3>
 											<span className="whitespace-nowrap font-semibold text-theme-blue dark:text-theme-gold">
 												{formatPrice(listing.price)}
 											</span>

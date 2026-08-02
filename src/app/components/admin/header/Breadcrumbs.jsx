@@ -11,9 +11,9 @@ function humanize(segment) {
 }
 
 // Route structure here doesn't always match the logical hierarchy we want to
-// show (e.g. /property/[slug] is conceptually under Properties but isn't
-// nested under /admin/properties in the URL), so this maps known routes
-// explicitly rather than mechanically walking path segments.
+// show (e.g. /admin/property/[slug] is conceptually under Properties but
+// isn't nested under /admin/properties in the URL), so this maps known
+// routes explicitly rather than mechanically walking path segments.
 function buildCrumbs(pathname) {
 	if (pathname === "/admin") return [];
 
@@ -39,8 +39,8 @@ function buildCrumbs(pathname) {
 		return crumbs;
 	}
 
-	if (pathname.startsWith("/property/")) {
-		const slug = pathname.split("/")[2] ?? "";
+	if (pathname.startsWith("/admin/property/")) {
+		const slug = pathname.split("/")[3] ?? "";
 		return [{ label: "Properties", href: "/admin/properties" }, { label: humanize(slug) }];
 	}
 

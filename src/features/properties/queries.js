@@ -104,7 +104,7 @@ export async function getPropertyById(id) {
 	return { ...property, assignedUserIds: (assignments ?? []).map((row) => row.user_id) };
 }
 
-// For the /property/[slug] preview page — same shape as getPropertyById plus
+// For the /admin/property/[slug] preview page — same shape as getPropertyById plus
 // the assigned agents' display info (name/email), since the preview shows
 // who else (if anyone) is on the listing.
 export async function getPropertyBySlug(slug) {

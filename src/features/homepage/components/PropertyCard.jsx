@@ -1,28 +1,28 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Bed, Bath, Ruler } from "lucide-react";
-import { getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
+import { formatPrice } from "@/features/homepage/data";
+import PropertyCoverImage from "@/features/properties/components/PropertyCoverImage";
 
 export default function PropertyCard({ property }) {
 	const hasBedsBaths = property.beds != null || property.baths != null;
 
 	return (
 		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]">
-			<div className="relative aspect-[4/3]">
-				<Image
-					src={getPropertyImageForSeed(property.id)}
+			<Link href={`/property/${property.slug}`}>
+				<PropertyCoverImage
+					slug={property.slug}
+					seed={property.id}
 					alt={`${property.name}${property.city ? ` in ${property.city}` : ""}`}
-					fill
-					sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-					className="object-cover"
+					badge={property.type}
 				/>
-				<span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
-					{property.type}
-				</span>
-			</div>
+			</Link>
 			<div className="p-5">
 				<div className="flex items-baseline justify-between gap-3">
-					<h3 className="text-lg font-semibold text-theme-blue dark:text-white">{property.name}</h3>
+					<h3 className="text-lg font-semibold text-theme-blue dark:text-white">
+						<Link href={`/property/${property.slug}`} className="hover:underline">
+							{property.name}
+						</Link>
+					</h3>
 					<span className="whitespace-nowrap font-semibold text-theme-blue dark:text-theme-gold">
 						{formatPrice(property.price)}
 					</span>

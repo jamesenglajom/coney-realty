@@ -236,6 +236,113 @@ export const listFeaturedProperties = unstable_cache(_listFeaturedProperties, ["
 	tags: [PUBLIC_PROPERTIES_TAG],
 });
 
+export const PUBLIC_PROPERTIES_PAGE_SIZE = 12;
+
+// Paginated, filterable catalog for /properties — same public column list
+// and location/type/price vocabulary as matchListedAgents above, just
+// returning properties themselves (with a total count for pagination)
+// instead of the agents attached to them.
+async function _listPublicProperties({ city, propertyType, price, page = 1 } = {}) {
+	const supabase = createAdminClient();
+
+	let query = supabase
+		.from("properties")
+		.select(
+			"id, slug, title, screen_name, property_type, price, city_state, custom_fields, user_property(users(id, full_name))",
+			{ count: "exact" },
+		)
+		.eq("status", "published")
+		.is("deleted_at", null)
+		.order("created_at", { ascending: false });
+
+	if (city) query = query.eq("city_state", city);
+	if (propertyType) query = query.eq("property_type", propertyType);
+
+	const bandIndex = Number(price);
+	const band = bandIndex > 0 ? PRICE_BANDS[bandIndex] : null;
+	if (band) {
+		query = query.gte("price", band.min);
+		if (Number.isFinite(band.max)) query = query.lte("price", band.max);
+	}
+
+	const safePage = Math.max(1, Number(page) || 1);
+	const from = (safePage - 1) * PUBLIC_PROPERTIES_PAGE_SIZE;
+	const to = from + PUBLIC_PROPERTIES_PAGE_SIZE - 1;
+
+	const { data, error, count } = await query.range(from, to);
+	if (error) throw new Error(error.message);
+
+	const properties = (data ?? []).map((property) => {
+		const agent = property.user_property?.[0]?.users ?? null;
+		return {
+			id: property.id,
+			slug: property.slug,
+			name: property.screen_name || property.title,
+			city: property.city_state,
+			price: property.price,
+			type: property.property_type,
+			beds: property.custom_fields?.beds ?? null,
+			baths: property.custom_fields?.baths ?? null,
+			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
+			agent: agent ? { id: agent.id, name: agent.full_name } : null,
+		};
+	});
+
+	return { properties, total: count ?? 0, page: safePage };
+}
+
+export const listPublicProperties = unstable_cache(_listPublicProperties, ["list-public-properties"], {
+	revalidate: ONE_DAY_SECONDS,
+	tags: [PUBLIC_PROPERTIES_TAG],
+});
+
+// One property's public-safe detail (no address_line/lat/lng — those are
+// treated as private everywhere else in the app, see PropertyForm) plus its
+// assigned agents' contact info, for /property/[slug]. Only ever returns a
+// published, non-deleted property — same visibility rule as every other
+// public property surface, so a sold/draft/archived slug 404s like it was
+// never there. Per-request cache() (not unstable_cache) since it's keyed by
+// slug rather than a short list of filter combinations — same choice as
+// getAgentProfile above.
+export const getPublicPropertyBySlug = cache(async function getPublicPropertyBySlug(slug) {
+	const supabase = createAdminClient();
+
+	const { data: property, error } = await supabase
+		.from("properties")
+		.select(
+			"id, slug, title, screen_name, property_type, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
+		)
+		.eq("slug", slug)
+		.eq("status", "published")
+		.is("deleted_at", null)
+		.maybeSingle();
+
+	if (error) throw new Error(error.message);
+	if (!property) return null;
+
+	const { user_property, ...rest } = property;
+	const agents = (user_property ?? [])
+		.map((link) => link.users)
+		.filter(Boolean)
+		.map((agent) => ({
+			id: agent.id,
+			name: agent.full_name || agent.email,
+			email: agent.email,
+			phone: agent.user_info?.phone ?? null,
+			avatarUrl: agent.user_info?.avatar_url ?? null,
+		}));
+
+	return {
+		...rest,
+		name: rest.screen_name || rest.title,
+		location: rest.city_state || [rest.city, rest.region, rest.district].filter(Boolean).join(", ") || null,
+		beds: rest.custom_fields?.beds ?? null,
+		baths: rest.custom_fields?.baths ?? null,
+		lotAreaSqm: rest.custom_fields?.lot?.lot_area_sqm ?? null,
+		agents,
+	};
+});
+
 // Real counts for the homepage stats band — replaces the old hardcoded
 // marketing numbers (which included a "client rating" with no reviews
 // system behind it at all) with what the properties/users tables actually

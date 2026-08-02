@@ -17,9 +17,14 @@ export default async function FeaturedHomes() {
 						title="A taste of the current collection"
 						description="We show the shape of a home — never the full file. Exact address, disclosures, and viewings come from the listing agent, so nothing here can be scraped and re-listed."
 					/>
-					<Button href="/#search" variant="ghost" className="self-start sm:self-auto">
-						Search by your criteria
-					</Button>
+					<div className="flex gap-2 self-start sm:self-auto">
+						<Button href="/properties" variant="ghost">
+							View all properties
+						</Button>
+						<Button href="/#search" variant="ghost">
+							Search by your criteria
+						</Button>
+					</div>
 				</div>
 				<ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{properties.map((property) => (

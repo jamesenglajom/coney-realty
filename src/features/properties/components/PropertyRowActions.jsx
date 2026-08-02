@@ -87,7 +87,7 @@ export default function PropertyRowActions({ property, canEdit, canDelete }) {
 							className="z-50 overflow-hidden rounded-lg border border-theme-gold-light bg-white py-1 shadow-lg dark:border-[#333] dark:bg-[#1a1a1a]"
 						>
 							<Link
-								href={`/property/${property.slug}`}
+								href={`/admin/property/${property.slug}`}
 								role="menuitem"
 								className={MENU_ITEM_CLASSES}
 								onClick={closeMenu}
