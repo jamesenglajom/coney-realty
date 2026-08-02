@@ -14,7 +14,7 @@ export function estimateReadMinutes(content) {
 
 // Public-facing reads for the marketing site. Uses the admin client rather
 // than a public RLS policy on `users` — the author join stays tightly scoped
-// to just `full_name` here, same reasoning as matchListedAgents in the
+// to just `full_name` here, same reasoning as listFeaturedProperties in the
 // homepage feature (explicit column selection, not a row-level policy).
 export async function listPublishedBlogs(limit) {
 	const supabase = createAdminClient();

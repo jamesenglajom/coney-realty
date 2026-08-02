@@ -36,62 +36,6 @@ export const listPublishedCityStates = unstable_cache(_listPublishedCityStates, 
 	tags: [PUBLIC_PROPERTIES_TAG],
 });
 
-// Uses the admin client rather than opening up a public RLS policy on
-// `users`/`user_info` — those tables hold more than we want exposed by a
-// row-level policy, so the trust boundary here is this function's explicit
-// column list rather than a correlated RLS rule.
-async function _matchListedAgents({ location, type, price } = {}) {
-	const supabase = createAdminClient();
-
-	let query = supabase
-		.from("properties")
-		.select("id, price, user_property(user_id, users(id, email, full_name, user_info(phone, bio, avatar_url)))")
-		.eq("status", "published")
-		.is("deleted_at", null);
-
-	if (location) query = query.eq("city_state", location);
-	if (type) query = query.eq("property_type", type);
-
-	const bandIndex = Number(price);
-	const band = bandIndex > 0 ? PRICE_BANDS[bandIndex] : null;
-	if (band) {
-		query = query.gte("price", band.min);
-		if (Number.isFinite(band.max)) query = query.lte("price", band.max);
-	}
-
-	const { data, error } = await query;
-	if (error) throw new Error(error.message);
-
-	const agentsById = new Map();
-	for (const property of data ?? []) {
-		for (const link of property.user_property ?? []) {
-			const user = link.users;
-			if (!user) continue;
-			const existing = agentsById.get(user.id);
-			if (existing) {
-				existing.listingsCount += 1;
-			} else {
-				agentsById.set(user.id, {
-					id: user.id,
-					name: user.full_name || user.email,
-					email: user.email,
-					phone: user.user_info?.phone ?? null,
-					bio: user.user_info?.bio ?? null,
-					avatarUrl: user.user_info?.avatar_url ?? null,
-					listingsCount: 1,
-				});
-			}
-		}
-	}
-
-	return Array.from(agentsById.values()).sort((a, b) => b.listingsCount - a.listingsCount);
-}
-
-export const matchListedAgents = unstable_cache(_matchListedAgents, ["match-listed-agents"], {
-	revalidate: ONE_DAY_SECONDS,
-	tags: [PUBLIC_PROPERTIES_TAG],
-});
-
 // One agent's public profile: contact details plus their currently published,
 // non-deleted listings. Powers /agents/[id]. Cached per-request so
 // generateMetadata() and the page component don't double-query.
@@ -198,7 +142,7 @@ export const listTopAgents = unstable_cache(_listTopAgents, ["list-top-agents"],
 
 // Featured listings for the homepage, with whichever agent (if any) is
 // assigned first. Uses the admin client to cross into user_property/users,
-// same trust boundary reasoning as matchListedAgents/listTopAgents above.
+// same trust boundary reasoning as listTopAgents above.
 async function _listFeaturedProperties(limit = 6) {
 	const supabase = createAdminClient();
 
@@ -239,9 +183,8 @@ export const listFeaturedProperties = unstable_cache(_listFeaturedProperties, ["
 export const PUBLIC_PROPERTIES_PAGE_SIZE = 12;
 
 // Paginated, filterable catalog for /properties — same public column list
-// and location/type/price vocabulary as matchListedAgents above, just
-// returning properties themselves (with a total count for pagination)
-// instead of the agents attached to them.
+// and location/type/price vocabulary listFeaturedProperties uses above,
+// plus a total count for pagination.
 async function _listPublicProperties({ city, propertyType, price, page = 1 } = {}) {
 	const supabase = createAdminClient();
 

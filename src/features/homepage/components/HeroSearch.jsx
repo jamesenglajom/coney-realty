@@ -3,14 +3,8 @@ import { HERO_IMAGE } from "@/features/homepage/data";
 import { listPublishedCityStates } from "@/features/homepage/queries";
 import Eyebrow from "./ui/Eyebrow";
 import FindAgentsForm from "./FindAgentsForm";
-import AgentResults from "./AgentResults";
 
-export default async function HeroSearch({ searchParams }) {
-	const hasSearched =
-		searchParams?.location !== undefined || searchParams?.type !== undefined || searchParams?.price !== undefined;
-	const location = searchParams?.location ?? "";
-	const type = searchParams?.type ?? "";
-	const price = searchParams?.price ?? "0";
+export default async function HeroSearch() {
 	const cityStates = await listPublishedCityStates();
 
 	return (
@@ -31,32 +25,21 @@ export default async function HeroSearch({ searchParams }) {
 				<div className="max-w-2xl text-white">
 					<Eyebrow tone="on-dark">People, not portals</Eyebrow>
 					<h1 className="mt-4 font-display text-[clamp(40px,8vw,76px)] font-semibold leading-[1.02]">
-						Meet the agent,
+						See the homes,
 						<br />
-						not the listing feed.
+						meet the agent who knows them.
 					</h1>
 					<p className="mt-5 max-w-lg text-lg text-white/85">
-						Tell us where you want to live, your budget, and the kind of home. We match you with vetted local
-						agents you can call or email today — including the homes that never hit public sites.
+						Tell us where you want to live, your budget, and the kind of home. We&apos;ll show you matching listings
+						— each one with a real local agent you can call or email today, not a call center.
 					</p>
 				</div>
 
 				<div id="search">
-					<FindAgentsForm
-						cityStates={cityStates}
-						defaultLocation={location}
-						defaultType={type}
-						defaultPrice={price}
-					/>
+					<FindAgentsForm cityStates={cityStates} defaultLocation="" defaultType="" defaultPrice="0" />
 					<p className="mt-3 text-xs text-white/70">
-						Search returns agents, not addresses. Full details come from the person who knows the home.
+						Every result links to a real listing and the agent behind it — no forms, no wait.
 					</p>
-
-					{hasSearched ? (
-						<div className="mt-6">
-							<AgentResults location={location} type={type} price={price} />
-						</div>
-					) : null}
 				</div>
 			</div>
 		</section>

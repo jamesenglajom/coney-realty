@@ -6,12 +6,10 @@ import Testimonial from "@/features/homepage/components/Testimonial";
 import BlogInsights from "@/features/homepage/components/BlogInsights";
 import CTASection from "@/features/homepage/components/CTASection";
 
-export default async function HomePage({ searchParams }) {
-	const resolvedSearchParams = await searchParams;
-
+export default function HomePage() {
 	return (
 		<>
-			<HeroSearch searchParams={resolvedSearchParams} />
+			<HeroSearch />
 			<StatsBand />
 			<FeaturedHomes />
 			<Leaderboard />
