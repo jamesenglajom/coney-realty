@@ -253,7 +253,7 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 	const { data: property, error } = await supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
+			"id, slug, title, screen_name, property_type, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, html_body, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
 		)
 		.eq("slug", slug)
 		.eq("status", "published")

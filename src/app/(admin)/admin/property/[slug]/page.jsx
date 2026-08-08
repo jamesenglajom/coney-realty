@@ -165,6 +165,18 @@ export default async function PropertyPreviewPage({ params }) {
 				</div>
 			</div>
 
+			{property.html_body ? (
+				<div className="mt-8">
+					<h2 className="text-sm font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+						Description
+					</h2>
+					<div
+						className="mt-2 max-w-none text-sm text-txt-secondary dark:text-txt-secondary-dark [&_a]:text-theme-blue [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-theme-gold [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mb-1.5 [&_h3]:mt-3 [&_h3]:text-sm [&_h3]:font-semibold [&_ol]:mb-2.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2.5 [&_ul]:mb-2.5 [&_ul]:list-disc [&_ul]:pl-5 dark:[&_a]:text-theme-gold"
+						dangerouslySetInnerHTML={{ __html: property.html_body }}
+					/>
+				</div>
+			) : null}
+
 			{property.assignedAgents.length > 0 ? (
 				<div className="mt-8">
 					<h2 className="text-sm font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">

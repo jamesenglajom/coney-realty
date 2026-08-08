@@ -39,6 +39,7 @@ const propertyBaseSchema = z.object({
 	lat: z.string().trim().optional(),
 	lng: z.string().trim().optional(),
 	customFields: jsonObjectString,
+	htmlBody: z.string().optional(),
 	assignedUserIds: z.array(z.string()).default([]),
 });
 

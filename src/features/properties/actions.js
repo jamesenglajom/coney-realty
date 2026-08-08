@@ -126,6 +126,7 @@ function toColumns(data) {
 		lat: toNumberOrNull(data.lat),
 		lng: toNumberOrNull(data.lng),
 		custom_fields: toCustomFields(data.customFields),
+		html_body: data.htmlBody || null,
 	};
 }
 

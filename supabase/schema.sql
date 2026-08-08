@@ -209,6 +209,10 @@ create table if not exists public.properties (
   lat double precision,
   lng double precision,
   custom_fields jsonb not null default '{}'::jsonb,
+  -- Rich-text (TipTap-authored HTML) description shown on the public
+  -- property detail page — admin-authored only (never public input), so
+  -- rendering it as raw HTML there is safe.
+  html_body text,
   -- Set (and cleared) by the app whenever status transitions into/out of
   -- 'sold' — see updatePropertyAction — so agent dashboards can compute
   -- "this month's sales" without guessing off updated_at.
@@ -223,6 +227,7 @@ create table if not exists public.properties (
 -- on a fresh `create table`. These `add column if not exists` cover the
 -- already-existing table when this file is re-run against it.
 alter table public.properties add column if not exists screen_name text;
+alter table public.properties add column if not exists html_body text;
 alter table public.properties add column if not exists city text;
 alter table public.properties add column if not exists region text;
 alter table public.properties add column if not exists district text;

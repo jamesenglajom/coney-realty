@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import Select from "@/components/ui/Select";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 import AdditionalFieldsEditor from "./AdditionalFieldsEditor";
+import HtmlBodyEditor from "./HtmlBodyEditor";
 
 function slugify(value) {
 	return value
@@ -73,6 +74,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					paymentTerms: property.payment_terms ?? "",
 					lat: property.lat != null ? String(property.lat) : "",
 					lng: property.lng != null ? String(property.lng) : "",
+					htmlBody: property.html_body ?? "",
 					// Overwritten from standardFields + additionalFields on submit —
 					// this default just needs to be *some* valid JSON string so the
 					// zod resolver's shape check trivially passes.
@@ -103,6 +105,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					paymentTerms: "",
 					lat: "",
 					lng: "",
+					htmlBody: "",
 					customFields: "{}",
 					standardFields: {},
 					additionalFieldPairs: [],
@@ -330,6 +333,19 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					Fills in full address, city, region, and district from the lat/lng above using OpenStreetMap — always
 					double-check before saving.
 				</p>
+			</div>
+
+			<div>
+				<Label htmlFor="htmlBody">Description</Label>
+				<p className="mb-2 -mt-0.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Shown on the public property page, below the key facts.
+				</p>
+				<Controller
+					name="htmlBody"
+					control={control}
+					render={({ field }) => <HtmlBodyEditor value={field.value} onChange={field.onChange} />}
+				/>
+				<FieldError>{errors.htmlBody?.message}</FieldError>
 			</div>
 
 			{activeFields.length > 0 ? (

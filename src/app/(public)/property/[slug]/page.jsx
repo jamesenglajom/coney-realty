@@ -92,6 +92,13 @@ export default async function PublicPropertyPage({ params }) {
 					</div>
 				) : null}
 
+				{property.html_body ? (
+					<div
+						className="mt-8 max-w-none text-sm text-txt-secondary dark:text-txt-secondary-dark [&_a]:text-theme-blue [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-theme-gold [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-theme-blue [&_h3]:mb-1.5 [&_h3]:mt-4 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-theme-blue [&_ol]:mb-2.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2.5 [&_ul]:mb-2.5 [&_ul]:list-disc [&_ul]:pl-5 dark:[&_a]:text-theme-gold dark:[&_h2]:text-white dark:[&_h3]:text-white"
+						dangerouslySetInnerHTML={{ __html: property.html_body }}
+					/>
+				) : null}
+
 				<div className="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
 					<div className="space-y-4">
 						{property.zone_type ? (
