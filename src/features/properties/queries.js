@@ -1,9 +1,24 @@
 import "server-only";
+import fs from "node:fs";
+import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const LIST_COLUMNS =
 	"id, title, screen_name, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at";
 const AGENT_JOIN = "users(id, full_name, user_info(avatar_url))";
+
+// Photos are static files in public/properties/ (see that folder's README),
+// not tracked in the DB — checking for {slug}_img_1.webp on disk is enough
+// to know whether a listing has a real photo yet, vs. falling back to the
+// placeholder pool everywhere it's displayed.
+function hasPropertyImage(slug) {
+	if (!slug) return false;
+	try {
+		return fs.existsSync(path.join(process.cwd(), "public", "properties", `${slug}_img_1.webp`));
+	} catch {
+		return false;
+	}
+}
 
 // Agents only ever see their own assigned properties — pass their id to
 // scope the list; everyone else (Admin/Manager/SAdmin) calls this with no
@@ -50,7 +65,7 @@ export async function listProperties({
 			.filter(Boolean)
 			.map((agent) => ({ id: agent.id, name: agent.full_name, avatarUrl: agent.user_info?.avatar_url ?? null }));
 
-		return { ...rest, assignedAgents };
+		return { ...rest, assignedAgents, hasImage: hasPropertyImage(rest.slug) };
 	});
 }
 

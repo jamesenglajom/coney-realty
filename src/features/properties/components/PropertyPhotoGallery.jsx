@@ -84,6 +84,12 @@ export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }
 
 				{badge ? <div className="absolute left-4 top-4 sm:left-6 sm:top-6">{badge}</div> : null}
 
+				{images.length === 0 ? (
+					<span className="absolute right-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white sm:right-6 sm:top-6">
+						No photos yet
+					</span>
+				) : null}
+
 				{overlay ? (
 					<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-4 pb-4 pt-16 sm:px-6 sm:pb-6">
 						{overlay}

@@ -115,7 +115,14 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 								<AgentAvatars agents={property.assignedAgents ?? []} />
 							</td>
 							<td className="p-4">
-								<p className="text-sm font-semibold text-theme-blue dark:text-white">{property.title}</p>
+								<div className="flex items-center gap-2">
+									<p className="text-sm font-semibold text-theme-blue dark:text-white">{property.title}</p>
+									{!property.hasImage ? (
+										<Badge tone="warning" className="shrink-0">
+											No image
+										</Badge>
+									) : null}
+								</div>
 								{property.screen_name ? (
 									<p className="text-xs text-txt-secondary dark:text-txt-secondary-dark">{property.screen_name}</p>
 								) : null}

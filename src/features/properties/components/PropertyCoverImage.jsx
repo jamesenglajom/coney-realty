@@ -28,6 +28,11 @@ export default function PropertyCoverImage({ slug, seed, alt, badge, sizes, clas
 					{badge}
 				</span>
 			) : null}
+			{!slug || errored ? (
+				<span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
+					No photos yet
+				</span>
+			) : null}
 		</div>
 	);
 }
