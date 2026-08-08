@@ -165,7 +165,7 @@ create trigger set_permissions_updated_at
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'property_type') then
-    create type property_type as enum ('House', 'Apartment', 'Villa', 'Condo', 'Land');
+    create type property_type as enum ('House', 'Apartment', 'Villa', 'Condo', 'Land', 'House and Lot');
   end if;
   if not exists (select 1 from pg_type where typname = 'property_status') then
     create type property_status as enum ('draft', 'published', 'sold', 'archived');
@@ -174,6 +174,14 @@ begin
     create type property_payment_type as enum ('buy', 'rent', 'rent-to-own');
   end if;
 end $$;
+
+-- Enum already exists in the deployed DB, so the value list above only
+-- applies on a fresh `create type`. This covers the already-existing type
+-- when this file is re-run against it. Postgres requires ADD VALUE to run
+-- outside any transaction that also uses the new value, so this must be a
+-- separate statement (not inside a do $$ block) and separately committed
+-- before anything inserts 'House and Lot'.
+alter type property_type add value if not exists 'House and Lot';
 
 create table if not exists public.properties (
   id uuid primary key default gen_random_uuid(),

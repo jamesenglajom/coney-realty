@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import { revalidatePath } from "next/cache";
 import { requirePermission } from "@/features/auth/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getActiveFieldSetsByType } from "@/features/propertyTypes/queries";
 import { validateImportRow } from "./schema";
 
 export async function importPropertiesAction(formData) {
@@ -29,8 +30,10 @@ export async function importPropertiesAction(formData) {
 		return { error: "That spreadsheet doesn't have any rows." };
 	}
 
+	const fieldSetsByType = await getActiveFieldSetsByType();
+
 	// Header row is row 1, so the first data row is row 2.
-	const validated = rawRows.map((row, index) => validateImportRow(row, index + 2));
+	const validated = rawRows.map((row, index) => validateImportRow(row, index + 2, fieldSetsByType));
 	const invalidRows = validated.filter((row) => row.errors.length > 0);
 	let validRows = validated.filter((row) => row.errors.length === 0);
 

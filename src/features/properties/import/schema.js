@@ -1,6 +1,9 @@
 import { PROPERTY_TYPES, PROPERTY_STATUSES, PAYMENT_TYPES } from "../schemas";
+import { buildFromPairs, deepMerge } from "@/features/propertyTypes/fieldPaths";
 
-export const TEMPLATE_HEADERS = [
+// Columns every property type shares — maps 1:1 to the properties table's
+// own columns, same set regardless of type.
+export const BASE_HEADERS = [
 	"slug",
 	"title",
 	"screen_name",
@@ -17,18 +20,15 @@ export const TEMPLATE_HEADERS = [
 	"payment_terms",
 	"lat",
 	"lng",
-	"beds",
-	"baths",
-	"sqft",
 	"custom_fields",
 	"assigned_agent_emails",
 ];
 
-export const TEMPLATE_EXAMPLE_ROW = [
+const BASE_EXAMPLE_VALUES = [
 	"cedar-ridge-residence",
 	"Cedar Ridge Residence",
 	"Cedar Ridge — 4BR Family Home",
-	"Villa",
+	"",
 	"published",
 	1250000,
 	"123 Cedar Ridge Rd",
@@ -41,12 +41,31 @@ export const TEMPLATE_EXAMPLE_ROW = [
 	"20% down, balance in 24 months",
 	30.2672,
 	-97.7431,
-	4,
-	3,
-	3200,
 	"{}",
 	"agent@example.com, agent2@example.com",
 ];
+
+const PROPERTY_TYPE_COLUMN_INDEX = BASE_HEADERS.indexOf("property_type");
+
+function exampleValueForFieldType(type) {
+	return type === "number" ? 0 : "";
+}
+
+// Headers for a given property type's template: the shared base columns
+// plus that type's own standard field keys (Admin > Property Types) —
+// dot-path keys (e.g. "lot.lot_area_sqm") work fine as column headers,
+// same convention the property form's AdditionalFieldsEditor uses.
+export function buildTemplateHeaders(propertyType, fieldSetsByType = {}) {
+	const typeFields = fieldSetsByType[propertyType] ?? [];
+	return [...BASE_HEADERS, ...typeFields.map((field) => field.key)];
+}
+
+export function buildTemplateExampleRow(propertyType, fieldSetsByType = {}) {
+	const typeFields = fieldSetsByType[propertyType] ?? [];
+	const base = [...BASE_EXAMPLE_VALUES];
+	base[PROPERTY_TYPE_COLUMN_INDEX] = propertyType;
+	return [...base, ...typeFields.map((field) => exampleValueForFieldType(field.type))];
+}
 
 function normalizeHeader(header) {
 	return String(header ?? "")
@@ -69,11 +88,34 @@ function toNumberOrNull(value) {
 	return Number.isFinite(num) ? num : null;
 }
 
+// Pulls this row's values for its property type's standard fields (Admin >
+// Property Types) into a nested object, the same dot-path-aware shape the
+// property form's "Standard fields" section produces — e.g. a "lot
+// .lot_area_sqm" column becomes { lot: { lot_area_sqm: 500 } }.
+function extractTypeFields(row, propertyType, fieldSetsByType) {
+	const typeFields = fieldSetsByType[propertyType] ?? [];
+	const pairs = [];
+
+	for (const field of typeFields) {
+		const raw = row[normalizeHeader(field.key)];
+		if (raw === undefined || raw === null || String(raw).trim() === "") continue;
+
+		if (field.type === "number") {
+			const num = Number(raw);
+			if (Number.isFinite(num)) pairs.push({ key: field.key, value: num });
+		} else {
+			pairs.push({ key: field.key, value: String(raw).trim() });
+		}
+	}
+
+	return buildFromPairs(pairs);
+}
+
 // Manual validation rather than a zod schema — spreadsheet cells arrive as an
 // unpredictable mix of numbers/strings/blanks depending on the source app
 // (Excel vs Google Sheets vs CSV), and a hand-written validator reads more
 // clearly here than a pile of zod preprocessors trying to cover every case.
-export function validateImportRow(rawRow, rowNumber) {
+export function validateImportRow(rawRow, rowNumber, fieldSetsByType = {}) {
 	const row = normalizeRowKeys(rawRow);
 	const errors = [];
 
@@ -122,12 +164,12 @@ export function validateImportRow(rawRow, rowNumber) {
 		}
 	}
 
-	const beds = toNumberOrNull(row.beds);
-	const baths = toNumberOrNull(row.baths);
-	const sqft = toNumberOrNull(row.sqft);
-	if (beds !== null) customFields.beds = beds;
-	if (baths !== null) customFields.baths = baths;
-	if (sqft !== null) customFields.sqft = sqft;
+	// Type-specific standard field columns take precedence over the raw
+	// custom_fields catch-all on overlapping keys — same precedence as the
+	// property form's standard fields vs. its additional-fields editor.
+	if (PROPERTY_TYPES.includes(propertyType)) {
+		customFields = deepMerge(customFields, extractTypeFields(row, propertyType, fieldSetsByType));
+	}
 
 	const assignedEmails = String(row.assigned_agent_emails ?? "")
 		.split(",")

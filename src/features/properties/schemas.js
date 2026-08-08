@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Condo", "Land"];
+export const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Condo", "Land", "House and Lot"];
 export const PROPERTY_STATUSES = ["draft", "published", "sold", "archived"];
 export const PAYMENT_TYPES = ["buy", "rent", "rent-to-own"];
 

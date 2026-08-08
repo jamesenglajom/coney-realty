@@ -116,9 +116,10 @@ export function flattenToPairs(obj) {
 }
 
 // The inverse of flattenToPairs — rebuilds a nested object from a flat list
-// of { key, value } rows, skipping blank keys. Every value comes back out
-// as a plain string (the editor's rows are always text), matching what it
-// wrote in.
+// of { key, value } rows, skipping blank keys. Values pass through as-is
+// (AdditionalFieldsEditor's rows are always text, but the property import's
+// type-specific columns reuse this too, passing real numbers for "number"
+// fields).
 export function buildFromPairs(pairs) {
 	const result = {};
 	for (const { key, value } of pairs ?? []) {
