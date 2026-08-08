@@ -275,13 +275,28 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 			avatarUrl: agent.user_info?.avatar_url ?? null,
 		}));
 
+	// Curated, not a raw custom_fields passthrough — same trust boundary as
+	// beds/baths/lotAreaSqm already were. Deliberately excludes fields that
+	// exist in custom_fields but aren't meant for public display (contact
+	// person, raw pin location, Facebook post links, RPT status — those stay
+	// admin-only, see the admin preview page for the full set).
+	const customFields = rest.custom_fields ?? {};
 	return {
 		...rest,
 		name: rest.screen_name || rest.title,
 		location: rest.city_state || [rest.city, rest.region, rest.district].filter(Boolean).join(", ") || null,
-		beds: rest.custom_fields?.beds ?? null,
-		baths: rest.custom_fields?.baths ?? null,
-		lotAreaSqm: rest.custom_fields?.lot?.lot_area_sqm ?? null,
+		beds: customFields.beds ?? null,
+		baths: customFields.baths ?? null,
+		carpark: customFields.carpark ?? null,
+		lotAreaSqm: customFields.lot?.lot_area_sqm ?? null,
+		floorAreaSqm: customFields.floor_area_sqm ?? null,
+		terrain: customFields.lot?.terrain ?? null,
+		condition: customFields.condition ?? null,
+		furnishing: customFields.furnishing ?? null,
+		age: customFields.age ?? null,
+		titleStatus: customFields.title_status ?? null,
+		requiredDownPayment: customFields.required_down_payment ?? null,
+		cashPrice: customFields.cash_price ?? null,
 		agents,
 	};
 });

@@ -45,13 +45,17 @@ function usePropertyImages(slug) {
 	return images;
 }
 
-export default function PropertyPhotoGallery({ slug, seed, alt }) {
+// `overlay` renders inside the main image's own box (bottom-aligned, over a
+// gradient scrim) so the page can compose a hero — title/location/price —
+// directly on the photo, PDP-style, without this component needing to know
+// anything about property data itself.
+export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }) {
 	const images = usePropertyImages(slug);
 	const [activeIndex, setActiveIndex] = useState(0);
 
 	if (images === null) {
 		return (
-			<div className="aspect-[16/10] w-full animate-pulse rounded-2xl bg-theme-gray/15 dark:bg-white/5" />
+			<div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-theme-gray/15 dark:bg-white/5 sm:aspect-[16/9] lg:aspect-[21/9]" />
 		);
 	}
 
@@ -68,15 +72,24 @@ export default function PropertyPhotoGallery({ slug, seed, alt }) {
 
 	return (
 		<div>
-			<div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-theme-gray/10 dark:bg-white/5">
+			<div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-theme-gray/10 dark:bg-white/5 sm:aspect-[16/9] lg:aspect-[21/9]">
 				<Image
 					src={gallery[safeIndex]}
 					alt={alt}
 					fill
 					priority
-					sizes="(min-width: 1024px) 800px, 100vw"
+					sizes="100vw"
 					className="object-cover"
 				/>
+
+				{badge ? <div className="absolute left-4 top-4 sm:left-6 sm:top-6">{badge}</div> : null}
+
+				{overlay ? (
+					<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-4 pb-4 pt-16 sm:px-6 sm:pb-6">
+						{overlay}
+					</div>
+				) : null}
+
 				{gallery.length > 1 ? (
 					<>
 						<button
@@ -95,7 +108,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt }) {
 						>
 							<ChevronRight className="h-5 w-5" aria-hidden="true" />
 						</button>
-						<span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
+						<span className="absolute right-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white sm:right-6 sm:top-6">
 							{safeIndex + 1} / {gallery.length}
 						</span>
 					</>
