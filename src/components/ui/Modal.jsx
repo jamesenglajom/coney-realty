@@ -24,7 +24,7 @@ export default function Modal({ open, onClose, title, children }) {
 				role="dialog"
 				aria-modal="true"
 				aria-label={title}
-				className="relative w-full max-w-sm rounded-2xl border border-theme-gold-light bg-white p-6 shadow-2xl dark:border-[#333] dark:bg-[#1a1a1a]"
+				className="relative w-full max-w-sm rounded-2xl border border-theme-gold-light bg-white p-6 shadow-2xl dark:border-border-dark dark:bg-surface-dark"
 			>
 				<div className="mb-4 flex items-center justify-between">
 					<h2 className="text-lg font-semibold text-theme-blue dark:text-white">{title}</h2>

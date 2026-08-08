@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { X, LogOut, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { navigationGroups, BASE_URL } from "@/app/data/Navigation";
 import AdminHeader from "@/app/components/admin/header/Header";
-import PageHeader from "@/app/components/admin/page-header/PageHeader1";
 import { logoutAction } from "@/features/auth/actions";
 
 const COLLAPSE_STORAGE_KEY = "admin:sidebar-collapsed";
@@ -168,11 +167,7 @@ const AdminShell = ({ user, permissions, children }) => {
 				<AdminHeader isOpen={isSidebarOpen} setOpen={setSidebarOpen} />
 				{/* Dashboard Body */}
 				<main className="flex-1 overflow-y-auto p-4 lg:p-8">
-					<div className="max-w-7xl mx-auto">
-						<PageHeader />
-
-						{children}
-					</div>
+					<div className="max-w-7xl mx-auto">{children}</div>
 				</main>
 			</div>
 		</div>

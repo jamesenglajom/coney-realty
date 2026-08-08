@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requirePermission } from "@/features/auth/permissions";
 import { getBlogById, listAuthors, listPropertiesForSelect } from "@/features/blogs/queries";
 import BlogForm from "@/features/blogs/components/BlogForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Edit post",
@@ -21,7 +22,7 @@ export default async function EditBlogPage({ params }) {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">Edit post</h1>
+			<PageHeader title="Edit post" />
 			<BlogForm mode="edit" blog={blog} authors={authors} properties={properties} currentUserId={currentUser.id} />
 		</div>
 	);

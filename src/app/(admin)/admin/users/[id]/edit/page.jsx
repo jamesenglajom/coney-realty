@@ -3,6 +3,7 @@ import { requirePermission } from "@/features/auth/permissions";
 import { getUserById } from "@/features/users/queries";
 import { USER_ROLES } from "@/features/users/schemas";
 import UserForm from "@/features/users/components/UserForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Edit user",
@@ -22,7 +23,7 @@ export default async function EditUserPage({ params }) {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">Edit user</h1>
+			<PageHeader title="Edit user" />
 			<UserForm mode="edit" user={user} assignableRoles={assignableRoles} />
 		</div>
 	);

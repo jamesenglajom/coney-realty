@@ -2,6 +2,7 @@ import { requirePermission, getPagePermissions } from "@/features/auth/permissio
 import { listBlogs } from "@/features/blogs/queries";
 import BlogsTable from "@/features/blogs/components/BlogsTable";
 import Button from "@/components/ui/Button";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Blogs",
@@ -13,17 +14,17 @@ export default async function BlogsPage() {
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold text-theme-blue dark:text-white">Blogs</h1>
-					<p className="text-txt-secondary dark:text-txt-secondary-dark">Draft, edit, and publish your latest articles.</p>
-				</div>
-				{permissions.can_create ? (
-					<Button href="/admin/blogs/new" size="sm">
-						New post
-					</Button>
-				) : null}
-			</div>
+			<PageHeader
+				title="Blogs"
+				description="Draft, edit, and publish your latest articles."
+				actions={
+					permissions.can_create ? (
+						<Button href="/admin/blogs/new" size="sm">
+							New post
+						</Button>
+					) : null
+				}
+			/>
 			<BlogsTable blogs={blogs} canEdit={permissions.can_edit} canDelete={permissions.can_delete} />
 		</div>
 	);

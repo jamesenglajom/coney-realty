@@ -1,6 +1,7 @@
 import { requirePermission } from "@/features/auth/permissions";
 import { listAuthors, listPropertiesForSelect } from "@/features/blogs/queries";
 import BlogForm from "@/features/blogs/components/BlogForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "New post",
@@ -12,7 +13,7 @@ export default async function NewBlogPage() {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">New post</h1>
+			<PageHeader title="New post" />
 			<BlogForm mode="create" authors={authors} properties={properties} currentUserId={currentUser.id} />
 		</div>
 	);

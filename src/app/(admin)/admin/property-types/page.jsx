@@ -3,6 +3,7 @@ import { listFieldSets } from "@/features/propertyTypes/queries";
 import { PROPERTY_TYPES } from "@/features/propertyTypes/schemas";
 import PropertyTypeFieldSetsTable from "@/features/propertyTypes/components/PropertyTypeFieldSetsTable";
 import Button from "@/components/ui/Button";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Property Types",
@@ -17,19 +18,17 @@ export default async function PropertyTypesPage() {
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold text-theme-blue dark:text-white">Property Types</h1>
-					<p className="text-txt-secondary dark:text-txt-secondary-dark">
-						Define the standard fields each property type should collect on the property form.
-					</p>
-				</div>
-				{permissions.can_create && hasUnconfiguredType ? (
-					<Button href="/admin/property-types/new" size="sm">
-						New field set
-					</Button>
-				) : null}
-			</div>
+			<PageHeader
+				title="Property Types"
+				description="Define the standard fields each property type should collect on the property form."
+				actions={
+					permissions.can_create && hasUnconfiguredType ? (
+						<Button href="/admin/property-types/new" size="sm">
+							New field set
+						</Button>
+					) : null
+				}
+			/>
 			<PropertyTypeFieldSetsTable fieldSets={fieldSets} canEdit={permissions.can_edit} canDelete={permissions.can_delete} />
 		</div>
 	);

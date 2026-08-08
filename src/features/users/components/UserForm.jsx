@@ -10,6 +10,7 @@ import { createUserAction, updateUserAction, checkEmailAvailabilityAction } from
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
+import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 
@@ -100,7 +101,7 @@ export default function UserForm({ mode, user, assignableRoles }) {
 						<span className="font-mono">{emailValue ? computeDefaultPassword(emailValue) : "—"}</span>
 					</p>
 					{duplicate ? (
-						<p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+						<p className="mt-1.5 text-xs font-medium text-danger dark:text-danger-dark">
 							A user with this email already exists: {duplicate.name} ({duplicate.role})
 							{duplicate.removed ? " — removed" : ""}.
 						</p>
@@ -142,12 +143,7 @@ export default function UserForm({ mode, user, assignableRoles }) {
 
 			<div>
 				<Label htmlFor="bio">Bio (public)</Label>
-				<textarea
-					id="bio"
-					rows={4}
-					{...register("bio")}
-					className="w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold"
-				/>
+				<Textarea id="bio" rows={4} {...register("bio")} />
 				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
 					Shown on this agent&apos;s public profile page.
 				</p>

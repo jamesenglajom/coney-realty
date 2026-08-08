@@ -84,7 +84,7 @@ export default function PropertyRowActions({ property, canEdit, canDelete }) {
 							ref={menuRef}
 							role="menu"
 							style={{ position: "fixed", top: menuPosition.top, left: menuPosition.left, width: MENU_WIDTH }}
-							className="z-50 overflow-hidden rounded-lg border border-theme-gold-light bg-white py-1 shadow-lg dark:border-[#333] dark:bg-[#1a1a1a]"
+							className="z-50 overflow-hidden rounded-lg border border-theme-gold-light bg-white py-1 shadow-lg dark:border-border-dark dark:bg-surface-dark"
 						>
 							<Link
 								href={`/admin/property/${property.slug}`}

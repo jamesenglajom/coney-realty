@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requirePermission } from "@/features/auth/permissions";
 import { getFieldSetById } from "@/features/propertyTypes/queries";
 import PropertyTypeFieldSetForm from "@/features/propertyTypes/components/PropertyTypeFieldSetForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Edit field set",
@@ -16,7 +17,7 @@ export default async function EditFieldSetPage({ params }) {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">Edit field set</h1>
+			<PageHeader title="Edit field set" />
 			<PropertyTypeFieldSetForm mode="edit" fieldSet={fieldSet} />
 		</div>
 	);

@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { PROPERTY_TYPES } from "../schemas";
-
-const SELECT_CLASSES =
-	"w-full rounded-xl border border-theme-gray/30 bg-white px-3 py-2 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold";
+import Select from "@/components/ui/Select";
+import Input from "@/components/ui/Input";
 
 export default function PropertiesFilterBar({ cities, districts, zoneTypes, agents, showAgentFilter }) {
 	const router = useRouter();
@@ -52,25 +51,20 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 	}
 
 	return (
-		<div className="mb-4 rounded-xl border border-theme-gold-light bg-white p-4 dark:border-[#333] dark:bg-[#1a1a1a]">
+		<div className="mb-4 rounded-xl border border-theme-gold-light bg-white p-4 dark:border-border-dark dark:bg-surface-dark">
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-				<select
-					value={searchParams.get("city") ?? ""}
-					onChange={(event) => updateParam("city", event.target.value)}
-					className={SELECT_CLASSES}
-				>
+				<Select value={searchParams.get("city") ?? ""} onChange={(event) => updateParam("city", event.target.value)}>
 					<option value="">All cities</option>
 					{cities.map((city) => (
 						<option key={city} value={city}>
 							{city}
 						</option>
 					))}
-				</select>
+				</Select>
 
-				<select
+				<Select
 					value={searchParams.get("district") ?? ""}
 					onChange={(event) => updateParam("district", event.target.value)}
-					className={SELECT_CLASSES}
 				>
 					<option value="">All districts</option>
 					{districts.map((district) => (
@@ -78,12 +72,11 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 							{district}
 						</option>
 					))}
-				</select>
+				</Select>
 
-				<select
+				<Select
 					value={searchParams.get("propertyType") ?? ""}
 					onChange={(event) => updateParam("propertyType", event.target.value)}
-					className={SELECT_CLASSES}
 				>
 					<option value="">All types</option>
 					{PROPERTY_TYPES.map((type) => (
@@ -91,12 +84,11 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 							{type}
 						</option>
 					))}
-				</select>
+				</Select>
 
-				<select
+				<Select
 					value={searchParams.get("zoneType") ?? ""}
 					onChange={(event) => updateParam("zoneType", event.target.value)}
-					className={SELECT_CLASSES}
 				>
 					<option value="">All zone types</option>
 					{zoneTypes.map((zoneType) => (
@@ -104,13 +96,12 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 							{zoneType}
 						</option>
 					))}
-				</select>
+				</Select>
 
 				{showAgentFilter ? (
-					<select
+					<Select
 						value={searchParams.get("agentId") ?? ""}
 						onChange={(event) => updateParam("agentId", event.target.value)}
-						className={SELECT_CLASSES}
 					>
 						<option value="">All agents</option>
 						{agents.map((agent) => (
@@ -118,24 +109,22 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 								{agent.full_name || agent.email}
 							</option>
 						))}
-					</select>
+					</Select>
 				) : null}
 
-				<input
+				<Input
 					type="number"
 					min="0"
 					placeholder="Min price"
 					value={priceMin}
 					onChange={(event) => setPriceMin(event.target.value)}
-					className={SELECT_CLASSES}
 				/>
-				<input
+				<Input
 					type="number"
 					min="0"
 					placeholder="Max price"
 					value={priceMax}
 					onChange={(event) => setPriceMax(event.target.value)}
-					className={SELECT_CLASSES}
 				/>
 			</div>
 

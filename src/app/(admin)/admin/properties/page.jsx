@@ -3,6 +3,7 @@ import { listProperties, listPropertyFilterOptions, listAssignableUsers } from "
 import PropertiesTable from "@/features/properties/components/PropertiesTable";
 import PropertiesFilterBar from "@/features/properties/components/PropertiesFilterBar";
 import Button from "@/components/ui/Button";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Properties",
@@ -33,24 +34,22 @@ export default async function PropertiesPage({ searchParams }) {
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold text-theme-blue dark:text-white">Properties</h1>
-					<p className="text-txt-secondary dark:text-txt-secondary-dark">
-						{isAgent ? "Your assigned listings." : "Manage your real estate listings."}
-					</p>
-				</div>
-				{permissions.can_create ? (
-					<div className="flex gap-2">
-						<Button href="/admin/properties/import" variant="ghost" size="sm">
-							Import spreadsheet
-						</Button>
-						<Button href="/admin/properties/new" size="sm">
-							New property
-						</Button>
-					</div>
-				) : null}
-			</div>
+			<PageHeader
+				title="Properties"
+				description={isAgent ? "Your assigned listings." : "Manage your real estate listings."}
+				actions={
+					permissions.can_create ? (
+						<>
+							<Button href="/admin/properties/import" variant="ghost" size="sm">
+								Import spreadsheet
+							</Button>
+							<Button href="/admin/properties/new" size="sm">
+								New property
+							</Button>
+						</>
+					) : null
+				}
+			/>
 			<PropertiesFilterBar
 				cities={filterOptions.cities}
 				districts={filterOptions.districts}

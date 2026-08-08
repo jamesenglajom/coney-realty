@@ -3,12 +3,17 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requirePermission } from "@/features/auth/permissions";
 import { getPropertyBySlug } from "@/features/properties/queries";
+import Badge from "@/components/ui/Badge";
 
+// Same chart-status-* tokens as the admin Properties table and dashboard
+// chart, so a status means the same color everywhere.
 const STATUS_BADGE_CLASSES = {
-	draft: "bg-theme-gray/15 text-txt-secondary dark:text-txt-secondary-dark",
-	published: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
-	sold: "bg-theme-gold/20 text-theme-blue dark:text-theme-gold",
-	archived: "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400",
+	draft: "bg-chart-status-draft/15 text-chart-status-draft dark:bg-chart-status-draft-dark/20 dark:text-chart-status-draft-dark",
+	published:
+		"bg-chart-status-published/15 text-chart-status-published dark:bg-chart-status-published-dark/20 dark:text-chart-status-published-dark",
+	sold: "bg-chart-status-sold/20 text-chart-status-sold dark:bg-chart-status-sold-dark/20 dark:text-chart-status-sold-dark",
+	archived:
+		"bg-chart-status-archived/15 text-chart-status-archived dark:bg-chart-status-archived-dark/20 dark:text-chart-status-archived-dark",
 };
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
@@ -98,7 +103,7 @@ export default async function PropertyPreviewPage({ params }) {
 
 			{property.lat != null && property.lng != null ? (
 				<div className="mt-6">
-					<div className="overflow-hidden rounded-xl border border-theme-gold-light dark:border-[#333]">
+					<div className="overflow-hidden rounded-xl border border-theme-gold-light dark:border-border-dark">
 						<iframe
 							title="Property location map"
 							src={`https://www.google.com/maps?q=${property.lat},${property.lng}&z=16&output=embed`}
@@ -125,25 +130,21 @@ export default async function PropertyPreviewPage({ params }) {
 					<h1 className="text-2xl font-bold text-theme-blue dark:text-white">{property.title}</h1>
 					<p className="mt-1 text-sm text-txt-muted dark:text-txt-muted-dark">{property.property_type}</p>
 				</div>
-				<span
-					className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${STATUS_BADGE_CLASSES[property.status]}`}
-				>
-					{property.status}
-				</span>
+				<Badge className={`px-3 py-1 capitalize ${STATUS_BADGE_CLASSES[property.status]}`}>{property.status}</Badge>
 			</div>
 
 			<div className="mt-8 grid gap-4 sm:grid-cols-2">
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-[#333]">
+				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Price</p>
 					<p className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
 						{property.price != null ? priceFormatter.format(property.price) : "Price on request"}
 					</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-[#333]">
+				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Location</p>
 					<p className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{location}</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-[#333]">
+				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 						Full address
 					</p>
@@ -151,7 +152,7 @@ export default async function PropertyPreviewPage({ params }) {
 						{property.address_line || "—"}
 					</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-[#333]">
+				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 						Zone / Payment
 					</p>
@@ -202,7 +203,7 @@ export default async function PropertyPreviewPage({ params }) {
 					</h2>
 					<dl className="mt-3 grid gap-3 sm:grid-cols-2">
 						{customFieldEntries.map(([key, value]) => (
-							<div key={key} className="rounded-xl border border-theme-gold-light p-3 dark:border-[#333]">
+							<div key={key} className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
 								<dt className="text-xs font-semibold text-txt-muted dark:text-txt-muted-dark">{humanizeKey(key)}</dt>
 								<dd className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 									<CustomFieldValue value={value} />

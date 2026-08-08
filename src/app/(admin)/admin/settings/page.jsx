@@ -6,6 +6,7 @@ import SettingsTabs from "@/features/users/components/SettingsTabs";
 import ProfileForm from "@/features/users/components/ProfileForm";
 import ChangePasswordForm from "@/features/users/components/ChangePasswordForm";
 import ChangeEmailForm from "@/features/users/components/ChangeEmailForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Settings",
@@ -23,12 +24,7 @@ export default async function SettingsPage() {
 
 	return (
 		<div>
-			<div className="mb-6">
-				<h1 className="text-2xl font-bold text-theme-blue dark:text-white">Settings</h1>
-				<p className="text-txt-secondary dark:text-txt-secondary-dark">
-					Manage your account and (for super admins) system parameters.
-				</p>
-			</div>
+			<PageHeader title="Settings" description="Manage your account and (for super admins) system parameters." />
 
 			<SettingsTabs
 				profileSlot={<ProfileForm user={user} />}

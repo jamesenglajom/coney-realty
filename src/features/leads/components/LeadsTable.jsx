@@ -1,4 +1,5 @@
 import { PRICE_BANDS } from "@/features/homepage/data";
+import Badge from "@/components/ui/Badge";
 
 const METHOD_BADGE_CLASSES = {
 	email: "bg-theme-gold/20 text-theme-blue dark:text-theme-gold",
@@ -23,18 +24,18 @@ function priceBandLabel(value) {
 export default function LeadsTable({ leads }) {
 	if (leads.length === 0) {
 		return (
-			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-[#333] dark:text-txt-muted-dark">
+			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 				No contact requests yet.
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[720px] text-left border-collapse">
 				<thead>
-					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
+					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Visitor
 						</th>
@@ -52,7 +53,7 @@ export default function LeadsTable({ leads }) {
 						</th>
 					</tr>
 				</thead>
-				<tbody className="divide-y divide-theme-gold-light dark:divide-[#333]">
+				<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
 					{leads.map((lead) => {
 						const searchParts = [
 							lead.search_location,
@@ -70,11 +71,9 @@ export default function LeadsTable({ leads }) {
 									{lead.agent?.full_name || lead.agent?.email || "—"}
 								</td>
 								<td className="p-4">
-									<span
-										className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${METHOD_BADGE_CLASSES[lead.contact_method]}`}
-									>
+									<Badge className={`capitalize ${METHOD_BADGE_CLASSES[lead.contact_method]}`}>
 										{lead.contact_method}
-									</span>
+									</Badge>
 								</td>
 								<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 									{searchParts.length > 0 ? searchParts.join(" · ") : "—"}

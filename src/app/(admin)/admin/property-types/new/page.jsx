@@ -3,6 +3,7 @@ import { requirePermission } from "@/features/auth/permissions";
 import { listFieldSets } from "@/features/propertyTypes/queries";
 import { PROPERTY_TYPES } from "@/features/propertyTypes/schemas";
 import PropertyTypeFieldSetForm from "@/features/propertyTypes/components/PropertyTypeFieldSetForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "New field set",
@@ -21,7 +22,7 @@ export default async function NewFieldSetPage() {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">New field set</h1>
+			<PageHeader title="New field set" />
 			<PropertyTypeFieldSetForm mode="create" availableTypes={availableTypes} />
 		</div>
 	);

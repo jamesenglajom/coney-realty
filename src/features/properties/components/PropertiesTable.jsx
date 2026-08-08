@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { User } from "lucide-react";
+import Badge from "@/components/ui/Badge";
 import PropertyRowActions from "./PropertyRowActions";
 
 const MAX_VISIBLE_AGENTS = 3;
@@ -25,7 +26,7 @@ function AgentAvatars({ agents }) {
 				<div
 					key={agent.id}
 					title={agent.name}
-					className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-[#1a1a1a]"
+					className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-surface-dark"
 				>
 					{agent.avatarUrl ? (
 						<Image src={agent.avatarUrl} alt={agent.name} fill sizes="32px" className="object-cover" />
@@ -39,7 +40,7 @@ function AgentAvatars({ agents }) {
 			{overflow.length > 0 ? (
 				<div
 					title={overflow.map((agent) => agent.name).join(", ")}
-					className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-theme-gray/20 text-[10px] font-semibold text-txt-secondary ring-2 ring-white dark:bg-white/10 dark:text-txt-secondary-dark dark:ring-[#1a1a1a]"
+					className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-theme-gray/20 text-[10px] font-semibold text-txt-secondary ring-2 ring-white dark:bg-white/10 dark:text-txt-secondary-dark dark:ring-surface-dark"
 				>
 					+{overflow.length}
 				</div>
@@ -48,11 +49,16 @@ function AgentAvatars({ agents }) {
 	);
 }
 
+// Reuses the same chart-status-* tokens the dashboard's "Properties by
+// status" chart draws from, so a status means the same color on this table
+// as it does on the chart, not two independently-maintained palettes.
 const STATUS_BADGE_CLASSES = {
-	draft: "bg-theme-gray/15 text-txt-secondary dark:text-txt-secondary-dark",
-	published: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
-	sold: "bg-theme-gold/20 text-theme-blue dark:text-theme-gold",
-	archived: "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400",
+	draft: "bg-chart-status-draft/15 text-chart-status-draft dark:bg-chart-status-draft-dark/20 dark:text-chart-status-draft-dark",
+	published:
+		"bg-chart-status-published/15 text-chart-status-published dark:bg-chart-status-published-dark/20 dark:text-chart-status-published-dark",
+	sold: "bg-chart-status-sold/20 text-chart-status-sold dark:bg-chart-status-sold-dark/20 dark:text-chart-status-sold-dark",
+	archived:
+		"bg-chart-status-archived/15 text-chart-status-archived dark:bg-chart-status-archived-dark/20 dark:text-chart-status-archived-dark",
 };
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
@@ -64,18 +70,18 @@ const priceFormatter = new Intl.NumberFormat("en-PH", {
 export default function PropertiesTable({ properties, canEdit, canDelete }) {
 	if (properties.length === 0) {
 		return (
-			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-[#333] dark:text-txt-muted-dark">
+			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 				No properties yet.
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[960px] text-left border-collapse">
 				<thead>
-					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
+					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Agent
 						</th>
@@ -102,20 +108,22 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 						</th>
 					</tr>
 				</thead>
-				<tbody className="divide-y divide-theme-gold-light dark:divide-[#333]">
+				<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
 					{properties.map((property) => (
 						<tr key={property.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
 							<td className="p-4">
 								<AgentAvatars agents={property.assignedAgents ?? []} />
 							</td>
-							<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">{property.title}</td>
+							<td className="p-4">
+								<p className="text-sm font-semibold text-theme-blue dark:text-white">{property.title}</p>
+								{property.screen_name ? (
+									<p className="text-xs text-txt-secondary dark:text-txt-secondary-dark">{property.screen_name}</p>
+								) : null}
+								<p className="font-mono text-xs text-txt-muted dark:text-txt-muted-dark">{property.slug}</p>
+							</td>
 							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{property.property_type}</td>
 							<td className="p-4">
-								<span
-									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE_CLASSES[property.status]}`}
-								>
-									{property.status}
-								</span>
+								<Badge className={`capitalize ${STATUS_BADGE_CLASSES[property.status]}`}>{property.status}</Badge>
 							</td>
 							<td className="p-4 text-sm capitalize text-txt-secondary dark:text-txt-secondary-dark">
 								{property.payment_type || "—"}

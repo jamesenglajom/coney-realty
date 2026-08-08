@@ -3,6 +3,9 @@ import { USER_ROLES } from "@/features/users/schemas";
 import { getAdminDashboardStats, getTopAgentsByListings } from "../queries";
 import BarChart from "./BarChart";
 import TrendChart from "./TrendChart";
+import KpiTile from "./KpiTile";
+import ChartPanel from "./ChartPanel";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
 	style: "currency",
@@ -25,25 +28,6 @@ const CATEGORICAL_COLOR_CLASSES = [
 	"bg-chart-4 dark:bg-chart-4-dark",
 	"bg-chart-5 dark:bg-chart-5-dark",
 ];
-
-function KpiTile({ label, value, sublabel }) {
-	return (
-		<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
-			<p className="text-sm font-medium text-txt-secondary dark:text-txt-secondary-dark">{label}</p>
-			<h3 className="mt-2 text-2xl font-bold text-theme-blue dark:text-white">{value}</h3>
-			{sublabel ? <p className="mt-1 text-xs text-txt-muted dark:text-txt-muted-dark">{sublabel}</p> : null}
-		</div>
-	);
-}
-
-function ChartPanel({ title, children }) {
-	return (
-		<div className="rounded-xl border border-theme-gold-light bg-white p-6 shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
-			<h3 className="mb-6 text-sm font-semibold text-theme-blue dark:text-white">{title}</h3>
-			{children}
-		</div>
-	);
-}
 
 export default async function AdminDashboard() {
 	const [stats, topAgents] = await Promise.all([getAdminDashboardStats(), getTopAgentsByListings(5)]);
@@ -76,10 +60,7 @@ export default async function AdminDashboard() {
 
 	return (
 		<div>
-			<h1 className="mb-1 text-2xl font-bold text-theme-blue dark:text-white">Dashboard</h1>
-			<p className="mb-6 text-txt-secondary dark:text-txt-secondary-dark">
-				Overview across all properties and users.
-			</p>
+			<PageHeader title="Dashboard" description="Overview across all properties and users." />
 
 			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 				<KpiTile label="Total properties" value={stats.totalProperties.toLocaleString()} />

@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import Badge from "@/components/ui/Badge";
 import DeleteBlogButton from "./DeleteBlogButton";
 
+// Reuses the same chart-status-* tokens the dashboard's "Properties by
+// status" chart draws from, so "draft"/"published" mean the same color
+// everywhere in the admin, not just within this table.
 const STATUS_BADGE_CLASSES = {
-	draft: "bg-theme-gray/15 text-txt-secondary dark:text-txt-secondary-dark",
-	published: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
+	draft: "bg-chart-status-draft/15 text-chart-status-draft dark:bg-chart-status-draft-dark/20 dark:text-chart-status-draft-dark",
+	published:
+		"bg-chart-status-published/15 text-chart-status-published dark:bg-chart-status-published-dark/20 dark:text-chart-status-published-dark",
 };
 
 export default function BlogsTable({ blogs, canEdit, canDelete }) {
@@ -12,18 +17,18 @@ export default function BlogsTable({ blogs, canEdit, canDelete }) {
 
 	if (blogs.length === 0) {
 		return (
-			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-[#333] dark:text-txt-muted-dark">
+			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 				No posts yet.
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[640px] text-left border-collapse">
 				<thead>
-					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
+					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Title
 						</th>
@@ -43,7 +48,7 @@ export default function BlogsTable({ blogs, canEdit, canDelete }) {
 						) : null}
 					</tr>
 				</thead>
-				<tbody className="divide-y divide-theme-gold-light dark:divide-[#333]">
+				<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
 					{blogs.map((blog) => (
 						<tr key={blog.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
 							<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">{blog.title}</td>
@@ -54,11 +59,7 @@ export default function BlogsTable({ blogs, canEdit, canDelete }) {
 								{blog.property?.title || "—"}
 							</td>
 							<td className="p-4">
-								<span
-									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE_CLASSES[blog.status]}`}
-								>
-									{blog.status}
-								</span>
+								<Badge className={`capitalize ${STATUS_BADGE_CLASSES[blog.status]}`}>{blog.status}</Badge>
 							</td>
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">

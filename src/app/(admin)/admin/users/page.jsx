@@ -3,6 +3,7 @@ import { listUsers } from "@/features/users/queries";
 import UsersTable from "@/features/users/components/UsersTable";
 import UsersSearchBar from "@/features/users/components/UsersSearchBar";
 import Button from "@/components/ui/Button";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Users",
@@ -22,17 +23,17 @@ export default async function UsersPage({ searchParams }) {
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold text-theme-blue dark:text-white">Users</h1>
-					<p className="text-txt-secondary dark:text-txt-secondary-dark">Manage who has access to the admin panel.</p>
-				</div>
-				{canCreate ? (
-					<Button href="/admin/users/new" size="sm">
-						New user
-					</Button>
-				) : null}
-			</div>
+			<PageHeader
+				title="Users"
+				description="Manage who has access to the admin panel."
+				actions={
+					canCreate ? (
+						<Button href="/admin/users/new" size="sm">
+							New user
+						</Button>
+					) : null
+				}
+			/>
 			<div className="mb-4">
 				<UsersSearchBar />
 			</div>

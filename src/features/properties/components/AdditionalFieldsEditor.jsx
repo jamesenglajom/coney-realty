@@ -9,7 +9,9 @@ import Button from "@/components/ui/Button";
 // Freeform key/value rows for anything not covered by this type's standard
 // fields (Admin > Property Types) — an admin-friendly alternative to hand-
 // writing JSON. Key can be a dot-path (e.g. "links.fbg") to nest into the
-// saved custom_fields the same way the standard fields do.
+// saved custom_fields the same way the standard fields do. Row/empty-state
+// treatment matches PropertyTypeFieldSetForm's field array — same "dynamic
+// key/value row" concept, one shared visual language between the two.
 export default function AdditionalFieldsEditor({ control, register }) {
 	const { fields, append, remove } = useFieldArray({ control, name: "additionalFieldPairs" });
 
@@ -28,32 +30,45 @@ export default function AdditionalFieldsEditor({ control, register }) {
 				nest it.
 			</p>
 
-			<div className="mt-3 space-y-2">
+			<div className="mt-3 space-y-3">
 				{fields.length === 0 ? (
-					<p className="rounded-xl border border-dashed border-theme-gray/30 p-4 text-center text-xs text-txt-muted dark:border-white/15 dark:text-txt-muted-dark">
+					<p className="rounded-xl border border-dashed border-theme-gray/30 p-6 text-center text-sm text-txt-muted dark:border-white/15 dark:text-txt-muted-dark">
 						No additional fields.
 					</p>
 				) : null}
 
 				{fields.map((field, index) => (
-					<div key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
-						<Input
-							type="text"
-							placeholder="Key (e.g. links.fbg)"
-							aria-label="Field key"
-							{...register(`additionalFieldPairs.${index}.key`)}
-						/>
-						<Input
-							type="text"
-							placeholder="Value"
-							aria-label="Field value"
-							{...register(`additionalFieldPairs.${index}.value`)}
-						/>
+					<div
+						key={field.id}
+						className="grid gap-3 rounded-xl border border-theme-gray/20 p-4 dark:border-white/10 sm:grid-cols-[1fr_1fr_auto] sm:items-start"
+					>
+						<div>
+							<Label htmlFor={`additionalFieldPairs.${index}.key`} className="sm:sr-only">
+								Key
+							</Label>
+							<Input
+								id={`additionalFieldPairs.${index}.key`}
+								type="text"
+								placeholder="Key (e.g. links.fbg)"
+								{...register(`additionalFieldPairs.${index}.key`)}
+							/>
+						</div>
+						<div>
+							<Label htmlFor={`additionalFieldPairs.${index}.value`} className="sm:sr-only">
+								Value
+							</Label>
+							<Input
+								id={`additionalFieldPairs.${index}.value`}
+								type="text"
+								placeholder="Value"
+								{...register(`additionalFieldPairs.${index}.value`)}
+							/>
+						</div>
 						<button
 							type="button"
 							onClick={() => remove(index)}
 							aria-label="Remove field"
-							className="flex h-[42px] items-center justify-center rounded-lg px-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+							className="flex h-[42px] items-center justify-center rounded-lg px-2 text-danger hover:bg-danger/10 dark:text-danger-dark dark:hover:bg-danger-dark/10"
 						>
 							<Trash2 className="h-4 w-4" aria-hidden="true" />
 						</button>

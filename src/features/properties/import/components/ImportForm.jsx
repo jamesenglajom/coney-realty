@@ -7,11 +7,12 @@ import { Upload } from "lucide-react";
 import { importPropertiesAction } from "../actions";
 import Button from "@/components/ui/Button";
 import FieldError from "@/components/ui/FieldError";
+import Badge from "@/components/ui/Badge";
 
-const ACTION_BADGE_CLASSES = {
-	created: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
-	updated: "bg-theme-gold/20 text-theme-blue dark:text-theme-gold",
-	error: "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400",
+const ACTION_BADGE_TONE = {
+	created: "success",
+	updated: "gold",
+	error: "danger",
 };
 
 export default function ImportForm() {
@@ -76,43 +77,43 @@ export default function ImportForm() {
 						{result.errorCount ? `, ${result.errorCount} row(s) skipped` : ""}.
 					</p>
 					{result.rows.length > 0 ? (
-						<div className="overflow-x-auto rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
-							<table className="w-full min-w-[560px] text-left border-collapse text-sm">
-								<thead>
-									<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
-										<th className="p-3 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-											Row
-										</th>
-										<th className="p-3 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-											Slug
-										</th>
-										<th className="p-3 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-											Result
-										</th>
-										<th className="p-3 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-											Notes
-										</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-theme-gold-light dark:divide-[#333]">
-									{result.rows.map((row) => (
-										<tr key={row.rowNumber}>
-											<td className="p-3 text-txt-secondary dark:text-txt-secondary-dark">{row.rowNumber}</td>
-											<td className="p-3 font-mono text-xs text-txt-secondary dark:text-txt-secondary-dark">
-												{row.slug || "—"}
-											</td>
-											<td className="p-3">
-												<span
-													className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${ACTION_BADGE_CLASSES[row.action]}`}
-												>
-													{row.action}
-												</span>
-											</td>
-											<td className="p-3 text-txt-secondary dark:text-txt-secondary-dark">{row.message || "—"}</td>
+						<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
+							<div className="overflow-x-auto">
+								<table className="w-full min-w-[560px] text-left border-collapse text-sm">
+									<thead>
+										<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
+											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+												Row
+											</th>
+											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+												Slug
+											</th>
+											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+												Result
+											</th>
+											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+												Notes
+											</th>
 										</tr>
-									))}
-								</tbody>
-							</table>
+									</thead>
+									<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
+										{result.rows.map((row) => (
+											<tr key={row.rowNumber} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
+												<td className="p-4 text-txt-secondary dark:text-txt-secondary-dark">{row.rowNumber}</td>
+												<td className="p-4 font-mono text-xs text-txt-secondary dark:text-txt-secondary-dark">
+													{row.slug || "—"}
+												</td>
+												<td className="p-4">
+													<Badge tone={ACTION_BADGE_TONE[row.action]} className="capitalize">
+														{row.action}
+													</Badge>
+												</td>
+												<td className="p-4 text-txt-secondary dark:text-txt-secondary-dark">{row.message || "—"}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
 						</div>
 					) : null}
 				</div>

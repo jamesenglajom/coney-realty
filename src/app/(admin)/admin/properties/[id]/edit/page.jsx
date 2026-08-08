@@ -3,6 +3,7 @@ import { requirePermission } from "@/features/auth/permissions";
 import { getPropertyById, listAssignableUsers } from "@/features/properties/queries";
 import { getActiveFieldSetsByType } from "@/features/propertyTypes/queries";
 import PropertyForm from "@/features/properties/components/PropertyForm";
+import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
 	title: "Edit property",
@@ -22,7 +23,7 @@ export default async function EditPropertyPage({ params }) {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-bold text-theme-blue dark:text-white">Edit property</h1>
+			<PageHeader title="Edit property" />
 			<PropertyForm mode="edit" property={property} assignableUsers={assignableUsers} fieldSetsByType={fieldSetsByType} />
 		</div>
 	);

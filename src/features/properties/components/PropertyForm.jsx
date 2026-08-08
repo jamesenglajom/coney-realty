@@ -359,7 +359,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 							<div key={field.key}>
 								<Label htmlFor={`standardFields.${field.key}`}>
 									{field.label}
-									{field.required ? <span className="text-red-600 dark:text-red-400"> *</span> : null}
+									{field.required ? <span className="text-danger dark:text-danger-dark"> *</span> : null}
 									{field.unit ? (
 										<span className="font-normal normal-case text-txt-muted dark:text-txt-muted-dark"> ({field.unit})</span>
 									) : null}

@@ -153,7 +153,7 @@ export default function PropertyTypeFieldSetForm({ mode, fieldSet, availableType
 								type="button"
 								onClick={() => remove(index)}
 								aria-label="Remove field"
-								className="flex h-[42px] items-center justify-center rounded-lg px-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+								className="flex h-[42px] items-center justify-center rounded-lg px-2 text-danger hover:bg-danger/10 dark:text-danger-dark dark:hover:bg-danger-dark/10"
 							>
 								<Trash2 className="h-4 w-4" aria-hidden="true" />
 							</button>

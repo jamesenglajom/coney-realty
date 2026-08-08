@@ -1,4 +1,3 @@
-
 import {
   Users,
   LayoutDashboardIcon,
@@ -22,8 +21,6 @@ export const navigationGroups = [
     items: [
       {
         name: "Dashboard",
-        title: "System Overview",
-        sub: "Welcome back, here is what changed today.",
         icon: LayoutDashboardIcon,
         href: `${BASE_URL}/admin`,
         pageKey: "dashboard",
@@ -35,40 +32,30 @@ export const navigationGroups = [
     items: [
       {
         name: "Users",
-        title: "User Management",
-        sub: "View, manage, and audit your registered members.",
         icon: Users,
         href: `${BASE_URL}/admin/users`,
         pageKey: "users",
       },
       {
         name: "Blogs",
-        title: "Content Hub",
-        sub: "Draft, edit, and publish your latest articles.",
         icon: FileText,
         href: `${BASE_URL}/admin/blogs`,
         pageKey: "blogs",
       },
       {
         name: "Properties",
-        title: "Property Listings",
-        sub: "Keep your property listings and details up to date.",
         icon: Building2,
         href: `${BASE_URL}/admin/properties`,
         pageKey: "properties",
       },
       {
         name: "Leads",
-        title: "Agent Contact Requests",
-        sub: "Visitors who reached out to an agent from the public site.",
         icon: Contact,
         href: `${BASE_URL}/admin/leads`,
         pageKey: "leads",
       },
       {
         name: "Property Types",
-        title: "Standard Fields",
-        sub: "Set the standard fields each property type should collect.",
         icon: ListChecks,
         href: `${BASE_URL}/admin/property-types`,
         pageKey: "propertyTypes",
@@ -80,8 +67,6 @@ export const navigationGroups = [
     items: [
       {
         name: "Settings",
-        title: "Account Settings",
-        sub: "Configure your preferences and system parameters.",
         icon: Settings,
         href: `${BASE_URL}/admin/settings`,
         // Settings now doubles as everyone's personal account page (change

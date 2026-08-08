@@ -13,7 +13,7 @@ export default function SettingsTabs({ profileSlot, changePasswordSlot, changeEm
 
 	return (
 		<div>
-			<div className="mb-6 flex gap-1 border-b border-theme-gold-light dark:border-[#333]">
+			<div className="mb-6 flex gap-1 border-b border-theme-gold-light dark:border-border-dark">
 				{tabs.map((tab) => (
 					<button
 						key={tab.key}

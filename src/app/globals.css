@@ -23,6 +23,25 @@
   --color-txt-secondary-dark: #a0a0a0;
   --color-txt-muted-dark: #666666;
 
+  /* Dark-mode "surface" (card/panel background) and "border" — the two
+     values every admin card/table/modal was independently reaching for as
+     raw hex (bg-[#1a1a1a], border-[#333]) before being promoted here. */
+  --color-surface-dark: #1a1a1a;
+  --color-border-dark: #333333;
+
+  /* Semantic feedback colors for badges, form errors, and destructive
+     actions — replaces ad hoc stock Tailwind red/green used independently
+     across UsersTable/BlogsTable/LeadsTable/FieldError/Button. Property
+     status (draft/published/sold/archived) keeps using the purpose-built
+     chart-status-* tokens below instead of these, since that's a closed set
+     of exactly four values with its own established colors already. */
+  --color-success: #15803d;
+  --color-success-dark: #4ade80;
+  --color-warning: #b45309;
+  --color-warning-dark: #fbbf24;
+  --color-danger: #b91c1c;
+  --color-danger-dark: #f87171;
+
   /* Chart palette: validated categorical order (see dataviz skill palette.md),
      used for nominal breakdowns (property type, user role). Each slot has an
      explicit -dark pair rather than relying on a media query, matching the

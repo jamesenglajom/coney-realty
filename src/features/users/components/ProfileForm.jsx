@@ -104,7 +104,7 @@ export default function ProfileForm({ user }) {
 						/>
 					</div>
 					{avatarLoadFailed ? (
-						<p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+						<p className="mt-1.5 text-xs text-danger dark:text-danger-dark">
 							Couldn&apos;t load an image from that URL.
 						</p>
 					) : null}

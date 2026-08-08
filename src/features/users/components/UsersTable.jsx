@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import Badge from "@/components/ui/Badge";
 import DeleteUserButton from "./DeleteUserButton";
 import ResetPasswordButton from "./ResetPasswordButton";
 
@@ -15,18 +16,18 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 
 	if (users.length === 0) {
 		return (
-			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-[#333] dark:text-txt-muted-dark">
+			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 				No users yet.
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-[#333] dark:bg-[#1a1a1a]">
+		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
 			<div className="overflow-x-auto">
 			<table className="w-full min-w-[560px] text-left border-collapse">
 				<thead>
-					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-[#333] dark:bg-black/40">
+					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Name
 						</th>
@@ -43,7 +44,7 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 						) : null}
 					</tr>
 				</thead>
-				<tbody className="divide-y divide-theme-gold-light dark:divide-[#333]">
+				<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
 					{users.map((user) => (
 						<tr key={user.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
 							<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">
@@ -51,11 +52,7 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 							</td>
 							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{user.email}</td>
 							<td className="p-4">
-								<span
-									className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${ROLE_BADGE_CLASSES[user.role]}`}
-								>
-									{user.role}
-								</span>
+								<Badge className={ROLE_BADGE_CLASSES[user.role]}>{user.role}</Badge>
 							</td>
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">

@@ -12,6 +12,7 @@ import { createBlogAction, updateBlogAction } from "../actions";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
+import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 
@@ -26,9 +27,6 @@ function slugify(value) {
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/(^-|-$)/g, "");
 }
-
-const TEXTAREA_CLASSES =
-	"w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold";
 
 export default function BlogForm({ mode, blog, authors, properties, currentUserId }) {
 	const router = useRouter();
@@ -192,7 +190,7 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 							{...register("coverImageUrl", { onChange: () => setCoverLoadFailed(false) })}
 						/>
 						{coverLoadFailed ? (
-							<p className="mt-1.5 text-xs text-red-600 dark:text-red-400">Couldn&apos;t load an image from that URL.</p>
+							<p className="mt-1.5 text-xs text-danger dark:text-danger-dark">Couldn&apos;t load an image from that URL.</p>
 						) : null}
 						<FieldError>{errors.coverImageUrl?.message}</FieldError>
 					</div>
@@ -201,13 +199,13 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 
 			<div>
 				<Label htmlFor="excerpt">Excerpt</Label>
-				<textarea id="excerpt" rows={2} {...register("excerpt")} className={TEXTAREA_CLASSES} />
+				<Textarea id="excerpt" rows={2} {...register("excerpt")} />
 				<FieldError>{errors.excerpt?.message}</FieldError>
 			</div>
 
 			<div>
 				<Label htmlFor="content">Content</Label>
-				<textarea id="content" rows={10} {...register("content")} className={TEXTAREA_CLASSES} />
+				<Textarea id="content" rows={10} {...register("content")} />
 				<FieldError>{errors.content?.message}</FieldError>
 			</div>
 
