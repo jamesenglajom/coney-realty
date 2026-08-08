@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, BedDouble, Bath, Ruler, SquareStack, Car } from "lucide-react";
 import { getPublicPropertyBySlug } from "@/features/homepage/queries";
 import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
+import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
 import ContactAgentButton from "@/features/homepage/components/ContactAgentButton";
 import PropertyPhotoGallery from "@/features/properties/components/PropertyPhotoGallery";
 
@@ -16,6 +17,11 @@ export async function generateMetadata({ params }) {
 		[property.location, property.property_type, formatPrice(property.price)].filter(Boolean).join(" · ") ||
 		`${property.name} — a listing with ConeyRealty.`;
 
+	// Real photo when one exists — falls back to the same deterministic
+	// placeholder the page itself shows, so the share preview never mismatches
+	// what a visitor actually sees when they click through.
+	const ogImage = hasPropertyImage(property.slug) ? propertyImagePath(property.slug) : getPropertyImageForSeed(property.id);
+
 	return {
 		title: property.name,
 		description,
@@ -23,7 +29,7 @@ export async function generateMetadata({ params }) {
 		openGraph: {
 			title: property.name,
 			description,
-			images: [getPropertyImageForSeed(property.id)],
+			images: [ogImage],
 		},
 	};
 }
