@@ -100,7 +100,6 @@ export default async function PublicPropertyPage({ params }) {
 									<h1 className="font-display text-[clamp(22px,4vw,34px)] font-semibold leading-tight text-white">
 										{property.name}
 									</h1>
-									{property.location ? <p className="mt-1 text-sm text-white/80">{property.location}</p> : null}
 								</div>
 								<p className="whitespace-nowrap font-display text-[clamp(22px,3.5vw,30px)] font-semibold text-theme-gold">
 									{formatPrice(property.price)}

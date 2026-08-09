@@ -26,7 +26,6 @@ export default function PropertyCard({ property }) {
 						{property.name}
 					</Link>
 				</h3>
-				{property.city ? <p className="mt-1 text-sm text-txt-muted dark:text-txt-muted-dark">{property.city}</p> : null}
 				{hasBedsBaths ? (
 					<div className="mt-4 flex flex-wrap gap-5 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 						{property.beds != null ? (
