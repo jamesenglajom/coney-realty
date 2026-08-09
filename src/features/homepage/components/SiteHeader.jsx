@@ -10,7 +10,6 @@ const NAV_LINKS = [
 	{ href: "/#featured", label: "Featured homes" },
 	{ href: "/#leaderboard", label: "Top agents" },
 	{ href: "/#insight", label: "Insight" },
-	{ href: "/schedule-viewing", label: "Schedule a viewing" },
 ];
 
 export default function SiteHeader() {
@@ -45,8 +44,8 @@ export default function SiteHeader() {
 				</ul>
 
 				<div className="flex items-center gap-2">
-					<Button href="/#search" variant="primary" className="hidden md:inline-flex">
-						Get matched
+					<Button href="/schedule-viewing" variant="primary" className="hidden md:inline-flex">
+						Schedule a viewing
 					</Button>
 					<MobileMenu>
 						<ul className="grid gap-1 py-2">
@@ -61,8 +60,8 @@ export default function SiteHeader() {
 								</li>
 							))}
 							<li>
-								<Button href="/#search" variant="primary" className="mt-2 w-full">
-									Get matched
+								<Button href="/schedule-viewing" variant="primary" className="mt-2 w-full">
+									Schedule a viewing
 								</Button>
 							</li>
 						</ul>
