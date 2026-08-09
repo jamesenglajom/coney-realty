@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Badge from "@/components/ui/Badge";
 import Select from "@/components/ui/Select";
-import { updateViewingRequestStatusAction } from "../actions";
+import { updateViewingRequestStatusAction, deleteViewingRequestAction } from "../actions";
 import { STATUSES } from "../schemas";
 
 const STATUS_TONES = {
@@ -66,7 +68,38 @@ function StatusSelect({ requestId, status }) {
 	);
 }
 
-export default function SiteViewingsTable({ requests }) {
+function DeleteButton({ requestId, visitorName }) {
+	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
+
+	function handleDelete() {
+		if (!window.confirm(`Remove the viewing request from ${visitorName}? This can't be undone from the UI.`)) return;
+
+		startTransition(async () => {
+			const result = await deleteViewingRequestAction(requestId);
+			if (result?.error) {
+				toast.error(result.error);
+			} else {
+				toast.success("Viewing request removed.");
+				router.refresh();
+			}
+		});
+	}
+
+	return (
+		<button
+			type="button"
+			onClick={handleDelete}
+			disabled={isPending}
+			aria-label={`Remove viewing request from ${visitorName}`}
+			className="inline-flex items-center justify-center rounded-lg p-1.5 text-danger hover:bg-danger/10 disabled:opacity-50 dark:text-danger-dark dark:hover:bg-danger-dark/10"
+		>
+			<Trash2 className="h-4 w-4" aria-hidden="true" />
+		</button>
+	);
+}
+
+export default function SiteViewingsTable({ requests, canDelete = false }) {
 	if (requests.length === 0) {
 		return (
 			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
@@ -99,6 +132,11 @@ export default function SiteViewingsTable({ requests }) {
 							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								Status
 							</th>
+							{canDelete ? (
+								<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+									<span className="sr-only">Actions</span>
+								</th>
+							) : null}
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
@@ -146,6 +184,11 @@ export default function SiteViewingsTable({ requests }) {
 									<td className="p-4">
 										<StatusSelect requestId={request.id} status={request.status} />
 									</td>
+									{canDelete ? (
+										<td className="p-4">
+											<DeleteButton requestId={request.id} visitorName={request.visitor_name} />
+										</td>
+									) : null}
 								</tr>
 							);
 						})}

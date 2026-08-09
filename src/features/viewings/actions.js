@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser, getPagePermissions } from "@/features/auth/permissions";
+import { requireUser, getPagePermissions, requirePermission } from "@/features/auth/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { scheduleViewingSchema, updateViewingStatusSchema } from "./schemas";
 
@@ -92,5 +92,19 @@ export async function updateViewingRequestStatusAction(id, status) {
 
 	revalidatePath("/admin/site-viewings");
 	revalidatePath("/admin");
+	return { success: true };
+}
+
+// SAdmin/Admin only (viewings:delete) — soft delete, same convention as
+// every other table in this app (never a hard delete from app code).
+export async function deleteViewingRequestAction(id) {
+	await requirePermission("viewings", "delete");
+
+	const supabase = createAdminClient();
+	const { error } = await supabase.from("viewing_requests").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+
+	if (error) return { error: error.message };
+
+	revalidatePath("/admin/site-viewings");
 	return { success: true };
 }
