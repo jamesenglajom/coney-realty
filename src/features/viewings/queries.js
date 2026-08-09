@@ -1,5 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
+import { getPropertyImageForSeed } from "@/features/homepage/data";
 
 // Public-safe read (used by the /schedule-viewing form) — goes through the
 // admin client like the rest of src/features/homepage/queries.js does, with
@@ -21,6 +23,10 @@ export async function listPropertyOptionsForViewingForm() {
 		slug: property.slug,
 		name: property.screen_name || property.title,
 		city: property.city_state,
+		// Real photo when one exists — same fallback pool the PLP/PDP use, so
+		// a property without photos yet still gets a plausible preview instead
+		// of a broken image.
+		image: hasPropertyImage(property.slug) ? propertyImagePath(property.slug) : getPropertyImageForSeed(property.id),
 	}));
 }
 

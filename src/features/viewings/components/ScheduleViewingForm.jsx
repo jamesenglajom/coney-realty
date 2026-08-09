@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { scheduleViewingSchema } from "../schemas";
 import { submitViewingRequestAction } from "../actions";
@@ -33,6 +34,8 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 	const {
 		register,
 		handleSubmit,
+		watch,
+		setValue,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(scheduleViewingSchema),
@@ -47,6 +50,8 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 		},
 	});
 
+	const selectedIds = watch("propertyIds") ?? [];
+
 	const filteredOptions = useMemo(() => {
 		const query = filterText.trim().toLowerCase();
 		if (!query) return propertyOptions;
@@ -54,6 +59,19 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 			`${property.name} ${property.city ?? ""}`.toLowerCase().includes(query),
 		);
 	}, [propertyOptions, filterText]);
+
+	const selectedProperties = useMemo(
+		() => propertyOptions.filter((property) => selectedIds.includes(property.id)),
+		[propertyOptions, selectedIds],
+	);
+
+	function removeSelectedProperty(propertyId) {
+		setValue(
+			"propertyIds",
+			selectedIds.filter((id) => id !== propertyId),
+			{ shouldValidate: true, shouldDirty: true },
+		);
+	}
 
 	function onSubmit(values) {
 		startTransition(async () => {
@@ -103,7 +121,37 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 			<div>
 				<Label>Properties you'd like to visit</Label>
 
-				<div className="relative mt-1.5 mb-3">
+				<div className="mb-3 rounded-xl border border-theme-gray/20 p-3 dark:border-white/10">
+					<p className="text-xs font-semibold uppercase tracking-wide text-txt-muted dark:text-txt-muted-dark">
+						Selected {selectedProperties.length > 0 ? `(${selectedProperties.length})` : ""}
+					</p>
+					{selectedProperties.length === 0 ? (
+						<p className="mt-1.5 text-sm text-txt-muted dark:text-txt-muted-dark">
+							None yet — check one or more properties below.
+						</p>
+					) : (
+						<ul className="mt-2 flex flex-wrap gap-2">
+							{selectedProperties.map((property) => (
+								<li key={property.id}>
+									<button
+										type="button"
+										onClick={() => removeSelectedProperty(property.id)}
+										className="inline-flex items-center gap-2 rounded-full bg-theme-gold/20 py-1 pl-1 pr-2.5 text-xs font-medium text-theme-blue transition-colors hover:bg-theme-gold/30 dark:text-theme-gold"
+									>
+										<span className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
+											<Image src={property.image} alt="" fill sizes="24px" className="object-cover" />
+										</span>
+										{property.name}
+										<X className="h-3.5 w-3.5" aria-hidden="true" />
+										<span className="sr-only">Remove {property.name}</span>
+									</button>
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
+
+				<div className="relative mb-3">
 					<Search
 						className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-txt-muted dark:text-txt-muted-dark"
 						aria-hidden="true"
@@ -123,25 +171,35 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 					</p>
 				) : (
 					<div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-theme-gray/20 p-2 dark:border-white/10">
-						{filteredOptions.map((property) => (
-							<label
-								key={property.id}
-								className="flex cursor-pointer items-center gap-3 rounded-lg p-2.5 text-sm hover:bg-theme-gold-light/40 dark:hover:bg-white/5"
-							>
-								<input
-									type="checkbox"
-									value={property.id}
-									className="h-4 w-4 shrink-0 accent-theme-gold"
-									{...register("propertyIds")}
-								/>
-								<span className="min-w-0">
-									<span className="block truncate font-medium text-theme-blue dark:text-white">{property.name}</span>
-									{property.city ? (
-										<span className="block truncate text-xs text-txt-muted dark:text-txt-muted-dark">{property.city}</span>
-									) : null}
-								</span>
-							</label>
-						))}
+						{filteredOptions.map((property) => {
+							const isSelected = selectedIds.includes(property.id);
+							return (
+								<label
+									key={property.id}
+									className={`flex cursor-pointer items-center gap-3 rounded-lg p-2.5 text-sm transition-colors ${
+										isSelected
+											? "bg-theme-gold/15 dark:bg-theme-gold/10"
+											: "hover:bg-theme-gold-light/40 dark:hover:bg-white/5"
+									}`}
+								>
+									<input
+										type="checkbox"
+										value={property.id}
+										className="h-4 w-4 shrink-0 accent-theme-gold"
+										{...register("propertyIds")}
+									/>
+									<span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-theme-gray/10 dark:bg-white/5">
+										<Image src={property.image} alt="" fill sizes="48px" className="object-cover" />
+									</span>
+									<span className="min-w-0">
+										<span className="block truncate font-medium text-theme-blue dark:text-white">{property.name}</span>
+										{property.city ? (
+											<span className="block truncate text-xs text-txt-muted dark:text-txt-muted-dark">{property.city}</span>
+										) : null}
+									</span>
+								</label>
+							);
+						})}
 					</div>
 				)}
 				<FieldError>{errors.propertyIds?.message}</FieldError>
