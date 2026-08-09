@@ -55,7 +55,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }
 
 	if (images === null) {
 		return (
-			<div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-theme-gray/15 dark:bg-white/5 sm:aspect-[16/9] lg:aspect-[21/9]" />
+			<div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-theme-gray/15 dark:bg-white/5 sm:aspect-[3/2] lg:aspect-[16/9]" />
 		);
 	}
 
@@ -72,7 +72,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }
 
 	return (
 		<div>
-			<div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-theme-gray/10 dark:bg-white/5 sm:aspect-[16/9] lg:aspect-[21/9]">
+			<div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-theme-gray/10 dark:bg-white/5 sm:aspect-[3/2] lg:aspect-[16/9]">
 				<Image
 					src={gallery[safeIndex]}
 					alt={alt}

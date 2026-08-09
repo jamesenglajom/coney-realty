@@ -226,6 +226,7 @@ async function _listPublicProperties({ city, propertyType, price, page = 1 } = {
 			type: property.property_type,
 			beds: property.custom_fields?.beds ?? null,
 			baths: property.custom_fields?.baths ?? null,
+			carpark: property.custom_fields?.carpark ?? null,
 			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
 			agent: agent ? { id: agent.id, name: agent.full_name } : null,
 		};
