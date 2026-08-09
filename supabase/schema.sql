@@ -127,30 +127,37 @@ values
   ('SAdmin', 'blogs', true, true, true, true),
   ('SAdmin', 'properties', true, true, true, true),
   ('SAdmin', 'settings', true, true, true, true),
-  ('SAdmin', 'leads', true, true, true, true),
+  ('SAdmin', 'viewings', true, true, true, true),
   ('SAdmin', 'propertyTypes', true, true, true, true),
   ('Admin', 'dashboard', true, true, true, true),
   ('Admin', 'users', true, true, true, false),
   ('Admin', 'blogs', true, true, true, true),
   ('Admin', 'properties', true, true, true, true),
   ('Admin', 'settings', true, false, false, false),
-  ('Admin', 'leads', true, false, false, false),
+  ('Admin', 'viewings', true, false, true, false),
   ('Admin', 'propertyTypes', true, true, true, true),
   ('Manager', 'dashboard', true, false, false, false),
   ('Manager', 'users', false, false, false, false),
   ('Manager', 'blogs', true, true, true, false),
   ('Manager', 'properties', true, true, true, false),
   ('Manager', 'settings', false, false, false, false),
-  ('Manager', 'leads', false, false, false, false),
+  ('Manager', 'viewings', false, false, false, false),
   ('Manager', 'propertyTypes', true, true, true, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
   ('Agent', 'blogs', false, false, false, false),
   ('Agent', 'properties', true, false, false, false),
   ('Agent', 'settings', false, false, false, false),
-  ('Agent', 'leads', false, false, false, false),
+  ('Agent', 'viewings', false, false, false, false),
   ('Agent', 'propertyTypes', false, false, false, false)
 on conflict (role, page) do nothing;
+
+-- Table already existed with a 'leads' page key before the "Schedule a site
+-- viewing" feature renamed it to 'viewings' — carries an already-deployed
+-- DB's existing rows (and whatever an SAdmin had customized) forward instead
+-- of losing them to the insert above's on-conflict-do-nothing.
+update public.permissions set page = 'viewings' where page = 'leads';
+update public.permissions set can_edit = true where page = 'viewings' and role = 'Admin';
 
 drop trigger if exists set_permissions_updated_at on public.permissions;
 create trigger set_permissions_updated_at
@@ -355,7 +362,89 @@ create trigger set_blogs_updated_at
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- agent_contact_requests — leads from the public "Find agents" search: the
+-- keep_alive_pings — insert-only log of manual "ping now" clicks from
+-- Settings > System (src/features/system), so that action can show "last
+-- triggered" and enforce a once-a-week cooldown without extra state. Not a
+-- business record — same insert-only, no-deleted_at shape as
+-- agent_contact_requests below, for the same reason.
+-- ---------------------------------------------------------------------------
+create table if not exists public.keep_alive_pings (
+  id uuid primary key default gen_random_uuid(),
+  triggered_at timestamptz not null default now(),
+  triggered_by uuid references public.users (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists keep_alive_pings_triggered_at_idx on public.keep_alive_pings (triggered_at desc);
+
+alter table public.keep_alive_pings enable row level security;
+-- No policies: deny-by-default. Both the read (Settings page) and the insert
+-- (the trigger action) go through the service-role client, gated by
+-- requirePermission("settings", "edit") in application code.
+
+-- ---------------------------------------------------------------------------
+-- viewing_requests / viewing_request_properties — "Schedule a site viewing"
+-- submissions from the public site (nav link, PLP card button, PDP button).
+-- Replaces the old lead-capture concept below: unlike agent_contact_requests,
+-- a single submission can name multiple properties, and it's an actionable
+-- workflow (status) rather than a passive log.
+-- ---------------------------------------------------------------------------
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'viewing_request_status') then
+    create type viewing_request_status as enum ('pending', 'confirmed', 'completed', 'cancelled');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'viewing_time_preference') then
+    create type viewing_time_preference as enum ('morning', 'afternoon', 'evening');
+  end if;
+end $$;
+
+create table if not exists public.viewing_requests (
+  id uuid primary key default gen_random_uuid(),
+  visitor_name text not null,
+  visitor_email text not null,
+  visitor_phone text,
+  preferred_date date,
+  preferred_time viewing_time_preference,
+  message text,
+  status viewing_request_status not null default 'pending',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists viewing_requests_status_idx on public.viewing_requests (status);
+create index if not exists viewing_requests_created_at_idx on public.viewing_requests (created_at desc);
+
+alter table public.viewing_requests enable row level security;
+-- Deny-by-default: the public submit action and all admin reads/updates go
+-- through the service-role client, same trust-boundary pattern as every
+-- other table in this schema.
+
+drop trigger if exists set_viewing_requests_updated_at on public.viewing_requests;
+create trigger set_viewing_requests_updated_at
+  before update on public.viewing_requests
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.viewing_request_properties (
+  viewing_request_id uuid not null references public.viewing_requests (id) on delete cascade,
+  property_id uuid not null references public.properties (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (viewing_request_id, property_id)
+);
+
+create index if not exists viewing_request_properties_property_idx on public.viewing_request_properties (property_id);
+
+alter table public.viewing_request_properties enable row level security;
+-- Deny-by-default, written alongside viewing_requests in the same
+-- service-role insert.
+
+-- ---------------------------------------------------------------------------
+-- agent_contact_requests — legacy lead capture from the public "Find agents"
+-- search, superseded by viewing_requests above as of the "Schedule a site
+-- viewing" feature. Nothing in the app writes to or reads this table
+-- anymore — kept only so existing historical rows aren't destroyed.
+-- Original comment, for context: the
 -- visitor's email (captured once, before results are shown) plus which
 -- agent they actually reached out to and how. Insert-only from a public
 -- Server Action (no session), so RLS stays deny-by-default and the action

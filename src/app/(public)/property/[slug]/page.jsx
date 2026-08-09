@@ -5,8 +5,8 @@ import { ArrowLeft, BedDouble, Bath, Ruler, SquareStack, Car } from "lucide-reac
 import { getPublicPropertyBySlug } from "@/features/homepage/queries";
 import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
 import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
-import ContactAgentButton from "@/features/homepage/components/ContactAgentButton";
 import PropertyPhotoGallery from "@/features/properties/components/PropertyPhotoGallery";
+import Button from "@/components/ui/Button";
 
 export async function generateMetadata({ params }) {
 	const { slug } = await params;
@@ -45,8 +45,6 @@ export default async function PublicPropertyPage({ params }) {
 	const property = await getPublicPropertyBySlug(slug);
 
 	if (!property) notFound();
-
-	const searchContext = { location: property.city_state, type: property.property_type };
 
 	// One stat block per fact that's actually present — a Land listing might
 	// only ever have a lot size, a House and Lot has the full set. Order
@@ -167,63 +165,42 @@ export default async function PublicPropertyPage({ params }) {
 						) : null}
 
 						<div>
+							<Button href={`/schedule-viewing?property=${property.slug}`} className="w-full">
+								Schedule a viewing
+							</Button>
+						</div>
+
+						<div>
 							<h2 className="text-sm font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-								Contact the listing agent
+								Listing agent
 							</h2>
 							<div className="mt-4 space-y-4">
 								{property.agents.length === 0 ? (
 									<p className="text-sm text-txt-muted dark:text-txt-muted-dark">
-										Reach out via our{" "}
+										Not sure who to ask? Use the{" "}
 										<Link href="/#search" className="font-semibold text-theme-blue hover:underline dark:text-theme-gold">
 											Find an agent
 										</Link>{" "}
-										search and we&apos;ll connect you.
+										search and we&apos;ll match you with one.
 									</p>
 								) : (
 									property.agents.map((agent) => (
-										<div key={agent.id} className="rounded-2xl border border-theme-gray/15 p-4 dark:border-white/10">
-											<div className="flex items-center gap-3">
-												<div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
-													<Image
-														src={agent.avatarUrl || getAvatarForSeed(agent.id)}
-														alt={agent.name}
-														fill
-														sizes="44px"
-														className="object-cover"
-													/>
-												</div>
-												<Link
-													href={`/agents/${agent.id}`}
-													className="min-w-0 truncate font-semibold text-theme-blue hover:underline dark:text-white"
-												>
-													{agent.name}
-												</Link>
+										<Link
+											key={agent.id}
+											href={`/agents/${agent.id}`}
+											className="flex items-center gap-3 rounded-2xl border border-theme-gray/15 p-4 hover:border-theme-gold dark:border-white/10 dark:hover:border-theme-gold"
+										>
+											<div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+												<Image
+													src={agent.avatarUrl || getAvatarForSeed(agent.id)}
+													alt={agent.name}
+													fill
+													sizes="44px"
+													className="object-cover"
+												/>
 											</div>
-											<div className="mt-3 flex gap-2">
-												<ContactAgentButton
-													href={`mailto:${agent.email}?subject=ConeyRealty%20enquiry`}
-													agentId={agent.id}
-													method="email"
-													searchContext={searchContext}
-													variant="primary"
-													className="flex-1 px-3 py-2 text-xs"
-												>
-													Email
-												</ContactAgentButton>
-												{agent.phone ? (
-													<ContactAgentButton
-														href={`tel:${agent.phone}`}
-														agentId={agent.id}
-														method="call"
-														searchContext={searchContext}
-														variant="ghost"
-														className="px-3 py-2 text-xs"
-													>
-														Call
-													</ContactAgentButton>
-												) : null}
-											</div>
-										</div>
+											<span className="min-w-0 truncate font-semibold text-theme-blue dark:text-white">{agent.name}</span>
+										</Link>
 									))
 								)}
 							</div>

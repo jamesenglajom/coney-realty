@@ -9,7 +9,7 @@ import {
   Search,
   Bell,
   ChevronRight,
-  Contact,
+  CalendarCheck,
   ListChecks,
 } from "lucide-react";
 
@@ -49,10 +49,10 @@ export const navigationGroups = [
         pageKey: "properties",
       },
       {
-        name: "Leads",
-        icon: Contact,
-        href: `${BASE_URL}/admin/leads`,
-        pageKey: "leads",
+        name: "Site Viewings",
+        icon: CalendarCheck,
+        href: `${BASE_URL}/admin/site-viewings`,
+        pageKey: "viewings",
       },
       {
         name: "Property Types",

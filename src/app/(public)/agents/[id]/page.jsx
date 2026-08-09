@@ -49,14 +49,9 @@ export default async function AgentProfilePage({ params }) {
 							<p className="mt-4 max-w-2xl text-base text-txt-secondary dark:text-txt-secondary-dark">{agent.bio}</p>
 						) : null}
 						<div className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
-							<Button href={`mailto:${agent.email}?subject=ConeyRealty%20enquiry`} variant="primary" size="sm">
-								Email {agent.name.split(" ")[0]}
+							<Button href="/schedule-viewing" variant="primary" size="sm">
+								Schedule a viewing with {agent.name.split(" ")[0]}
 							</Button>
-							{agent.phone ? (
-								<Button href={`tel:${agent.phone}`} variant="ghost" size="sm">
-									Call {agent.phone}
-								</Button>
-							) : null}
 						</div>
 					</div>
 				</div>
@@ -66,7 +61,7 @@ export default async function AgentProfilePage({ params }) {
 
 					{agent.listings.length === 0 ? (
 						<p className="mt-4 text-sm text-txt-muted dark:text-txt-muted-dark">
-							No active listings from {agent.name} right now — reach out directly for off-market options.
+							No active listings from {agent.name} right now — check back soon.
 						</p>
 					) : (
 						<ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

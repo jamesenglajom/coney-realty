@@ -10,6 +10,7 @@ const NAV_LINKS = [
 	{ href: "/#featured", label: "Featured homes" },
 	{ href: "/#leaderboard", label: "Top agents" },
 	{ href: "/#insight", label: "Insight" },
+	{ href: "/schedule-viewing", label: "Schedule a viewing" },
 ];
 
 export default function SiteHeader() {

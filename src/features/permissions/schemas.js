@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PAGES = ["dashboard", "users", "blogs", "properties", "settings", "leads", "propertyTypes"];
+export const PAGES = ["dashboard", "users", "blogs", "properties", "settings", "viewings", "propertyTypes"];
 export const EDITABLE_ROLES = ["Admin", "Manager", "Agent"];
 export const PERMISSION_ACTIONS = ["view", "create", "edit", "delete"];
 
