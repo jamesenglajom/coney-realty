@@ -7,6 +7,7 @@ export const BASE_HEADERS = [
 	"slug",
 	"title",
 	"screen_name",
+	"code_name",
 	"property_type",
 	"status",
 	"price",
@@ -28,6 +29,7 @@ const BASE_EXAMPLE_VALUES = [
 	"cedar-ridge-residence",
 	"Cedar Ridge Residence",
 	"Cedar Ridge — 4BR Family Home",
+	"",
 	"",
 	"published",
 	1250000,
@@ -131,6 +133,7 @@ export function validateImportRow(rawRow, rowNumber, fieldSetsByType = {}) {
 	if (!title) errors.push("title is required");
 
 	const screenName = String(row.screen_name ?? "").trim();
+	const codeName = String(row.code_name ?? "").trim();
 
 	const propertyType = String(row.property_type ?? "").trim();
 	if (!PROPERTY_TYPES.includes(propertyType)) {
@@ -187,6 +190,7 @@ export function validateImportRow(rawRow, rowNumber, fieldSetsByType = {}) {
 		data: {
 			title,
 			screen_name: screenName || null,
+			code_name: codeName || null,
 			slug,
 			property_type: propertyType,
 			status,

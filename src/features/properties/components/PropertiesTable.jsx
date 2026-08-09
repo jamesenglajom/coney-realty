@@ -126,6 +126,9 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 								{property.screen_name ? (
 									<p className="text-xs text-txt-secondary dark:text-txt-secondary-dark">{property.screen_name}</p>
 								) : null}
+								{property.code_name ? (
+									<p className="text-xs text-txt-muted dark:text-txt-muted-dark">Code: {property.code_name}</p>
+								) : null}
 								<p className="font-mono text-xs text-txt-muted dark:text-txt-muted-dark">{property.slug}</p>
 							</td>
 							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{property.property_type}</td>

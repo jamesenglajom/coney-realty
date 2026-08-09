@@ -111,6 +111,7 @@ function toColumns(data) {
 	return {
 		title: data.title,
 		screen_name: data.screenName || null,
+		code_name: data.codeName || null,
 		slug: data.slug,
 		property_type: data.propertyType,
 		status: data.status,

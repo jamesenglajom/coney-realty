@@ -20,6 +20,7 @@ const jsonObjectString = z
 const propertyBaseSchema = z.object({
 	title: z.string().trim().min(1, "Title is required"),
 	screenName: z.string().trim().optional(),
+	codeName: z.string().trim().optional(),
 	slug: z
 		.string()
 		.trim()

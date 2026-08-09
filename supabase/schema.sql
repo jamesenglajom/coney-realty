@@ -197,6 +197,9 @@ create table if not exists public.properties (
   -- `title` when set (falls back to `title` when null) — lets the internal
   -- listing title differ from what's posted publicly.
   screen_name text,
+  -- Optional internal reference code/name (e.g. a project codename) — admin
+  -- use only, never shown on the public site.
+  code_name text,
   slug text not null,
   property_type property_type not null,
   status property_status not null default 'draft',
@@ -234,6 +237,7 @@ create table if not exists public.properties (
 -- on a fresh `create table`. These `add column if not exists` cover the
 -- already-existing table when this file is re-run against it.
 alter table public.properties add column if not exists screen_name text;
+alter table public.properties add column if not exists code_name text;
 alter table public.properties add column if not exists html_body text;
 alter table public.properties add column if not exists city text;
 alter table public.properties add column if not exists region text;

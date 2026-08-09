@@ -60,6 +60,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					id: property.id,
 					title: property.title,
 					screenName: property.screen_name ?? "",
+					codeName: property.code_name ?? "",
 					slug: property.slug,
 					propertyType: property.property_type,
 					status: property.status,
@@ -91,6 +92,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 			: {
 					title: "",
 					screenName: "",
+					codeName: "",
 					slug: "",
 					propertyType: PROPERTY_TYPES[0],
 					status: PROPERTY_STATUSES[0],
@@ -216,6 +218,15 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					internal listing title.
 				</p>
 				<FieldError>{errors.screenName?.message}</FieldError>
+			</div>
+
+			<div>
+				<Label htmlFor="codeName">Code name (optional)</Label>
+				<Input id="codeName" type="text" placeholder="Internal reference code" {...register("codeName")} />
+				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Internal reference only — never shown on the public site.
+				</p>
+				<FieldError>{errors.codeName?.message}</FieldError>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">
