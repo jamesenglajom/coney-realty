@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Search, X } from "lucide-react";
 import { toast } from "sonner";
+import { formatPrice } from "@/features/homepage/data";
 import { scheduleViewingSchema } from "../schemas";
 import { submitViewingRequestAction } from "../actions";
 import Input from "@/components/ui/Input";
@@ -141,7 +142,10 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 										<span className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
 											<Image src={property.image} alt="" fill sizes="24px" className="object-cover" />
 										</span>
-										{property.name}
+										<span>
+											{property.name}
+											{property.price != null ? <span className="ml-1 opacity-80">· {formatPrice(property.price)}</span> : null}
+										</span>
 										<X className="h-3.5 w-3.5" aria-hidden="true" />
 										<span className="sr-only">Remove {property.name}</span>
 									</button>
@@ -193,9 +197,11 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 									</span>
 									<span className="min-w-0">
 										<span className="block truncate font-medium text-theme-blue dark:text-white">{property.name}</span>
-										{property.city ? (
-											<span className="block truncate text-xs text-txt-muted dark:text-txt-muted-dark">{property.city}</span>
-										) : null}
+										<span className="block truncate text-xs text-txt-muted dark:text-txt-muted-dark">
+											{[property.city, property.price != null ? formatPrice(property.price) : null]
+												.filter(Boolean)
+												.join(" · ")}
+										</span>
 									</span>
 								</label>
 							);

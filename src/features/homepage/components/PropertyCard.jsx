@@ -21,7 +21,7 @@ export default function PropertyCard({ property }) {
 				<p className="text-2xl font-bold leading-tight text-theme-blue dark:text-theme-gold">
 					{formatPrice(property.price)}
 				</p>
-				<h3 className="mt-1 text-sm font-semibold text-txt-secondary dark:text-txt-secondary-dark">
+				<h3 className="mt-1 text-lg font-semibold text-txt-secondary dark:text-txt-secondary-dark">
 					<Link href={`/property/${property.slug}`} className="hover:underline">
 						{property.name}
 					</Link>

@@ -155,19 +155,25 @@ export default function SiteViewingsTable({ requests, canDelete = false }) {
 										) : null}
 									</td>
 									<td className="p-4">
-										<div className="flex flex-wrap gap-1.5">
+										<div className="space-y-2">
 											{request.properties.length === 0 ? (
 												<span className="text-sm text-txt-muted dark:text-txt-muted-dark">—</span>
 											) : (
 												request.properties.map((property) => (
-													<Link
-														key={property.id}
-														href={`/property/${property.slug}`}
-														target="_blank"
-														className="rounded-full bg-theme-gold/20 px-2.5 py-0.5 text-xs font-medium text-theme-blue hover:underline dark:text-theme-gold"
-													>
-														{property.name}
-													</Link>
+													<div key={property.id}>
+														<Link
+															href={`/property/${property.slug}`}
+															target="_blank"
+															className="text-xs font-medium text-theme-blue hover:underline dark:text-theme-gold"
+														>
+															{property.name}
+														</Link>
+														<p className="text-[11px] text-txt-muted dark:text-txt-muted-dark">
+															{property.agents.length > 0
+																? `Agent: ${property.agents.map((agent) => agent.name).join(", ")}`
+																: "No agent assigned"}
+														</p>
+													</div>
 												))
 											)}
 										</div>

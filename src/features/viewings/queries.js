@@ -11,7 +11,7 @@ export async function listPropertyOptionsForViewingForm() {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("properties")
-		.select("id, slug, screen_name, title, city_state")
+		.select("id, slug, screen_name, title, city_state, price")
 		.eq("status", "published")
 		.is("deleted_at", null)
 		.order("screen_name", { ascending: true });
@@ -23,6 +23,7 @@ export async function listPropertyOptionsForViewingForm() {
 		slug: property.slug,
 		name: property.screen_name || property.title,
 		city: property.city_state,
+		price: property.price,
 		// Real photo when one exists — same fallback pool the PLP/PDP use, so
 		// a property without photos yet still gets a plausible preview instead
 		// of a broken image.
@@ -31,7 +32,7 @@ export async function listPropertyOptionsForViewingForm() {
 }
 
 const VIEWING_REQUEST_COLUMNS =
-	"id, visitor_name, visitor_email, visitor_phone, preferred_date, preferred_time, message, status, created_at, viewing_request_properties(properties(id, slug, screen_name, title))";
+	"id, visitor_name, visitor_email, visitor_phone, preferred_date, preferred_time, message, status, created_at, viewing_request_properties(properties(id, slug, screen_name, title, user_property(users(id, full_name, email))))";
 
 function mapViewingRequestRow(request) {
 	return {
@@ -39,7 +40,15 @@ function mapViewingRequestRow(request) {
 		properties: (request.viewing_request_properties ?? [])
 			.map((row) => row.properties)
 			.filter(Boolean)
-			.map((property) => ({ id: property.id, slug: property.slug, name: property.screen_name || property.title })),
+			.map((property) => ({
+				id: property.id,
+				slug: property.slug,
+				name: property.screen_name || property.title,
+				agents: (property.user_property ?? [])
+					.map((row) => row.users)
+					.filter(Boolean)
+					.map((user) => ({ id: user.id, name: user.full_name || user.email })),
+			})),
 	};
 }
 
