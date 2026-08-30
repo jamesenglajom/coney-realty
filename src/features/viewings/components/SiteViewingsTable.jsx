@@ -121,6 +121,9 @@ export default function SiteViewingsTable({ requests, canDelete = false }) {
 								Properties
 							</th>
 							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+								Referred to
+							</th>
+							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								Preferred
 							</th>
 							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
@@ -170,13 +173,22 @@ export default function SiteViewingsTable({ requests, canDelete = false }) {
 														</Link>
 														<p className="text-[11px] text-txt-muted dark:text-txt-muted-dark">
 															{property.agents.length > 0
-																? `Agent: ${property.agents.map((agent) => agent.name).join(", ")}`
-																: "No agent assigned"}
+																? `Listed by: ${property.agents.map((agent) => agent.name).join(", ")}`
+																: "No listing agent"}
 														</p>
 													</div>
 												))
 											)}
 										</div>
+									</td>
+									<td className="p-4">
+										{request.referringAgent ? (
+											<span className="text-sm font-medium text-theme-blue dark:text-white">
+												{request.referringAgent.name}
+											</span>
+										) : (
+											<span className="text-sm text-txt-muted dark:text-txt-muted-dark">Unassigned</span>
+										)}
 									</td>
 									<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 										{preferredParts.length > 0 ? preferredParts.join(" · ") : "—"}

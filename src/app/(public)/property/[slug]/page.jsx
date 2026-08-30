@@ -90,9 +90,16 @@ export default async function PublicPropertyPage({ params }) {
 						seed={property.id}
 						alt={property.name}
 						badge={
-							<span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
-								{property.property_type}
-							</span>
+							<div className="flex flex-wrap items-center gap-2">
+								<span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
+									{property.property_type}
+								</span>
+								{property.isOnHold ? (
+									<span className="inline-flex items-center rounded-full bg-warning px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm dark:bg-warning-dark dark:text-theme-blue">
+										On Hold
+									</span>
+								) : null}
+							</div>
 						}
 						overlay={
 							<div className="flex flex-wrap items-end justify-between gap-3">
@@ -176,11 +183,14 @@ export default async function PublicPropertyPage({ params }) {
 							<div className="mt-4 space-y-4">
 								{property.agents.length === 0 ? (
 									<p className="text-sm text-txt-muted dark:text-txt-muted-dark">
-										Not sure who to ask? Use the{" "}
-										<Link href="/#search" className="font-semibold text-theme-blue hover:underline dark:text-theme-gold">
-											Find an agent
+										No agent is assigned yet —{" "}
+										<Link
+											href={`/schedule-viewing?property=${property.slug}`}
+											className="font-semibold text-theme-blue hover:underline dark:text-theme-gold"
+										>
+											request a viewing
 										</Link>{" "}
-										search and we&apos;ll match you with one.
+										and our team will follow up.
 									</p>
 								) : (
 									property.agents.map((agent) => (

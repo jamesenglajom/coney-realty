@@ -141,7 +141,7 @@ export async function getAgentPropertyStats(agentId) {
 
 	const properties = (data ?? []).map((row) => row.properties).filter((property) => property && !property.deleted_at);
 
-	const byStatus = { draft: 0, published: 0, sold: 0, archived: 0 };
+	const byStatus = { draft: 0, published: 0, on_hold: 0, sold: 0, archived: 0 };
 	let lifetimeSoldCount = 0;
 	let lifetimeSoldVolume = 0;
 	let monthCount = 0;

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { formatPrice } from "@/features/homepage/data";
 import { scheduleViewingSchema } from "../schemas";
 import { submitViewingRequestAction } from "../actions";
+import { getStoredReferringAgentId } from "../referral";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
@@ -76,13 +77,23 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 
 	function onSubmit(values) {
 		startTransition(async () => {
-			const result = await submitViewingRequestAction(values);
+			const result = await submitViewingRequestAction({
+				...values,
+				referringAgentId: getStoredReferringAgentId() ?? "",
+			});
 			if (result?.error) {
 				toast.error(result.error);
 				return;
 			}
 			setIsSubmitted(true);
 		});
+	}
+
+	// Backstop for every field, not just the ones with a visible <FieldError>
+	// — if validation fails for any reason, this guarantees the click isn't
+	// silently a no-op (the original bug report).
+	function onInvalid() {
+		toast.error("Please fix the highlighted fields before submitting.");
 	}
 
 	if (isSubmitted) {
@@ -100,7 +111,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 	}
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+		<form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="space-y-8">
 			<div className="grid gap-4 sm:grid-cols-2">
 				<div>
 					<Label htmlFor="visitorName">Full name</Label>
@@ -218,7 +229,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 					<FieldError>{errors.preferredDate?.message}</FieldError>
 				</div>
 				<div>
-					<Label htmlFor="preferredTime">Preferred time of day</Label>
+					<Label htmlFor="preferredTime">Preferred time of day (optional)</Label>
 					<Select id="preferredTime" {...register("preferredTime")}>
 						{TIME_OPTIONS.map((option) => (
 							<option key={option.value} value={option.value}>
@@ -226,6 +237,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 							</option>
 						))}
 					</Select>
+					<FieldError>{errors.preferredTime?.message}</FieldError>
 				</div>
 			</div>
 

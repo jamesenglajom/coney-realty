@@ -20,6 +20,7 @@ export default async function UsersPage({ searchParams }) {
 	const canCreate = permissions.can_create;
 	const canEdit = permissions.can_edit;
 	const canDelete = permissions.can_delete;
+	const showUserId = ["SAdmin", "Admin"].includes(user.role);
 
 	return (
 		<div>
@@ -37,7 +38,7 @@ export default async function UsersPage({ searchParams }) {
 			<div className="mb-4">
 				<UsersSearchBar />
 			</div>
-			<UsersTable users={users} canEdit={canEdit} canDelete={canDelete} />
+			<UsersTable users={users} canEdit={canEdit} canDelete={canDelete} showUserId={showUserId} />
 		</div>
 	);
 }

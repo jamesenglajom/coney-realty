@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { MoreVertical, Eye, Pencil, BadgeCheck } from "lucide-react";
 import UnmarkSoldButton from "./UnmarkSoldButton";
+import MarkOnHoldButton from "./MarkOnHoldButton";
+import UnmarkOnHoldButton from "./UnmarkOnHoldButton";
 import DeletePropertyButton from "./DeletePropertyButton";
 import MarkSoldModal from "./MarkSoldModal";
 
@@ -122,6 +124,12 @@ export default function PropertyRowActions({ property, canEdit, canDelete }) {
 							) : null}
 							{canEdit && property.status === "sold" ? (
 								<UnmarkSoldButton propertyId={property.id} propertyTitle={property.title} onDone={closeMenu} />
+							) : null}
+							{canEdit && property.status !== "sold" && property.status !== "on_hold" ? (
+								<MarkOnHoldButton propertyId={property.id} propertyTitle={property.title} onDone={closeMenu} />
+							) : null}
+							{canEdit && property.status === "on_hold" ? (
+								<UnmarkOnHoldButton propertyId={property.id} propertyTitle={property.title} onDone={closeMenu} />
 							) : null}
 							{canDelete ? (
 								<DeletePropertyButton propertyId={property.id} propertyTitle={property.title} onDone={closeMenu} />

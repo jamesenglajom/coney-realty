@@ -1,7 +1,17 @@
 import { z } from "zod";
 
 export const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Condo", "Land", "House and Lot"];
-export const PROPERTY_STATUSES = ["draft", "published", "sold", "archived"];
+export const PROPERTY_STATUSES = ["draft", "published", "on_hold", "sold", "archived"];
+
+// Display text for statuses that aren't a single plain word — "on_hold"
+// would otherwise print literally as "on_hold" (raw value + CSS
+// `capitalize` doesn't reliably style native <option> text, and doesn't
+// touch underscores either way). Every other status is fine capitalized
+// from its raw value, so this only needs the one entry to look right;
+// callers fall back to the raw value for anything not listed here.
+export const PROPERTY_STATUS_LABELS = {
+	on_hold: "On Hold",
+};
 export const PAYMENT_TYPES = ["buy", "rent", "rent-to-own"];
 
 const jsonObjectString = z

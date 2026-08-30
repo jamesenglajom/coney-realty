@@ -128,6 +128,7 @@ values
   ('SAdmin', 'properties', true, true, true, true),
   ('SAdmin', 'settings', true, true, true, true),
   ('SAdmin', 'viewings', true, true, true, true),
+  ('SAdmin', 'leaderboard', true, true, true, true),
   ('SAdmin', 'propertyTypes', true, true, true, true),
   ('Admin', 'dashboard', true, true, true, true),
   ('Admin', 'users', true, true, true, false),
@@ -135,6 +136,7 @@ values
   ('Admin', 'properties', true, true, true, true),
   ('Admin', 'settings', true, false, false, false),
   ('Admin', 'viewings', true, false, true, false),
+  ('Admin', 'leaderboard', true, true, true, true),
   ('Admin', 'propertyTypes', true, true, true, true),
   ('Manager', 'dashboard', true, false, false, false),
   ('Manager', 'users', false, false, false, false),
@@ -142,6 +144,7 @@ values
   ('Manager', 'properties', true, true, true, false),
   ('Manager', 'settings', false, false, false, false),
   ('Manager', 'viewings', false, false, false, false),
+  ('Manager', 'leaderboard', false, false, false, false),
   ('Manager', 'propertyTypes', true, true, true, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
@@ -149,6 +152,7 @@ values
   ('Agent', 'properties', true, false, false, false),
   ('Agent', 'settings', false, false, false, false),
   ('Agent', 'viewings', false, false, false, false),
+  ('Agent', 'leaderboard', false, false, false, false),
   ('Agent', 'propertyTypes', false, false, false, false)
 on conflict (role, page) do nothing;
 
@@ -175,7 +179,7 @@ begin
     create type property_type as enum ('House', 'Apartment', 'Villa', 'Condo', 'Land', 'House and Lot');
   end if;
   if not exists (select 1 from pg_type where typname = 'property_status') then
-    create type property_status as enum ('draft', 'published', 'sold', 'archived');
+    create type property_status as enum ('draft', 'published', 'on_hold', 'sold', 'archived');
   end if;
   if not exists (select 1 from pg_type where typname = 'property_payment_type') then
     create type property_payment_type as enum ('buy', 'rent', 'rent-to-own');
@@ -189,6 +193,11 @@ end $$;
 -- separate statement (not inside a do $$ block) and separately committed
 -- before anything inserts 'House and Lot'.
 alter type property_type add value if not exists 'House and Lot';
+
+-- Same reasoning as above — 'on_hold' sits between published and sold:
+-- still publicly viewable/bookable (unlike sold, which is hidden), just
+-- flagged. See markPropertyOnHoldAction / unmarkPropertyOnHoldAction.
+alter type property_status add value if not exists 'on_hold';
 
 create table if not exists public.properties (
   id uuid primary key default gen_random_uuid(),
@@ -412,13 +421,25 @@ create table if not exists public.viewing_requests (
   preferred_time viewing_time_preference,
   message text,
   status viewing_request_status not null default 'pending',
+  -- The agent to notify, captured from a ?agent=<user_id> link the agent
+  -- shared and stashed client-side (localStorage) until the visitor submits
+  -- this form — see src/features/viewings/referral.js. Replaces the earlier
+  -- "notify whoever is assigned to the requested property" behavior: this
+  -- is who actually gets credit/visibility for the lead, independent of who
+  -- lists the property. Left null when no referral link was used.
+  referring_agent_id uuid references public.users (id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
 );
 
+-- Table already existed before referring_agent_id was added — this covers
+-- the already-deployed DB when this file is re-run against it.
+alter table public.viewing_requests add column if not exists referring_agent_id uuid references public.users (id) on delete set null;
+
 create index if not exists viewing_requests_status_idx on public.viewing_requests (status);
 create index if not exists viewing_requests_created_at_idx on public.viewing_requests (created_at desc);
+create index if not exists viewing_requests_referring_agent_idx on public.viewing_requests (referring_agent_id);
 
 alter table public.viewing_requests enable row level security;
 -- Deny-by-default: the public submit action and all admin reads/updates go
@@ -442,6 +463,92 @@ create index if not exists viewing_request_properties_property_idx on public.vie
 alter table public.viewing_request_properties enable row level security;
 -- Deny-by-default, written alongside viewing_requests in the same
 -- service-role insert.
+
+-- ---------------------------------------------------------------------------
+-- site_settings — single-row table holding public-site contact details
+-- (address / phone / email) an SAdmin or Admin edits from admin Settings,
+-- rendered in the public footer. The boolean primary key + check constraint
+-- is a singleton guard: there can only ever be the one row (id = true).
+-- ---------------------------------------------------------------------------
+create table if not exists public.site_settings (
+  id boolean primary key default true,
+  address text,
+  contact_number text,
+  contact_email text,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references public.users (id) on delete set null,
+  constraint site_settings_singleton check (id)
+);
+
+insert into public.site_settings (id) values (true) on conflict (id) do nothing;
+
+alter table public.site_settings enable row level security;
+-- Deny-by-default: the footer reads this through the admin client in a
+-- server-only query (same convention as the rest of the homepage queries),
+-- and the write goes through a Server Action gated to SAdmin/Admin.
+
+drop trigger if exists set_site_settings_updated_at on public.site_settings;
+create trigger set_site_settings_updated_at
+  before update on public.site_settings
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- leaderboard_entries / leaderboard_config — the hand-curated "Top
+-- Producers" board on the homepage. Not computed from data: an Admin/SAdmin
+-- picks ~10 people, orders them (drag-and-drop → display_order), and
+-- publishes. Overwritten each month; no history is kept.
+-- ---------------------------------------------------------------------------
+create table if not exists public.leaderboard_entries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  title text,
+  photo_url text,
+  agent_id uuid references public.users (id) on delete set null,
+  display_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists leaderboard_entries_order_idx
+  on public.leaderboard_entries (display_order) where deleted_at is null;
+
+alter table public.leaderboard_entries enable row level security;
+-- Deny-by-default: the homepage reads this through the admin client in a
+-- server-only query, writes go through Server Actions gated to the
+-- "leaderboard" page permission.
+
+drop trigger if exists set_leaderboard_entries_updated_at on public.leaderboard_entries;
+create trigger set_leaderboard_entries_updated_at
+  before update on public.leaderboard_entries
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.leaderboard_config (
+  id boolean primary key default true,
+  heading text not null default 'Top Producers',
+  period_label text,
+  is_published boolean not null default false,
+  -- Ranks 1-5 (the big cards) always show; this only toggles the 6-10
+  -- circle-avatar row underneath, for a board with fewer than 10 curated
+  -- producers ready.
+  show_ranks_6_to_10 boolean not null default true,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references public.users (id) on delete set null,
+  constraint leaderboard_config_singleton check (id)
+);
+
+-- Table already existed before show_ranks_6_to_10 was added — covers the
+-- already-deployed DB when this file is re-run against it.
+alter table public.leaderboard_config add column if not exists show_ranks_6_to_10 boolean not null default true;
+
+insert into public.leaderboard_config (id) values (true) on conflict (id) do nothing;
+
+alter table public.leaderboard_config enable row level security;
+
+drop trigger if exists set_leaderboard_config_updated_at on public.leaderboard_config;
+create trigger set_leaderboard_config_updated_at
+  before update on public.leaderboard_config
+  for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- agent_contact_requests — legacy lead capture from the public "Find agents"

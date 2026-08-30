@@ -1,9 +1,11 @@
 import SiteHeader from "@/features/homepage/components/SiteHeader";
 import SiteFooter from "@/features/homepage/components/SiteFooter";
+import ReferralCapture from "@/features/viewings/components/ReferralCapture";
 
 export default function PublicLayout({ children }) {
 	return (
 		<div className="font-body">
+			<ReferralCapture />
 			<a
 				href="#main"
 				className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-theme-blue focus:px-4 focus:py-2 focus:font-semibold focus:text-white"

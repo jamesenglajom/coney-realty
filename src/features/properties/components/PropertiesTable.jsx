@@ -2,6 +2,7 @@ import Image from "next/image";
 import { User } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import PropertyRowActions from "./PropertyRowActions";
+import { PROPERTY_STATUS_LABELS } from "../schemas";
 
 const MAX_VISIBLE_AGENTS = 3;
 
@@ -56,6 +57,8 @@ const STATUS_BADGE_CLASSES = {
 	draft: "bg-chart-status-draft/15 text-chart-status-draft dark:bg-chart-status-draft-dark/20 dark:text-chart-status-draft-dark",
 	published:
 		"bg-chart-status-published/15 text-chart-status-published dark:bg-chart-status-published-dark/20 dark:text-chart-status-published-dark",
+	on_hold:
+		"bg-chart-status-onhold/15 text-chart-status-onhold dark:bg-chart-status-onhold-dark/20 dark:text-chart-status-onhold-dark",
 	sold: "bg-chart-status-sold/20 text-chart-status-sold dark:bg-chart-status-sold-dark/20 dark:text-chart-status-sold-dark",
 	archived:
 		"bg-chart-status-archived/15 text-chart-status-archived dark:bg-chart-status-archived-dark/20 dark:text-chart-status-archived-dark",
@@ -133,7 +136,9 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 							</td>
 							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{property.property_type}</td>
 							<td className="p-4">
-								<Badge className={`capitalize ${STATUS_BADGE_CLASSES[property.status]}`}>{property.status}</Badge>
+								<Badge className={`capitalize ${STATUS_BADGE_CLASSES[property.status]}`}>
+									{PROPERTY_STATUS_LABELS[property.status] ?? property.status}
+								</Badge>
 							</td>
 							<td className="p-4 text-sm capitalize text-txt-secondary dark:text-txt-secondary-dark">
 								{property.payment_type || "—"}

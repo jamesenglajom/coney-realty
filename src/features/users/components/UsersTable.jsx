@@ -3,6 +3,7 @@ import { Pencil } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import DeleteUserButton from "./DeleteUserButton";
 import ResetPasswordButton from "./ResetPasswordButton";
+import CopyUserIdButton from "./CopyUserIdButton";
 
 const ROLE_BADGE_CLASSES = {
 	SAdmin: "bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue",
@@ -11,7 +12,7 @@ const ROLE_BADGE_CLASSES = {
 	Agent: "bg-theme-gray/10 text-txt-muted dark:text-txt-muted-dark",
 };
 
-export default function UsersTable({ users, canEdit, canDelete }) {
+export default function UsersTable({ users, canEdit, canDelete, showUserId = false }) {
 	const hasActionsColumn = canEdit || canDelete;
 
 	if (users.length === 0) {
@@ -25,7 +26,7 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 	return (
 		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
 			<div className="overflow-x-auto">
-			<table className="w-full min-w-[560px] text-left border-collapse">
+			<table className="w-full min-w-180 text-left border-collapse">
 				<thead>
 					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
@@ -37,6 +38,11 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Role
 						</th>
+						{showUserId ? (
+							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+								User ID
+							</th>
+						) : null}
 						{hasActionsColumn ? (
 							<th className="p-4 text-right text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								Actions
@@ -54,6 +60,14 @@ export default function UsersTable({ users, canEdit, canDelete }) {
 							<td className="p-4">
 								<Badge className={ROLE_BADGE_CLASSES[user.role]}>{user.role}</Badge>
 							</td>
+							{showUserId ? (
+								<td className="p-4">
+									<div className="flex items-center gap-1.5">
+										<span className="truncate font-mono text-xs text-txt-muted dark:text-txt-muted-dark">{user.id}</span>
+										<CopyUserIdButton userId={user.id} />
+									</div>
+								</td>
+							) : null}
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">
 									{user.role === "SAdmin" ? (

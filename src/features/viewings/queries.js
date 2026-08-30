@@ -32,11 +32,14 @@ export async function listPropertyOptionsForViewingForm() {
 }
 
 const VIEWING_REQUEST_COLUMNS =
-	"id, visitor_name, visitor_email, visitor_phone, preferred_date, preferred_time, message, status, created_at, viewing_request_properties(properties(id, slug, screen_name, title, user_property(users(id, full_name, email))))";
+	"id, visitor_name, visitor_email, visitor_phone, preferred_date, preferred_time, message, status, created_at, referring_agent:users(id, full_name, email), viewing_request_properties(properties(id, slug, screen_name, title, user_property(users(id, full_name, email))))";
 
 function mapViewingRequestRow(request) {
 	return {
 		...request,
+		referringAgent: request.referring_agent
+			? { id: request.referring_agent.id, name: request.referring_agent.full_name || request.referring_agent.email }
+			: null,
 		properties: (request.viewing_request_properties ?? [])
 			.map((row) => row.properties)
 			.filter(Boolean)
@@ -64,35 +67,17 @@ export async function listViewingRequests() {
 	return (data ?? []).map(mapViewingRequestRow);
 }
 
-// Scoped to whatever properties this agent is assigned to (via user_property)
-// — powers the "Viewing requests" section on an Agent's own dashboard, so
-// they see (and can act on) requests naming their listings without needing
-// the admin-wide "viewings" page permission.
+// Scoped to whichever requests this agent was actually referred (via
+// referring_agent_id — see src/features/viewings/referral.js), not whatever
+// properties they happen to be assigned to. Powers the "Viewing requests"
+// section on an Agent's own dashboard, so they see (and can act on) leads
+// they're credited for without needing the admin-wide "viewings" permission.
 export async function listViewingRequestsForAgent(agentId) {
 	const supabase = createAdminClient();
-
-	const { data: assigned, error: assignedError } = await supabase
-		.from("user_property")
-		.select("property_id")
-		.eq("user_id", agentId);
-	if (assignedError) throw new Error(assignedError.message);
-
-	const propertyIds = (assigned ?? []).map((row) => row.property_id);
-	if (propertyIds.length === 0) return [];
-
-	const { data: joins, error: joinsError } = await supabase
-		.from("viewing_request_properties")
-		.select("viewing_request_id")
-		.in("property_id", propertyIds);
-	if (joinsError) throw new Error(joinsError.message);
-
-	const requestIds = [...new Set((joins ?? []).map((row) => row.viewing_request_id))];
-	if (requestIds.length === 0) return [];
-
 	const { data, error } = await supabase
 		.from("viewing_requests")
 		.select(VIEWING_REQUEST_COLUMNS)
-		.in("id", requestIds)
+		.eq("referring_agent_id", agentId)
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
 

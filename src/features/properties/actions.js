@@ -273,6 +273,41 @@ export async function unmarkPropertySoldAction(id) {
 	return { success: true };
 }
 
+// One-click "Set on hold" — unlike sold, this stays fully visible/bookable
+// on the public site (PLP/PDP), just flagged. No date to capture, so no
+// modal, same as the sold toggle's "undo" side.
+export async function markPropertyOnHoldAction(id) {
+	await requirePermission("properties", "edit");
+
+	const supabase = createAdminClient();
+	const { error } = await supabase.from("properties").update({ status: "on_hold" }).eq("id", id).is("deleted_at", null);
+
+	if (error) return { error: error.message };
+
+	revalidatePath("/admin/properties");
+	revalidateTag(PUBLIC_PROPERTIES_TAG);
+	return { success: true };
+}
+
+// Undo for "Set on hold" — reverts to published. Only acts if the property
+// is currently on hold, same guard as unmarkPropertySoldAction.
+export async function unmarkPropertyOnHoldAction(id) {
+	await requirePermission("properties", "edit");
+
+	const supabase = createAdminClient();
+	const { error } = await supabase
+		.from("properties")
+		.update({ status: "published" })
+		.eq("id", id)
+		.eq("status", "on_hold");
+
+	if (error) return { error: error.message };
+
+	revalidatePath("/admin/properties");
+	revalidateTag(PUBLIC_PROPERTIES_TAG);
+	return { success: true };
+}
+
 export async function softDeletePropertyAction(id) {
 	await requirePermission("properties", "delete");
 

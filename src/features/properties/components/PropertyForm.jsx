@@ -11,6 +11,7 @@ import {
 	updatePropertySchema,
 	PROPERTY_TYPES,
 	PROPERTY_STATUSES,
+	PROPERTY_STATUS_LABELS,
 	PAYMENT_TYPES,
 } from "../schemas";
 import { createPropertyAction, updatePropertyAction, reverseGeocodeAction } from "../actions";
@@ -246,7 +247,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					<Select id="status" {...register("status")}>
 						{PROPERTY_STATUSES.map((status) => (
 							<option key={status} value={status} className="capitalize">
-								{status}
+								{PROPERTY_STATUS_LABELS[status] ?? status}
 							</option>
 						))}
 					</Select>

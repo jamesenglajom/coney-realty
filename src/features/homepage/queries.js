@@ -21,7 +21,7 @@ async function _listPublishedCityStates() {
 	const { data, error } = await supabase
 		.from("properties")
 		.select("city_state")
-		.eq("status", "published")
+		.in("status", ["published", "on_hold"])
 		.is("deleted_at", null)
 		.not("city_state", "is", null);
 
@@ -87,71 +87,18 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 	};
 });
 
-// "Top agents" for the homepage leaderboard, ranked by real closed-listing
-// volume/count instead of the old hardcoded rating — there's no reviews
-// table yet, so rating isn't a thing we can compute honestly.
-async function _listTopAgents(limit = 8) {
-	const supabase = createAdminClient();
-
-	const { data, error } = await supabase
-		.from("user_property")
-		.select(
-			"user_id, users(id, email, full_name, user_info(phone, bio, avatar_url)), properties(price, city_state, status, deleted_at)",
-		);
-
-	if (error) throw new Error(error.message);
-
-	const byAgent = new Map();
-	for (const row of data ?? []) {
-		const property = row.properties;
-		if (!property || property.status !== "published" || property.deleted_at) continue;
-
-		const user = row.users;
-		if (!user) continue;
-
-		const price = Number(property.price) || 0;
-		const existing = byAgent.get(user.id);
-		if (existing) {
-			existing.deals += 1;
-			existing.volume += price;
-			if (property.city_state) existing.regions.add(property.city_state);
-		} else {
-			byAgent.set(user.id, {
-				id: user.id,
-				name: user.full_name || user.email,
-				phone: user.user_info?.phone ?? null,
-				bio: user.user_info?.bio ?? null,
-				avatarUrl: user.user_info?.avatar_url ?? null,
-				deals: 1,
-				volume: price,
-				regions: new Set(property.city_state ? [property.city_state] : []),
-			});
-		}
-	}
-
-	return Array.from(byAgent.values())
-		.map((agent) => ({ ...agent, regions: Array.from(agent.regions) }))
-		.sort((a, b) => b.volume - a.volume || b.deals - a.deals)
-		.slice(0, limit);
-}
-
-export const listTopAgents = unstable_cache(_listTopAgents, ["list-top-agents"], {
-	revalidate: ONE_DAY_SECONDS,
-	tags: [PUBLIC_PROPERTIES_TAG],
-});
-
 // Featured listings for the homepage, with whichever agent (if any) is
-// assigned first. Uses the admin client to cross into user_property/users,
-// same trust boundary reasoning as listTopAgents above.
+// assigned first. Uses the admin client to cross into user_property/users
+// for the same trust-boundary reasons as the other homepage queries here.
 async function _listFeaturedProperties(limit = 6) {
 	const supabase = createAdminClient();
 
 	const { data, error } = await supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, price, city_state, custom_fields, user_property(users(id, full_name))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, user_property(users(id, full_name))",
 		)
-		.eq("status", "published")
+		.in("status", ["published", "on_hold"])
 		.is("deleted_at", null)
 		.order("price", { ascending: false })
 		.limit(limit);
@@ -167,6 +114,7 @@ async function _listFeaturedProperties(limit = 6) {
 			city: property.city_state,
 			price: property.price,
 			type: property.property_type,
+			isOnHold: property.status === "on_hold",
 			beds: property.custom_fields?.beds ?? null,
 			baths: property.custom_fields?.baths ?? null,
 			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
@@ -191,10 +139,10 @@ async function _listPublicProperties({ city, propertyType, price, page = 1 } = {
 	let query = supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, price, city_state, custom_fields, user_property(users(id, full_name))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, user_property(users(id, full_name))",
 			{ count: "exact" },
 		)
-		.eq("status", "published")
+		.in("status", ["published", "on_hold"])
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
 
@@ -224,6 +172,7 @@ async function _listPublicProperties({ city, propertyType, price, page = 1 } = {
 			city: property.city_state,
 			price: property.price,
 			type: property.property_type,
+			isOnHold: property.status === "on_hold",
 			beds: property.custom_fields?.beds ?? null,
 			baths: property.custom_fields?.baths ?? null,
 			carpark: property.custom_fields?.carpark ?? null,
@@ -254,10 +203,10 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 	const { data: property, error } = await supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, html_body, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, html_body, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
 		)
 		.eq("slug", slug)
-		.eq("status", "published")
+		.in("status", ["published", "on_hold"])
 		.is("deleted_at", null)
 		.maybeSingle();
 
@@ -285,6 +234,7 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 	return {
 		...rest,
 		name: rest.screen_name || rest.title,
+		isOnHold: rest.status === "on_hold",
 		location: rest.city_state || [rest.city, rest.region, rest.district].filter(Boolean).join(", ") || null,
 		beds: customFields.beds ?? null,
 		baths: customFields.baths ?? null,
@@ -300,37 +250,6 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 		cashPrice: customFields.cash_price ?? null,
 		agents,
 	};
-});
-
-// Real counts for the homepage stats band — replaces the old hardcoded
-// marketing numbers (which included a "client rating" with no reviews
-// system behind it at all) with what the properties/users tables actually
-// contain.
-async function _getPublicPropertyStats() {
-	const supabase = createAdminClient();
-
-	const [{ data: properties, error: propertiesError }, { count: agentCount, error: agentError }] = await Promise.all([
-		supabase.from("properties").select("price, district").eq("status", "published").is("deleted_at", null),
-		supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "Agent").is("deleted_at", null),
-	]);
-
-	if (propertiesError) throw new Error(propertiesError.message);
-	if (agentError) throw new Error(agentError.message);
-
-	const totalValue = (properties ?? []).reduce((sum, property) => sum + (Number(property.price) || 0), 0);
-	const districts = new Set((properties ?? []).map((property) => property.district).filter(Boolean));
-
-	return {
-		totalListings: properties?.length ?? 0,
-		totalValue,
-		totalAgents: agentCount ?? 0,
-		districtsCovered: districts.size,
-	};
-}
-
-export const getPublicPropertyStats = unstable_cache(_getPublicPropertyStats, ["public-property-stats"], {
-	revalidate: ONE_DAY_SECONDS,
-	tags: [PUBLIC_PROPERTIES_TAG],
 });
 
 // For the homepage Testimonial section — looks up the quoted agent's current

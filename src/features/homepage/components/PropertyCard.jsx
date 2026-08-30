@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Bed, Bath, Car, Ruler } from "lucide-react";
 import { formatPrice } from "@/features/homepage/data";
 import PropertyCoverImage from "@/features/properties/components/PropertyCoverImage";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
 export default function PropertyCard({ property }) {
@@ -18,6 +19,11 @@ export default function PropertyCard({ property }) {
 				/>
 			</Link>
 			<div className="p-5">
+				{property.isOnHold ? (
+					<Badge tone="warning" className="mb-2">
+						On Hold
+					</Badge>
+				) : null}
 				<p className="text-2xl font-bold leading-tight text-theme-blue dark:text-theme-gold">
 					{formatPrice(property.price)}
 				</p>
@@ -55,36 +61,14 @@ export default function PropertyCard({ property }) {
 						</span>
 					</div>
 				) : null}
-				<div className="mt-5 flex items-center justify-between gap-2 border-t border-theme-gray/15 pt-4 text-xs text-txt-muted dark:border-white/10 dark:text-txt-muted-dark">
-					<span>
-						Listed by{" "}
-						{property.agent ? (
-							<Link
-								href={`/agents/${property.agent.id}`}
-								className="font-semibold text-theme-blue hover:underline dark:text-white"
-							>
-								{property.agent.name}
-							</Link>
-						) : (
-							<strong className="font-semibold text-theme-blue dark:text-white">ConeyRealty Team</strong>
-						)}
-					</span>
-					<Link
-						href={property.agent ? `/agents/${property.agent.id}` : "/#search"}
-						className="text-sm font-semibold text-theme-blue hover:underline dark:text-theme-gold"
-					>
-						Contact for details →
-					</Link>
-				</div>
-
 				<Button
-					href={`/schedule-viewing?property=${property.slug}`}
+					href={`/property/${property.slug}`}
 					variant="ghost"
 					size="sm"
 					shape="rounded"
-					className="mt-3 w-full"
+					className="mt-5 w-full"
 				>
-					Schedule a viewing
+					View Property
 				</Button>
 			</div>
 		</li>

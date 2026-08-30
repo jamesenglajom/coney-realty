@@ -15,6 +15,23 @@ export async function submitViewingRequestAction(values) {
 	}
 
 	const supabase = createAdminClient();
+
+	// The client only ever supplies an id it read back out of its own
+	// localStorage — never trust it outright. Only honor it if it actually
+	// belongs to a real, non-deleted staff account — any role, not just
+	// Agent, since whoever shares the ?agent= link (an Admin/SAdmin
+	// included) should get credited the same way.
+	let referringAgentId = null;
+	if (parsed.data.referringAgentId) {
+		const { data: referrer } = await supabase
+			.from("users")
+			.select("id")
+			.eq("id", parsed.data.referringAgentId)
+			.is("deleted_at", null)
+			.maybeSingle();
+		if (referrer) referringAgentId = referrer.id;
+	}
+
 	const { data: created, error: insertError } = await supabase
 		.from("viewing_requests")
 		.insert({
@@ -24,6 +41,7 @@ export async function submitViewingRequestAction(values) {
 			preferred_date: parsed.data.preferredDate || null,
 			preferred_time: parsed.data.preferredTime || null,
 			message: parsed.data.message || null,
+			referring_agent_id: referringAgentId,
 		})
 		.select("id")
 		.single();
@@ -40,29 +58,6 @@ export async function submitViewingRequestAction(values) {
 	return { success: true };
 }
 
-// True if `agentId` is assigned (via user_property) to at least one of the
-// properties named on this viewing request — the ownership check that lets a
-// listing agent update a request's status without the admin-wide "viewings"
-// page permission.
-async function isAgentAssignedToRequest(supabase, requestId, agentId) {
-	const { data: joins } = await supabase
-		.from("viewing_request_properties")
-		.select("property_id")
-		.eq("viewing_request_id", requestId);
-
-	const propertyIds = (joins ?? []).map((row) => row.property_id);
-	if (propertyIds.length === 0) return false;
-
-	const { data: assigned } = await supabase
-		.from("user_property")
-		.select("property_id")
-		.eq("user_id", agentId)
-		.in("property_id", propertyIds)
-		.limit(1);
-
-	return (assigned ?? []).length > 0;
-}
-
 export async function updateViewingRequestStatusAction(id, status) {
 	const user = await requireUser();
 
@@ -75,10 +70,18 @@ export async function updateViewingRequestStatusAction(id, status) {
 
 	if (user.role !== "SAdmin") {
 		const permissions = await getPagePermissions(user.role, "viewings");
-		const isOwningAgent =
-			user.role === "Agent" && (await isAgentAssignedToRequest(supabase, parsed.data.id, user.id));
+		let isReferringAgent = false;
 
-		if (!permissions.can_edit && !isOwningAgent) {
+		if (user.role === "Agent") {
+			const { data: request } = await supabase
+				.from("viewing_requests")
+				.select("referring_agent_id")
+				.eq("id", parsed.data.id)
+				.maybeSingle();
+			isReferringAgent = request?.referring_agent_id === user.id;
+		}
+
+		if (!permissions.can_edit && !isReferringAgent) {
 			return { error: "You don't have permission to update this request." };
 		}
 	}

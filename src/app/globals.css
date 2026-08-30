@@ -64,6 +64,12 @@
   --color-chart-status-draft-dark: #9ca3af;
   --color-chart-status-published: #0ca30c;
   --color-chart-status-published-dark: #0ca30c;
+  /* Same values as --color-warning/-dark — on_hold is a "caution" state,
+     same semantics as the generic warning tone, just kept in this
+     purpose-built set so it prints consistently on both the table badge
+     and the dashboard's "Properties by status" chart. */
+  --color-chart-status-onhold: #b45309;
+  --color-chart-status-onhold-dark: #fbbf24;
   --color-chart-status-sold: #b6aa84;
   --color-chart-status-sold-dark: #b6aa84;
   --color-chart-status-archived: #d03b3b;
@@ -106,7 +112,18 @@
 	}
 }
 
+/* Belt-and-suspenders against horizontal scroll on narrow viewports: a
+   decorative absolutely-positioned element (glow blobs, etc.) or a stray
+   wide child anywhere in the tree can otherwise push the whole page wider
+   than the viewport. This clips at the document level without touching any
+   element's own vertical scrolling or the intentional overflow-x-auto
+   wrappers (tables, thumbnail strips) that must keep scrolling internally. */
+html {
+	overflow-x: hidden;
+}
+
 body {
+	overflow-x: hidden;
 	background: var(--background);
 	color: var(--foreground);
 	font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;

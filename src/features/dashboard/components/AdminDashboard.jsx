@@ -1,10 +1,11 @@
-import { PROPERTY_TYPES, PROPERTY_STATUSES } from "@/features/properties/schemas";
+import { PROPERTY_TYPES, PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
 import { USER_ROLES } from "@/features/users/schemas";
 import { getAdminDashboardStats, getTopAgentsByListings } from "../queries";
 import BarChart from "./BarChart";
 import TrendChart from "./TrendChart";
 import KpiTile from "./KpiTile";
 import ChartPanel from "./ChartPanel";
+import MyReferredViewingRequests from "@/features/viewings/components/MyReferredViewingRequests";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
@@ -17,6 +18,7 @@ const priceFormatter = new Intl.NumberFormat("en-PH", {
 const STATUS_COLOR_CLASSES = {
 	draft: "bg-chart-status-draft dark:bg-chart-status-draft-dark",
 	published: "bg-chart-status-published dark:bg-chart-status-published-dark",
+	on_hold: "bg-chart-status-onhold dark:bg-chart-status-onhold-dark",
 	sold: "bg-chart-status-sold dark:bg-chart-status-sold-dark",
 	archived: "bg-chart-status-archived dark:bg-chart-status-archived-dark",
 };
@@ -29,11 +31,11 @@ const CATEGORICAL_COLOR_CLASSES = [
 	"bg-chart-5 dark:bg-chart-5-dark",
 ];
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({ userId }) {
 	const [stats, topAgents] = await Promise.all([getAdminDashboardStats(), getTopAgentsByListings(5)]);
 
 	const statusData = PROPERTY_STATUSES.map((status) => ({
-		label: status,
+		label: PROPERTY_STATUS_LABELS[status] ?? status,
 		value: stats.byStatus[status] ?? 0,
 		colorClassName: STATUS_COLOR_CLASSES[status],
 	}));
@@ -95,6 +97,8 @@ export default async function AdminDashboard() {
 					</ChartPanel>
 				</div>
 			) : null}
+
+			<MyReferredViewingRequests userId={userId} />
 		</div>
 	);
 }
