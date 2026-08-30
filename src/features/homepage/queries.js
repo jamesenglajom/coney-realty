@@ -251,21 +251,3 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 		agents,
 	};
 });
-
-// For the homepage Testimonial section — looks up the quoted agent's current
-// name/avatar live, so if they add a real photo later (Settings > Profile)
-// it shows up automatically; the quote copy itself stays authored content.
-export async function getAgentByEmail(email) {
-	const supabase = createAdminClient();
-	const { data, error } = await supabase
-		.from("users")
-		.select("full_name, user_info(avatar_url)")
-		.ilike("email", email)
-		.is("deleted_at", null)
-		.maybeSingle();
-
-	if (error) throw new Error(error.message);
-	if (!data) return null;
-
-	return { name: data.full_name, avatarUrl: data.user_info?.avatar_url ?? null };
-}

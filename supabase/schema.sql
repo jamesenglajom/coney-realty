@@ -129,6 +129,7 @@ values
   ('SAdmin', 'settings', true, true, true, true),
   ('SAdmin', 'viewings', true, true, true, true),
   ('SAdmin', 'leaderboard', true, true, true, true),
+  ('SAdmin', 'testimonials', true, true, true, true),
   ('SAdmin', 'propertyTypes', true, true, true, true),
   ('Admin', 'dashboard', true, true, true, true),
   ('Admin', 'users', true, true, true, false),
@@ -137,6 +138,7 @@ values
   ('Admin', 'settings', true, false, false, false),
   ('Admin', 'viewings', true, false, true, false),
   ('Admin', 'leaderboard', true, true, true, true),
+  ('Admin', 'testimonials', true, true, true, true),
   ('Admin', 'propertyTypes', true, true, true, true),
   ('Manager', 'dashboard', true, false, false, false),
   ('Manager', 'users', false, false, false, false),
@@ -145,6 +147,7 @@ values
   ('Manager', 'settings', false, false, false, false),
   ('Manager', 'viewings', false, false, false, false),
   ('Manager', 'leaderboard', false, false, false, false),
+  ('Manager', 'testimonials', false, false, false, false),
   ('Manager', 'propertyTypes', true, true, true, false),
   ('Agent', 'dashboard', true, false, false, false),
   ('Agent', 'users', false, false, false, false),
@@ -153,6 +156,7 @@ values
   ('Agent', 'settings', false, false, false, false),
   ('Agent', 'viewings', false, false, false, false),
   ('Agent', 'leaderboard', false, false, false, false),
+  ('Agent', 'testimonials', false, false, false, false),
   ('Agent', 'propertyTypes', false, false, false, false)
 on conflict (role, page) do nothing;
 
@@ -548,6 +552,41 @@ alter table public.leaderboard_config enable row level security;
 drop trigger if exists set_leaderboard_config_updated_at on public.leaderboard_config;
 create trigger set_leaderboard_config_updated_at
   before update on public.leaderboard_config
+  for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- testimonials — hand-curated client quotes for the homepage carousel.
+-- agent_id (optional) links to a real agent account for photo-library
+-- lookup (public/agents/<user_id>_<shot>.webp — see
+-- src/features/users/imageFs.js); agent_display_name/agent_tagline are
+-- always free text (same reasoning as leaderboard_entries.name), and
+-- photo_url is an explicit override that wins over the photo library.
+-- ---------------------------------------------------------------------------
+create table if not exists public.testimonials (
+  id uuid primary key default gen_random_uuid(),
+  quote text not null,
+  client_name text not null,
+  agent_display_name text not null,
+  agent_tagline text,
+  photo_url text,
+  agent_id uuid references public.users (id) on delete set null,
+  display_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists testimonials_order_idx
+  on public.testimonials (display_order) where deleted_at is null;
+
+alter table public.testimonials enable row level security;
+-- Deny-by-default: the homepage reads this through the admin client in a
+-- server-only query, writes go through Server Actions gated to the
+-- "testimonials" page permission.
+
+drop trigger if exists set_testimonials_updated_at on public.testimonials;
+create trigger set_testimonials_updated_at
+  before update on public.testimonials
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------

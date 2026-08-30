@@ -29,14 +29,6 @@ export const FEATURED_PROPERTIES = [
 	{ name: "Research Triangle Flat", city: "Raleigh, NC", priceLabel: "From $360k", beds: 2, baths: 1, type: "Apartment", agentId: "a4", image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=70" },
 ];
 
-export const TESTIMONIAL = {
-	quote:
-		"We don't hand buyers a wall of listings and disappear. Every client gets a real agent who already knows the property — the zoning, the title history, the neighborhood — before the first viewing. That's the whole idea behind ConeyRealty.",
-	name: "Coney Marie Lajom",
-	role: "Principal Agent, ConeyRealty",
-	email: "coneylajom@dvorealty.com",
-};
-
 // Real agents (from Supabase) and real blog posts don't have photo/cover
 // columns in the schema yet, so these pools give the public site a populated
 // look for presentation purposes — picked deterministically per record so

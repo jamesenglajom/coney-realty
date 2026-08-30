@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CalendarCheck,
   Trophy,
+  Quote,
   ListChecks,
 } from "lucide-react";
 
@@ -60,6 +61,12 @@ export const navigationGroups = [
         icon: Trophy,
         href: `${BASE_URL}/admin/leaderboard`,
         pageKey: "leaderboard",
+      },
+      {
+        name: "Testimonials",
+        icon: Quote,
+        href: `${BASE_URL}/admin/testimonials`,
+        pageKey: "testimonials",
       },
       {
         name: "Property Types",
