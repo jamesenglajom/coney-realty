@@ -5,8 +5,8 @@ export const USER_ROLES = ["SAdmin", "Admin", "Manager", "Agent"];
 
 // Rejects the URL at save time if it's from a host next/image isn't
 // configured to fetch (next.config.ts) — otherwise it saves fine here and
-// throws wherever it's later rendered (agent cards, leaderboard, property
-// tables, the public agent profile page, ...).
+// throws wherever it's later rendered (agent cards, property tables, the
+// public agent profile page, ...).
 const avatarUrlField = z
 	.string()
 	.trim()

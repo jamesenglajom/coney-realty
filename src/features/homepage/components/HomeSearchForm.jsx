@@ -11,9 +11,8 @@ const FIELD_CLASSES =
 const LABEL_CLASSES = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70";
 
 // Field names (city/propertyType/price) match /properties' filter vocabulary
-// directly, since submitting this just redirects there with those params —
-// no results render on the homepage itself anymore.
-export default function FindAgentsForm({ cityStates, defaultLocation, defaultType, defaultPrice }) {
+// directly, since submitting this just redirects there with those params.
+export default function HomeSearchForm({ cityStates, defaultLocation, defaultType, defaultPrice }) {
 	const router = useRouter();
 	const formRef = useRef(null);
 

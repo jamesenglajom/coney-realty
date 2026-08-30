@@ -13,18 +13,22 @@ export default function CTASection() {
 					Ready when you are
 				</Eyebrow>
 				<h2 className="relative mx-auto mt-4 max-w-xl font-display text-[clamp(32px,5vw,52px)] font-semibold">
-					Make your next move with someone who actually picks up
+					Browse the listings, then book the viewing
 				</h2>
 				<p className="relative mx-auto mt-4 max-w-lg text-white/80">
-					One quick search and you&apos;re talking to a real agent — not a chatbot, not a form that disappears into
-					a queue.
+					Filter by location, budget, and property type to see real listings — then request a viewing and our team
+					lines up the rest.
 				</p>
 				<div className="relative mt-8 flex flex-wrap justify-center gap-3">
-					<Button href="/#search" variant="brass">
-						Find my agent
+					<Button href="/properties" variant="brass">
+						Browse properties
 					</Button>
-					<Button href="/#leaderboard" variant="ghost" className="border-white/30 text-white hover:border-white/50">
-						Meet the team
+					<Button
+						href="/schedule-viewing"
+						variant="ghost"
+						className="border-white/30 text-white hover:border-white/50"
+					>
+						Schedule a viewing
 					</Button>
 				</div>
 			</div>

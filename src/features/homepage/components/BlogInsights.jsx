@@ -11,7 +11,7 @@ export default async function BlogInsights() {
 	return (
 		<section id="insight" className="py-20 sm:py-28">
 			<div className="mx-auto max-w-6xl px-5 sm:px-8">
-				<SectionHeading eyebrow="From the desk" title="Market insight, written by people who close deals" />
+				<SectionHeading eyebrow="From the desk" title="The Real Estate Playbook: Buying & Selling Made Simple" />
 				<Button href="/blog" variant="ghost" className="mt-6">
 					All articles
 				</Button>

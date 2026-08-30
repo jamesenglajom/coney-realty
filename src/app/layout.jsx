@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono, Montserrat, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,17 +39,22 @@ export const metadata = {
 		template: "%s | ConeyRealty",
 	},
 	description:
-		"Search homes by location, budget, and type and get matched with vetted local real estate agents you can call or email today.",
+		"Search homes by location, budget, and type, see the agent behind each listing, and book a viewing online.",
 };
-
-const noFlashThemeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<link rel="icon" href="/logo/conyrealty-logo.jpg" type="image/jpeg" />
-				<script dangerouslySetInnerHTML={{ __html: noFlashThemeScript }} />
+				{/* Dark-mode no-flash script, as an external file (public/no-flash-theme.js)
+				    rather than inline dangerouslySetInnerHTML content — React 19 only
+				    exempts src-based scripts from its "script tag rendered as a
+				    component" warning; an inline one triggers it even under Next's
+				    beforeInteractive strategy. beforeInteractive (root layout only)
+				    still guarantees this runs before hydration/paint, so there's no
+				    dark-mode flash either way. */}
+				<Script src="/no-flash-theme.js" strategy="beforeInteractive" />
 			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} antialiased`}

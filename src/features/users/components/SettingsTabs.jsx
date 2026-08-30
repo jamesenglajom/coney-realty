@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 
-export default function SettingsTabs({ profileSlot, changePasswordSlot, changeEmailSlot, permissionsSlot, systemSlot }) {
+export default function SettingsTabs({
+	profileSlot,
+	changePasswordSlot,
+	changeEmailSlot,
+	permissionsSlot,
+	siteSlot,
+	systemSlot,
+}) {
 	const tabs = [
 		{ key: "profile", label: "Profile" },
 		{ key: "email", label: "Change email" },
 		{ key: "password", label: "Change password" },
 		...(permissionsSlot ? [{ key: "permissions", label: "Permissions" }] : []),
+		...(siteSlot ? [{ key: "site", label: "Site" }] : []),
 		...(systemSlot ? [{ key: "system", label: "System" }] : []),
 	];
 	const [activeTab, setActiveTab] = useState(tabs[0].key);
@@ -35,6 +43,7 @@ export default function SettingsTabs({ profileSlot, changePasswordSlot, changeEm
 			{activeTab === "email" ? changeEmailSlot : null}
 			{activeTab === "password" ? changePasswordSlot : null}
 			{activeTab === "permissions" ? permissionsSlot : null}
+			{activeTab === "site" ? siteSlot : null}
 			{activeTab === "system" ? systemSlot : null}
 		</div>
 	);

@@ -1,9 +1,10 @@
 import { requireUser } from "@/features/auth/permissions";
 import { listPermissions } from "@/features/permissions/queries";
 import { getUserById } from "@/features/users/queries";
-import { getLastKeepAlivePing } from "@/features/system/queries";
+import { getLastKeepAlivePing, getSiteSettings } from "@/features/system/queries";
 import PermissionsMatrix from "@/features/permissions/components/PermissionsMatrix";
 import KeepAlivePingCard from "@/features/system/components/KeepAlivePingCard";
+import SiteSettingsForm from "@/features/system/components/SiteSettingsForm";
 import SettingsTabs from "@/features/users/components/SettingsTabs";
 import ProfileForm from "@/features/users/components/ProfileForm";
 import ChangePasswordForm from "@/features/users/components/ChangePasswordForm";
@@ -22,8 +23,10 @@ export default async function SettingsPage() {
 	const currentUser = await requireUser();
 	const user = await getUserById(currentUser.id);
 	const isSAdmin = currentUser.role === "SAdmin";
+	const canEditSite = ["SAdmin", "Admin"].includes(currentUser.role);
 	const permissions = isSAdmin ? await listPermissions() : [];
 	const lastKeepAlivePing = isSAdmin ? await getLastKeepAlivePing() : null;
+	const siteSettings = canEditSite ? await getSiteSettings() : null;
 
 	return (
 		<div>
@@ -34,6 +37,7 @@ export default async function SettingsPage() {
 				changeEmailSlot={<ChangeEmailForm currentEmail={user.email} />}
 				changePasswordSlot={<ChangePasswordForm />}
 				permissionsSlot={isSAdmin ? <PermissionsMatrix initialPermissions={permissions} /> : null}
+				siteSlot={canEditSite ? <SiteSettingsForm settings={siteSettings} /> : null}
 				systemSlot={isSAdmin ? <KeepAlivePingCard lastTriggeredAt={lastKeepAlivePing} /> : null}
 			/>
 		</div>

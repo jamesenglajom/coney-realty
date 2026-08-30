@@ -6,9 +6,9 @@ import Button from "@/components/ui/Button";
 
 const NAV_LINKS = [
 	{ href: "/properties", label: "Properties" },
-	{ href: "/#search", label: "Find an agent" },
+	{ href: "/#search", label: "Find My Home" },
 	{ href: "/#featured", label: "Featured homes" },
-	{ href: "/#leaderboard", label: "Top agents" },
+	{ href: "/#leaderboard", label: "Top producers" },
 	{ href: "/#insight", label: "Insight" },
 ];
 

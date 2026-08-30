@@ -2,7 +2,7 @@ import Image from "next/image";
 import { HERO_IMAGE } from "@/features/homepage/data";
 import { listPublishedCityStates } from "@/features/homepage/queries";
 import Eyebrow from "./ui/Eyebrow";
-import FindAgentsForm from "./FindAgentsForm";
+import HomeSearchForm from "./HomeSearchForm";
 
 export default async function HeroSearch() {
 	const cityStates = await listPublishedCityStates();
@@ -23,22 +23,20 @@ export default async function HeroSearch() {
 
 			<div className="mx-auto flex min-h-[92svh] max-w-6xl flex-col justify-end gap-10 px-5 pb-16 pt-28 sm:px-8">
 				<div className="max-w-2xl text-white">
-					<Eyebrow tone="on-dark">People, not portals</Eyebrow>
+					<Eyebrow tone="on-dark">Your trusted real estate partners</Eyebrow>
 					<h1 className="mt-4 font-display text-[clamp(40px,8vw,76px)] font-semibold leading-[1.02]">
-						See the homes,
-						<br />
-						meet the agent who knows them.
+						Finding your home is easier with people you can trust.
 					</h1>
 					<p className="mt-5 max-w-lg text-lg text-white/85">
-						Tell us where you want to live, your budget, and the kind of home. We&apos;ll show you matching listings
-						— each one with a real local agent you can call or email today, not a call center.
+						Tell us your preferred location and budget, and we&apos;ll match you with verified properties and
+						dedicated agents who will guide you every step of the way.
 					</p>
 				</div>
 
 				<div id="search">
-					<FindAgentsForm cityStates={cityStates} defaultLocation="" defaultType="" defaultPrice="0" />
+					<HomeSearchForm cityStates={cityStates} defaultLocation="" defaultType="" defaultPrice="0" />
 					<p className="mt-3 text-xs text-white/70">
-						Every result links to a real listing and the agent behind it — no forms, no wait.
+						Every result links to a real listing — book a viewing in a couple of clicks.
 					</p>
 				</div>
 			</div>

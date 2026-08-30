@@ -1,12 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getSiteSettings } from "@/features/system/queries";
 
 const EXPLORE_LINKS = [
-	{ href: "/#search", label: "Find an agent" },
+	{ href: "/#search", label: "Search homes" },
 	{ href: "/#featured", label: "Featured homes" },
-	{ href: "/#leaderboard", label: "Top agents" },
+	{ href: "/#leaderboard", label: "Top producers" },
 	{ href: "/#insight", label: "Insight" },
 ];
+
+const FALLBACK_ADDRESS = "123 Cedar Row, Austin, TX 78701";
+const FALLBACK_CONTACT_NUMBER = "+1 (512) 555-0100";
 const COMPANY_LINKS = [
 	{ href: "#", label: "About" },
 	{ href: "#", label: "Careers" },
@@ -42,7 +46,12 @@ function FooterColumn({ title, links }) {
 	);
 }
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+	const site = await getSiteSettings();
+	const address = site.address || FALLBACK_ADDRESS;
+	const contactNumber = site.contactNumber || FALLBACK_CONTACT_NUMBER;
+	const telHref = `tel:${contactNumber.replace(/[^\d+]/g, "")}`;
+
 	return (
 		<footer className="border-t border-theme-gray/15 dark:border-white/10">
 			<div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -64,12 +73,23 @@ export default function SiteFooter() {
 						A real estate platform built around people. Search homes, meet the agent, skip the scrape-able
 						listing feeds.
 					</p>
-					<address className="mt-4 text-sm not-italic text-txt-muted dark:text-txt-muted-dark">
-						123 Cedar Row, Austin, TX 78701
+					<address className="mt-4 whitespace-pre-line text-sm not-italic text-txt-muted dark:text-txt-muted-dark">
+						{address}
 						<br />
-						<a href="tel:+15125550100" className="hover:text-theme-blue dark:hover:text-white">
-							+1 (512) 555-0100
+						<a href={telHref} className="hover:text-theme-blue dark:hover:text-white">
+							{contactNumber}
 						</a>
+						{site.contactEmail ? (
+							<>
+								<br />
+								<a
+									href={`mailto:${site.contactEmail}`}
+									className="hover:text-theme-blue dark:hover:text-white"
+								>
+									{site.contactEmail}
+								</a>
+							</>
+						) : null}
 					</address>
 				</div>
 				<FooterColumn title="Explore" links={EXPLORE_LINKS} />

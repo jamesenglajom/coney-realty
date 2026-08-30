@@ -1,5 +1,4 @@
-export const HERO_IMAGE =
-	"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=60";
+export const HERO_IMAGE = "/images/hero-team.webp";
 
 export const PRICE_BANDS = [
 	{ label: "Any price", min: 0, max: Infinity },
@@ -106,10 +105,6 @@ const agentById = Object.fromEntries(AGENTS.map((agent) => [agent.id, agent]));
 
 export function getAgentById(id) {
 	return agentById[id];
-}
-
-export function getLeaderboard(limit = 8) {
-	return [...AGENTS].sort((a, b) => b.rating - a.rating || b.deals - a.deals).slice(0, limit);
 }
 
 export function formatPostDate(iso) {
