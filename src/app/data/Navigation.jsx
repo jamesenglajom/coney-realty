@@ -10,6 +10,7 @@ import {
   Bell,
   ChevronRight,
   CalendarCheck,
+  Trophy,
   ListChecks,
 } from "lucide-react";
 
@@ -53,6 +54,12 @@ export const navigationGroups = [
         icon: CalendarCheck,
         href: `${BASE_URL}/admin/site-viewings`,
         pageKey: "viewings",
+      },
+      {
+        name: "Leaderboard",
+        icon: Trophy,
+        href: `${BASE_URL}/admin/leaderboard`,
+        pageKey: "leaderboard",
       },
       {
         name: "Property Types",

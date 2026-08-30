@@ -1,98 +1,130 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getAvatarForSeed, formatPrice } from "@/features/homepage/data";
-import { listTopAgents } from "@/features/homepage/queries";
-import SectionHeading from "./ui/SectionHeading";
+import { Ballet, Fjalla_One } from "next/font/google";
+import { Award } from "lucide-react";
+import { getPublicLeaderboard } from "@/features/leaderboard/queries";
+
+// Deliberately scoped to this one section, not added to the site-wide
+// font-display/font-body tokens (Montserrat/Inter — see CLAUDE.md) — this
+// board is a distinct "printed award poster" moment matching the client's
+// reference image, not the rest of the public site's typography. The
+// heading uses Times New Roman (a system font, no loader needed).
+const scriptFont = Ballet({ subsets: ["latin"], weight: "400" });
+const namesFont = Fjalla_One({ subsets: ["latin"], weight: "400" });
+
+// Repeating fractal-noise SVG, tiled as a background — the grain texture
+// from the reference poster, generated in CSS rather than shipping an
+// image asset.
+const NOISE_BACKGROUND =
+	"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+// Abstract sunburst, tones of #e3a965 — sits behind each top-5 photo (the
+// photo is inset with padding so this peeks out as a frame around it),
+// echoing the golden studio-backdrop glow behind each headshot in the
+// reference poster.
+const SUNBURST_BACKGROUND =
+	"repeating-conic-gradient(from 0deg, #f2c78e 0deg 9deg, #e3a965 9deg 18deg, #c98a49 18deg 27deg, #e3a965 27deg 36deg)";
+
+function EntryFigure({ entry, children, className }) {
+	if (entry.agentId) {
+		return (
+			<Link href={`/agents/${entry.agentId}`} className={className}>
+				{children}
+			</Link>
+		);
+	}
+	return <div className={className}>{children}</div>;
+}
 
 export default async function Leaderboard() {
-	const ranked = await listTopAgents(8);
+	const { config, entries } = await getPublicLeaderboard();
 
-	if (ranked.length === 0) return null;
+	if (!config.isPublished || entries.length === 0) return null;
 
-	const [first, second, third, ...rest] = ranked;
-	const podium = [
-		{ agent: second, rank: 2 },
-		{ agent: first, rank: 1 },
-		{ agent: third, rank: 3 },
-	].filter((slot) => slot.agent);
+	const featured = entries.slice(0, 5);
+	const rest = entries.slice(5, 10);
 
 	return (
-		<section id="leaderboard" className="bg-theme-blue text-white">
-			<div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-				<SectionHeading
-					eyebrow="This quarter"
-					title="The agents topping the board"
-					description="Ranked by real closed-listing volume — the people you actually want in your corner."
-					tone="on-dark"
-					className="max-w-xl"
-				/>
+		<section id="leaderboard" className="relative isolate overflow-hidden bg-black text-white">
+			{/* Warm gold glow spanning the heading through the photo row, plus a
+			    faint crest — echoes the printed board's emblem watermark. */}
+			<div
+				className="pointer-events-none absolute left-1/2 top-0 -z-20 h-160 w-225 -translate-x-1/2 -translate-y-1/4 rounded-full bg-theme-gold/25 blur-[130px]"
+				aria-hidden="true"
+			/>
+			<Award
+				className="pointer-events-none absolute left-1/2 top-10 -z-10 h-28 w-28 -translate-x-1/2 text-theme-gold/10 sm:h-36 sm:w-36"
+				aria-hidden="true"
+			/>
+			{/* Grain texture over everything else in the section. */}
+			<div
+				className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18] mix-blend-overlay"
+				style={{ backgroundImage: NOISE_BACKGROUND }}
+				aria-hidden="true"
+			/>
 
-				<div className="mt-14 grid grid-cols-3 items-end gap-3 sm:gap-6">
-					{podium.map(({ agent, rank }) => {
-						const isLead = rank === 1;
-						const size = isLead ? "h-28 w-28 sm:h-36 sm:w-36" : "h-20 w-20 sm:h-24 sm:w-24";
+			<div className="mx-auto max-w-6xl px-5 py-20 text-center sm:px-8 sm:py-28">
+				{config.periodLabel ? (
+					<p className={`${scriptFont.className} text-5xl leading-none text-theme-gold sm:text-6xl`}>
+						{config.periodLabel}
+					</p>
+				) : null}
+				<h2
+					style={{ fontFamily: "'Times New Roman', Times, serif" }}
+					className="mt-3 text-[clamp(34px,6vw,64px)] font-bold uppercase tracking-[0.03em] text-white"
+				>
+					{config.heading}
+				</h2>
 
-						return (
-							<Link key={agent.id} href={`/agents/${agent.id}`} className="flex flex-col items-center text-center">
-								<div className="relative">
-									<div
-										className={`relative overflow-hidden rounded-full ${size} ${isLead ? "ring-4 ring-theme-gold" : "ring-4 ring-white/30"}`}
-									>
-										<Image
-											src={agent.avatarUrl || getAvatarForSeed(agent.id)}
-											alt={agent.name}
-											fill
-											sizes="144px"
-											className="object-cover"
-										/>
-									</div>
-									<span
-										className={`absolute -bottom-2 left-1/2 grid -translate-x-1/2 place-items-center rounded-full font-display font-semibold ${
-											isLead ? "h-9 w-9 bg-theme-gold text-lg text-theme-blue" : "h-7 w-7 bg-white text-sm text-theme-blue"
-										}`}
-									>
-										{rank}
-									</span>
-								</div>
-								<p className={`mt-5 font-semibold hover:underline ${isLead ? "text-lg" : ""}`}>{agent.name}</p>
-								<p className="mt-1 text-xs font-medium text-theme-gold">
-									{formatPrice(agent.volume)} · {agent.deals} deal{agent.deals === 1 ? "" : "s"}
-								</p>
-							</Link>
-						);
-					})}
+				<div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-px overflow-hidden bg-black shadow-[0_0_100px_-20px_rgba(182,170,132,0.55)] ring-1 ring-theme-gold/20 sm:grid-cols-5">
+					{featured.map((entry) => (
+						<EntryFigure key={entry.id} entry={entry} className="group flex flex-col">
+							<span
+								className="relative block aspect-2/3 w-full overflow-hidden p-1.5"
+								style={{ backgroundImage: SUNBURST_BACKGROUND }}
+							>
+								<span className="relative block h-full w-full overflow-hidden">
+									<Image
+										src={entry.photo}
+										alt={entry.name}
+										fill
+										sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 200px"
+										className="object-cover transition-transform duration-500 group-hover:scale-105"
+									/>
+									{/* Warm gold cast up top (matching the poster's color grade),
+									    fading to a dark base so the name bar below reads clean. */}
+									<span className="pointer-events-none absolute inset-0 bg-linear-to-b from-theme-gold/35 via-transparent to-black/60 mix-blend-overlay" />
+									<span className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+								</span>
+							</span>
+							<span className="bg-[#726b59] px-1.5 py-2.5">
+								<span
+									className={`${namesFont.className} block truncate text-[11px] uppercase tracking-wide text-white sm:text-xs`}
+								>
+									{entry.name}
+								</span>
+							</span>
+						</EntryFigure>
+					))}
 				</div>
 
-				{rest.length > 0 ? (
-					<ol className="mt-14 grid gap-3 sm:grid-cols-2">
-						{rest.map((agent, index) => (
-							<li key={agent.id}>
-								<Link
-									href={`/agents/${agent.id}`}
-									className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3 hover:bg-white/10"
-								>
-									<span className="w-6 text-center font-display text-lg font-semibold text-white/50">{index + 4}</span>
-									<div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
-										<Image
-											src={agent.avatarUrl || getAvatarForSeed(agent.id)}
-											alt={agent.name}
-											fill
-											sizes="44px"
-											className="object-cover"
-										/>
-									</div>
-									<div className="min-w-0 flex-1">
-										<p className="truncate font-medium">{agent.name}</p>
-										<p className="truncate text-xs text-white/60">{agent.regions.join(" · ") || "—"}</p>
-									</div>
-									<div className="text-right">
-										<p className="text-sm font-semibold text-theme-gold">{formatPrice(agent.volume)}</p>
-										<p className="text-xs text-white/60">{agent.deals} deal{agent.deals === 1 ? "" : "s"}</p>
-									</div>
-								</Link>
+				{config.showRanks6To10 && rest.length > 0 ? (
+					<ul className="mt-14 flex flex-wrap justify-center gap-6 sm:gap-10">
+						{rest.map((entry) => (
+							<li key={entry.id}>
+								<EntryFigure entry={entry} className="flex flex-col items-center">
+									<span className="rounded-full bg-theme-gold p-1">
+										<span className="relative block h-18 w-18 overflow-hidden rounded-full ring-2 ring-black sm:h-22 sm:w-22">
+											<Image src={entry.photo} alt={entry.name} fill sizes="96px" className="object-cover" />
+										</span>
+									</span>
+									<span className="mt-2.5 max-w-28 truncate text-xs font-semibold uppercase tracking-wide text-white/85">
+										{entry.name}
+									</span>
+								</EntryFigure>
 							</li>
 						))}
-					</ol>
+					</ul>
 				) : null}
 			</div>
 		</section>
