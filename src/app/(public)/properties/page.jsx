@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getCurrentUser } from "@/features/auth/permissions";
 import { listPublicProperties, listPublishedCityStates, PUBLIC_PROPERTIES_PAGE_SIZE } from "@/features/homepage/queries";
 import SectionHeading from "@/features/homepage/components/ui/SectionHeading";
 import PublicPropertiesFilterBar from "@/features/homepage/components/PublicPropertiesFilterBar";
 import PropertyCard from "@/features/homepage/components/PropertyCard";
+import GetMyUrlButton from "@/features/viewings/components/GetMyUrlButton";
 
 export const metadata = {
 	title: "Properties",
@@ -27,9 +29,10 @@ export default async function PublicPropertiesPage({ searchParams }) {
 	const price = params.price || undefined;
 	const page = Number(params.page) || 1;
 
-	const [{ properties, total }, cities] = await Promise.all([
+	const [{ properties, total }, cities, currentUser] = await Promise.all([
 		listPublicProperties({ city, propertyType, price, page }),
 		listPublishedCityStates(),
+		getCurrentUser(),
 	]);
 
 	const totalPages = Math.max(1, Math.ceil(total / PUBLIC_PROPERTIES_PAGE_SIZE));
@@ -39,11 +42,14 @@ export default async function PublicPropertiesPage({ searchParams }) {
 	return (
 		<section className="py-16 sm:py-24">
 			<div className="mx-auto max-w-6xl px-5 sm:px-8">
-				<SectionHeading
-					eyebrow="Listings"
-					title="Every current property, in one place"
-					description="Filter by where you're looking, what kind of home, and your budget — every card links straight to the listing agent."
-				/>
+				<div className="flex flex-wrap items-start justify-between gap-4">
+					<SectionHeading
+						eyebrow="Listings"
+						title="Every current property, in one place"
+						description="Filter by where you're looking, what kind of home, and your budget — every card links straight to the listing agent."
+					/>
+					{currentUser ? <GetMyUrlButton userId={currentUser.id} className="shrink-0" /> : null}
+				</div>
 
 				<div className="mt-10">
 					<PublicPropertiesFilterBar cities={cities} city={city} propertyType={propertyType} price={price} />

@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, BedDouble, Bath, Ruler, SquareStack, Car } from "lucide-react";
+import { getCurrentUser } from "@/features/auth/permissions";
 import { getPublicPropertyBySlug } from "@/features/homepage/queries";
 import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
 import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
 import PropertyPhotoGallery from "@/features/properties/components/PropertyPhotoGallery";
+import GetMyUrlButton from "@/features/viewings/components/GetMyUrlButton";
 import Button from "@/components/ui/Button";
 
 export async function generateMetadata({ params }) {
@@ -42,7 +44,7 @@ function formatUnit(value, unit) {
 
 export default async function PublicPropertyPage({ params }) {
 	const { slug } = await params;
-	const property = await getPublicPropertyBySlug(slug);
+	const [property, currentUser] = await Promise.all([getPublicPropertyBySlug(slug), getCurrentUser()]);
 
 	if (!property) notFound();
 
@@ -76,13 +78,16 @@ export default async function PublicPropertyPage({ params }) {
 	return (
 		<div className="py-10 sm:py-16">
 			<div className="mx-auto max-w-5xl px-5 sm:px-8">
-				<Link
-					href="/properties"
-					className="inline-flex items-center gap-1.5 text-sm font-medium text-theme-blue hover:underline dark:text-theme-gold"
-				>
-					<ArrowLeft className="h-4 w-4" aria-hidden="true" />
-					Back to properties
-				</Link>
+				<div className="flex items-center justify-between gap-3">
+					<Link
+						href="/properties"
+						className="inline-flex items-center gap-1.5 text-sm font-medium text-theme-blue hover:underline dark:text-theme-gold"
+					>
+						<ArrowLeft className="h-4 w-4" aria-hidden="true" />
+						Back to properties
+					</Link>
+					{currentUser ? <GetMyUrlButton userId={currentUser.id} /> : null}
+				</div>
 
 				<div className="mt-4">
 					<PropertyPhotoGallery
