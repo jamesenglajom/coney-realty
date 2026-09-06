@@ -9,20 +9,17 @@ const EXPLORE_LINKS = [
 	{ href: "/#insight", label: "Insight" },
 ];
 
+// Real, distinct pages (not homepage anchors) — every one of these needs to
+// resolve to actual content, not a stub, per the "no dead links" rule for
+// this footer.
+const GET_STARTED_LINKS = [
+	{ href: "/properties", label: "Browse properties" },
+	{ href: "/blog", label: "Blog" },
+	{ href: "/schedule-viewing", label: "Schedule a viewing" },
+];
+
 const FALLBACK_ADDRESS = "123 Cedar Row, Austin, TX 78701";
 const FALLBACK_CONTACT_NUMBER = "+1 (512) 555-0100";
-const COMPANY_LINKS = [
-	{ href: "#", label: "About" },
-	{ href: "#", label: "Careers" },
-	{ href: "#", label: "Press" },
-	{ href: "#", label: "Contact" },
-];
-const LEGAL_LINKS = [
-	{ href: "#", label: "Privacy" },
-	{ href: "#", label: "Terms" },
-	{ href: "#", label: "Fair housing" },
-	{ href: "#", label: "Accessibility" },
-];
 
 function FooterColumn({ title, links }) {
 	return (
@@ -54,7 +51,7 @@ export default async function SiteFooter() {
 
 	return (
 		<footer className="border-t border-theme-gray/15 dark:border-white/10">
-			<div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+			<div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
 				<div>
 					<Link
 						href="/#top"
@@ -93,8 +90,7 @@ export default async function SiteFooter() {
 					</address>
 				</div>
 				<FooterColumn title="Explore" links={EXPLORE_LINKS} />
-				<FooterColumn title="Company" links={COMPANY_LINKS} />
-				<FooterColumn title="Legal" links={LEGAL_LINKS} />
+				<FooterColumn title="Get started" links={GET_STARTED_LINKS} />
 			</div>
 			<div className="border-t border-theme-gray/15 dark:border-white/10">
 				<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-txt-muted dark:text-txt-muted-dark sm:flex-row sm:px-8">
