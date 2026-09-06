@@ -7,6 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { Ballet } from "next/font/google";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import SectionHeading from "./ui/SectionHeading";
 
 // Scoped to this carousel only — same "printed poster" script treatment as
 // the leaderboard's period label (src/features/homepage/components/
@@ -82,7 +83,14 @@ export default function TestimonialCarouselClient({ testimonials }) {
 			className="border-y border-theme-gray/15 bg-theme-gold-light/40 dark:border-white/10 dark:bg-white/[0.02]"
 		>
 			<div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
-				<div className="relative">
+				<SectionHeading
+					eyebrow="In Their Words"
+					title="Trusted by the Families We've Served"
+					description="Don't just take our word for it — here's what clients say after the keys change hands."
+					className="mx-auto max-w-2xl text-center [&_p]:mx-auto"
+				/>
+
+				<div className="relative mt-12">
 					{/* Reels-style row — several portrait cards visible at once, each its
 					    own snap point, rather than one full-width slide at a time. */}
 					<div className="overflow-hidden" ref={emblaRef}>
