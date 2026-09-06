@@ -45,18 +45,15 @@ function usePropertyImages(slug) {
 	return images;
 }
 
-// `overlay` renders inside the main image's own box (bottom-aligned, over a
-// gradient scrim) so the page can compose a hero — title/location/price —
-// directly on the photo, PDP-style, without this component needing to know
-// anything about property data itself.
-export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }) {
+// `badge` renders top-left over the main image (property type / on-hold
+// pills) — title/price live in the page itself now, not composed onto the
+// photo, so this component only ever needs to know about the badge slot.
+export default function PropertyPhotoGallery({ slug, seed, alt, badge }) {
 	const images = usePropertyImages(slug);
 	const [activeIndex, setActiveIndex] = useState(0);
 
 	if (images === null) {
-		return (
-			<div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-theme-gray/15 dark:bg-white/5 sm:aspect-[3/2] lg:aspect-[16/9]" />
-		);
+		return <div className="aspect-video max-h-[70vh] w-full animate-pulse bg-theme-gray/15 dark:bg-white/5" />;
 	}
 
 	const gallery = images.length > 0 ? images : [getPropertyImageForSeed(seed)];
@@ -72,7 +69,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }
 
 	return (
 		<div>
-			<div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-theme-gray/10 dark:bg-white/5 sm:aspect-[3/2] lg:aspect-[16/9]">
+			<div className="relative aspect-video max-h-[70vh] w-full overflow-hidden bg-theme-gray/10 dark:bg-white/5">
 				<Image
 					src={gallery[safeIndex]}
 					alt={alt}
@@ -88,12 +85,6 @@ export default function PropertyPhotoGallery({ slug, seed, alt, overlay, badge }
 					<span className="absolute right-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white sm:right-6 sm:top-6">
 						No photos yet
 					</span>
-				) : null}
-
-				{overlay ? (
-					<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-4 pb-4 pt-16 sm:px-6 sm:pb-6">
-						{overlay}
-					</div>
 				) : null}
 
 				{gallery.length > 1 ? (

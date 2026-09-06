@@ -88,49 +88,58 @@ export default async function PublicPropertyPage({ params }) {
 					</Link>
 					{currentUser ? <GetMyUrlButton userId={currentUser.id} /> : null}
 				</div>
+			</div>
 
-				<div className="mt-4">
-					<PropertyPhotoGallery
-						slug={property.slug}
-						seed={property.id}
-						alt={property.name}
-						badge={
-							<div className="flex flex-wrap items-center gap-2">
-								<span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
-									{property.property_type}
+			{/* Full-bleed — deliberately outside the max-w-5xl/px wrapper above so
+			    the gallery (main image + thumbnail strip) spans the entire page
+			    width, not just the content column. */}
+			<div className="mt-4">
+				<PropertyPhotoGallery
+					slug={property.slug}
+					seed={property.id}
+					alt={property.name}
+					badge={
+						<div className="flex flex-wrap items-center gap-2">
+							<span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-theme-blue backdrop-blur-sm dark:bg-black/70 dark:text-white">
+								{property.property_type}
+							</span>
+							{property.isOnHold ? (
+								<span className="inline-flex items-center rounded-full bg-warning px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm dark:bg-warning-dark dark:text-theme-blue">
+									On Hold
 								</span>
-								{property.isOnHold ? (
-									<span className="inline-flex items-center rounded-full bg-warning px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm dark:bg-warning-dark dark:text-theme-blue">
-										On Hold
-									</span>
-								) : null}
-							</div>
-						}
-						overlay={
-							<div className="flex flex-wrap items-end justify-between gap-3">
-								<div className="min-w-0">
-									<h1 className="font-display text-[clamp(22px,4vw,34px)] font-semibold leading-tight text-white">
-										{property.name}
-									</h1>
-								</div>
-								<p className="whitespace-nowrap font-display text-[clamp(22px,3.5vw,30px)] font-semibold text-theme-gold">
-									{formatPrice(property.price)}
-								</p>
-							</div>
-						}
-					/>
+							) : null}
+						</div>
+					}
+				/>
+			</div>
+
+			<div className="mx-auto max-w-5xl px-5 sm:px-8">
+				{/* Title/price used to be composed on top of the main image; now its
+				    own header, sitting above the specs section instead. */}
+				<div className="mt-6 flex flex-wrap items-end justify-between gap-3">
+					<div className="min-w-0">
+						<h1 className="font-display text-[clamp(22px,4vw,34px)] font-semibold leading-tight text-theme-blue dark:text-white">
+							{property.name}
+						</h1>
+						{property.location ? (
+							<p className="mt-1 text-sm text-txt-muted dark:text-txt-muted-dark">{property.location}</p>
+						) : null}
+					</div>
+					<p className="whitespace-nowrap font-display text-[clamp(22px,3.5vw,30px)] font-semibold text-theme-blue dark:text-theme-gold">
+						{formatPrice(property.price)}
+					</p>
 				</div>
 
 				{stats.length > 0 ? (
-					<div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-theme-gray/15 bg-theme-gray/15 dark:border-white/10 dark:bg-white/10 sm:grid-cols-3 lg:grid-cols-5">
+					<div className="mt-6 grid grid-cols-4 gap-px overflow-hidden rounded-2xl border border-theme-gray/15 bg-theme-gray/15 dark:border-white/10 dark:bg-white/10 sm:grid-cols-5">
 						{stats.map((stat) => (
 							<div
 								key={stat.label}
-								className="flex flex-col items-center gap-1.5 bg-white px-4 py-5 text-center dark:bg-black"
+								className="flex flex-col items-center gap-1 bg-white px-2 py-3 text-center dark:bg-black sm:gap-1.5 sm:px-4 sm:py-5"
 							>
 								<stat.icon className="h-5 w-5 text-theme-gold" aria-hidden="true" />
-								<p className="text-base font-bold text-theme-blue dark:text-white">{stat.value}</p>
-								<p className="text-[11px] font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+								<p className="text-sm font-bold text-theme-blue dark:text-white sm:text-base">{stat.value}</p>
+								<p className="text-[10px] font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark sm:text-[11px]">
 									{stat.label}
 								</p>
 							</div>
