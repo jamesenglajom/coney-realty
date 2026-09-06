@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import DeleteUserButton from "./DeleteUserButton";
 import ResetPasswordButton from "./ResetPasswordButton";
@@ -13,7 +13,10 @@ const ROLE_BADGE_CLASSES = {
 };
 
 export default function UsersTable({ users, canEdit, canDelete, showUserId = false }) {
-	const hasActionsColumn = canEdit || canDelete;
+	// Preview is always available to anyone who can see this table (the page
+	// itself is already gated on the "users" view permission), so the Actions
+	// column shows regardless of edit/delete rights.
+	const hasActionsColumn = true;
 
 	if (users.length === 0) {
 		return (
@@ -33,9 +36,6 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 							Name
 						</th>
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-							Email
-						</th>
-						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Role
 						</th>
 						{showUserId ? (
@@ -53,10 +53,13 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 				<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
 					{users.map((user) => (
 						<tr key={user.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
-							<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">
-								{user.full_name || "—"}
+							<td className="p-4">
+								<p className="text-sm font-semibold text-theme-blue dark:text-white">{user.full_name || "—"}</p>
+								<p className="mt-0.5 truncate text-xs text-txt-secondary dark:text-txt-secondary-dark">{user.email}</p>
+								{user.phone ? (
+									<p className="mt-0.5 text-xs text-txt-muted dark:text-txt-muted-dark">{user.phone}</p>
+								) : null}
 							</td>
-							<td className="p-4 text-sm text-txt-secondary dark:text-txt-secondary-dark">{user.email}</td>
 							<td className="p-4">
 								<Badge className={ROLE_BADGE_CLASSES[user.role]}>{user.role}</Badge>
 							</td>
@@ -70,25 +73,36 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 							) : null}
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">
-									{user.role === "SAdmin" ? (
-										<span className="text-xs text-txt-muted dark:text-txt-muted-dark">Not editable</span>
-									) : (
-										<div className="flex justify-end gap-2">
-											{canEdit ? (
-												<Link
-													href={`/admin/users/${user.id}/edit`}
-													className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5"
-												>
-													<Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-													Edit
-												</Link>
-											) : null}
-											{canEdit ? (
-												<ResetPasswordButton userId={user.id} userName={user.full_name || user.email} />
-											) : null}
-											{canDelete ? <DeleteUserButton userId={user.id} userName={user.full_name || user.email} /> : null}
-										</div>
-									)}
+									<div className="flex justify-end gap-2">
+										<Link
+											href={`/admin/users/${user.id}`}
+											className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5"
+										>
+											<Eye className="h-3.5 w-3.5" aria-hidden="true" />
+											Preview
+										</Link>
+										{user.role === "SAdmin" ? (
+											<span className="inline-flex items-center px-2 py-1 text-xs text-txt-muted dark:text-txt-muted-dark">
+												Not editable
+											</span>
+										) : (
+											<>
+												{canEdit ? (
+													<Link
+														href={`/admin/users/${user.id}/edit`}
+														className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5"
+													>
+														<Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+														Edit
+													</Link>
+												) : null}
+												{canEdit ? (
+													<ResetPasswordButton userId={user.id} userName={user.full_name || user.email} />
+												) : null}
+												{canDelete ? <DeleteUserButton userId={user.id} userName={user.full_name || user.email} /> : null}
+											</>
+										)}
+									</div>
 								</td>
 							) : null}
 						</tr>

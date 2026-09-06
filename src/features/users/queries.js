@@ -9,7 +9,7 @@ export async function listUsers({ query } = {}) {
 	const supabase = createAdminClient();
 	let request = supabase
 		.from("users")
-		.select("id, email, full_name, role, created_at")
+		.select("id, email, full_name, role, created_at, user_info(phone)")
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
 
@@ -20,7 +20,8 @@ export async function listUsers({ query } = {}) {
 
 	const { data, error } = await request;
 	if (error) throw new Error(error.message);
-	return data;
+
+	return data.map(({ user_info, ...user }) => ({ ...user, phone: user_info?.phone ?? "" }));
 }
 
 // For the create-user form's live duplicate check. Deliberately does NOT
