@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Ballet, Fjalla_One } from "next/font/google";
 import { Award } from "lucide-react";
 import { getPublicLeaderboard } from "@/features/leaderboard/queries";
+import LeaderboardMobileCarousel from "./LeaderboardMobileCarousel";
 
 // Deliberately scoped to this one section, not added to the site-wide
 // font-display/font-body tokens (Montserrat/Inter — see CLAUDE.md) — this
@@ -36,6 +37,40 @@ function EntryFigure({ entry, children, className }) {
 	return <div className={className}>{children}</div>;
 }
 
+// Photo + name-bar for one top-5 entry — shared between the mobile carousel
+// and the desktop poster grid so the two layouts never drift out of sync.
+function FeaturedCard({ entry }) {
+	return (
+		<EntryFigure entry={entry} className="group flex h-full flex-col">
+			<span
+				className="relative block aspect-2/3 w-full overflow-hidden p-1.5"
+				style={{ backgroundImage: SUNBURST_BACKGROUND }}
+			>
+				<span className="relative block h-full w-full overflow-hidden">
+					<Image
+						src={entry.photo}
+						alt={entry.name}
+						fill
+						sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 200px"
+						className="object-cover transition-transform duration-500 group-hover:scale-105"
+					/>
+					{/* Warm gold cast up top (matching the poster's color grade),
+					    fading to a dark base so the name bar below reads clean. */}
+					<span className="pointer-events-none absolute inset-0 bg-linear-to-b from-theme-gold/35 via-transparent to-black/60 mix-blend-overlay" />
+					<span className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+				</span>
+			</span>
+			<span className="bg-[#726b59] px-1.5 py-2.5">
+				<span
+					className={`${namesFont.className} block truncate text-[11px] uppercase tracking-wide text-white sm:text-xs`}
+				>
+					{entry.name}
+				</span>
+			</span>
+		</EntryFigure>
+	);
+}
+
 export default async function Leaderboard() {
 	const { config, entries } = await getPublicLeaderboard();
 
@@ -46,6 +81,18 @@ export default async function Leaderboard() {
 
 	return (
 		<section id="leaderboard" className="relative isolate overflow-hidden bg-black text-white">
+			{/* Client-supplied backdrop photo behind the whole section, dimmed so
+			    the gold glow/noise/content above it all stay legible. */}
+			<div className="pointer-events-none absolute inset-0 -z-30" aria-hidden="true">
+				<Image
+					src="/top_10/top_performers_bg.jpg"
+					alt=""
+					fill
+					sizes="100vw"
+					className="object-cover object-top"
+				/>
+				<div className="absolute inset-0 bg-black/75" />
+			</div>
 			{/* Warm gold glow spanning the heading through the photo row, plus a
 			    faint crest — echoes the printed board's emblem watermark. */}
 			<div
@@ -76,35 +123,15 @@ export default async function Leaderboard() {
 					{config.heading}
 				</h2>
 
-				<div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-px overflow-hidden bg-black shadow-[0_0_100px_-20px_rgba(182,170,132,0.55)] ring-1 ring-theme-gold/20 sm:grid-cols-5">
+				{/* Mobile: horizontal "Stories"/"My Day"-style carousel, with
+				    prev/next chevrons — swapped out entirely for the poster grid at
+				    sm: and up. */}
+				<LeaderboardMobileCarousel featured={featured} />
+
+				{/* Tablet/desktop: the original printed-poster grid. */}
+				<div className="mx-auto mt-14 hidden max-w-4xl grid-cols-5 gap-px overflow-hidden bg-black shadow-[0_0_100px_-20px_rgba(182,170,132,0.55)] ring-1 ring-theme-gold/20 sm:grid">
 					{featured.map((entry) => (
-						<EntryFigure key={entry.id} entry={entry} className="group flex flex-col">
-							<span
-								className="relative block aspect-2/3 w-full overflow-hidden p-1.5"
-								style={{ backgroundImage: SUNBURST_BACKGROUND }}
-							>
-								<span className="relative block h-full w-full overflow-hidden">
-									<Image
-										src={entry.photo}
-										alt={entry.name}
-										fill
-										sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 200px"
-										className="object-cover transition-transform duration-500 group-hover:scale-105"
-									/>
-									{/* Warm gold cast up top (matching the poster's color grade),
-									    fading to a dark base so the name bar below reads clean. */}
-									<span className="pointer-events-none absolute inset-0 bg-linear-to-b from-theme-gold/35 via-transparent to-black/60 mix-blend-overlay" />
-									<span className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
-								</span>
-							</span>
-							<span className="bg-[#726b59] px-1.5 py-2.5">
-								<span
-									className={`${namesFont.className} block truncate text-[11px] uppercase tracking-wide text-white sm:text-xs`}
-								>
-									{entry.name}
-								</span>
-							</span>
-						</EntryFigure>
+						<FeaturedCard key={entry.id} entry={entry} />
 					))}
 				</div>
 
