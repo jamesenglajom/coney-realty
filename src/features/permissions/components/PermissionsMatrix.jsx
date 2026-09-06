@@ -42,7 +42,7 @@ export default function PermissionsMatrix({ initialPermissions }) {
 
 	return (
 		<div className="space-y-8">
-			<div className="rounded-xl border border-theme-gold-light bg-theme-gold-light/40 p-4 text-sm text-txt-secondary dark:border-border-dark dark:bg-white/[0.03] dark:text-txt-secondary-dark">
+			<div className="rounded-xl border border-theme-gold-light bg-theme-gold-light/40 p-4 text-sm text-txt-secondary dark:border-border-dark dark:bg-surface-dark dark:text-txt-secondary-dark">
 				SAdmin always has full access to every page — it&apos;s built into the app and can&apos;t be changed here.
 				Changes below take effect immediately.
 			</div>
@@ -54,7 +54,7 @@ export default function PermissionsMatrix({ initialPermissions }) {
 						<div className="overflow-x-auto">
 							<table className="w-full min-w-[420px] text-left border-collapse">
 								<thead>
-									<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
+									<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
 										<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 											Page
 										</th>

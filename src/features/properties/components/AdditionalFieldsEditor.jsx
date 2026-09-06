@@ -32,7 +32,7 @@ export default function AdditionalFieldsEditor({ control, register }) {
 
 			<div className="mt-3 space-y-3">
 				{fields.length === 0 ? (
-					<p className="rounded-xl border border-dashed border-theme-gray/30 p-6 text-center text-sm text-txt-muted dark:border-white/15 dark:text-txt-muted-dark">
+					<p className="rounded-xl border border-dashed border-theme-gray/30 p-6 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 						No additional fields.
 					</p>
 				) : null}
@@ -40,7 +40,7 @@ export default function AdditionalFieldsEditor({ control, register }) {
 				{fields.map((field, index) => (
 					<div
 						key={field.id}
-						className="grid gap-3 rounded-xl border border-theme-gray/20 p-4 dark:border-white/10 sm:grid-cols-[1fr_1fr_auto] sm:items-start"
+						className="grid gap-3 rounded-xl border border-theme-gray/20 p-4 dark:border-border-dark sm:grid-cols-[1fr_1fr_auto] sm:items-start"
 					>
 						<div>
 							<Label htmlFor={`additionalFieldPairs.${index}.key`} className="sm:sr-only">

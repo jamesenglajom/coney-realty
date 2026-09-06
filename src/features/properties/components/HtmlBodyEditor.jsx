@@ -59,13 +59,13 @@ export default function HtmlBodyEditor({ value, onChange }) {
 
 	if (!editor) {
 		return (
-			<div className="min-h-[240px] animate-pulse rounded-xl border border-theme-gray/30 bg-theme-gray/5 dark:border-white/15 dark:bg-white/5" />
+			<div className="min-h-[240px] animate-pulse rounded-xl border border-theme-gray/30 bg-theme-gray/5 dark:border-border-dark dark:bg-surface-dark-raised" />
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gray/30 bg-white focus-within:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:focus-within:border-theme-gold">
-			<div className="flex flex-wrap items-center gap-1 border-b border-theme-gray/20 p-1.5 dark:border-white/10">
+		<div className="overflow-hidden rounded-xl border border-theme-gray/30 bg-white focus-within:border-theme-blue dark:border-border-dark dark:bg-surface-dark-raised dark:focus-within:border-theme-gold">
+			<div className="flex flex-wrap items-center gap-1 border-b border-theme-gray/20 p-1.5 dark:border-border-dark">
 				<ToolbarButton
 					onClick={() => editor.chain().focus().toggleBold().run()}
 					active={editor.isActive("bold")}

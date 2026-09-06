@@ -14,7 +14,7 @@ export default function MobileMenu({ children }) {
 				aria-label="Toggle menu"
 				aria-expanded={isOpen}
 				aria-controls="mobile-menu-panel"
-				className="grid h-9 w-9 place-items-center rounded-full border border-theme-gray/30 text-current dark:border-white/20"
+				className="grid h-9 w-9 place-items-center rounded-full border border-theme-gray/30 text-current dark:border-border-dark"
 			>
 				{isOpen ? (
 					<X className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -25,7 +25,7 @@ export default function MobileMenu({ children }) {
 			{isOpen ? (
 				<div
 					id="mobile-menu-panel"
-					className="absolute inset-x-0 top-16 border-t border-theme-gray/15 bg-white dark:border-white/10 dark:bg-black"
+					className="absolute inset-x-0 top-16 border-t border-theme-gray/15 bg-white dark:border-border-dark dark:bg-surface-dark-raised"
 				>
 					<div className="mx-auto max-w-6xl px-5 py-3 sm:px-8" onClick={() => setIsOpen(false)}>
 						{children}

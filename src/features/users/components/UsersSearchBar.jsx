@@ -39,7 +39,7 @@ export default function UsersSearchBar() {
 				value={value}
 				onChange={(event) => setValue(event.target.value)}
 				placeholder="Search by name or email…"
-				className="w-full rounded-xl border border-theme-gray/30 bg-white py-2.5 pl-9 pr-3.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold"
+				className="w-full rounded-xl border border-theme-gray/30 bg-white py-2.5 pl-9 pr-3.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-border-dark dark:bg-surface-dark-raised dark:text-txt-primary-dark dark:focus:border-theme-gold"
 			/>
 		</div>
 	);

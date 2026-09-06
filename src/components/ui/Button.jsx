@@ -2,10 +2,10 @@ import Link from "next/link";
 
 const VARIANT_CLASSES = {
 	primary:
-		"bg-theme-blue text-white hover:bg-theme-blue/90 dark:bg-theme-gold dark:text-theme-blue dark:hover:bg-theme-gold/90",
+		"bg-theme-blue text-white hover:bg-theme-blue/90 dark:bg-accent-dark dark:text-theme-blue dark:hover:bg-accent-dark/90",
 	brass: "bg-theme-gold text-theme-blue hover:brightness-105 dark:hover:brightness-110",
 	ghost:
-		"border border-theme-gray/30 text-current hover:border-theme-gray/60 dark:border-white/20 dark:hover:border-white/40",
+		"border border-theme-gray/30 text-current hover:border-theme-gray/60 dark:border-border-dark dark:hover:border-theme-gold/40",
 	danger: "bg-danger text-white hover:bg-danger/90 dark:bg-danger-dark dark:text-theme-blue dark:hover:bg-danger-dark/90",
 };
 
@@ -29,7 +29,7 @@ const DEFAULT_SHAPE_BY_SIZE = {
 };
 
 const BASE_CLASSES =
-	"inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black";
+	"inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-bg-dark";
 
 function isRawAnchorHref(href) {
 	return /^(https?:|tel:|mailto:)/.test(href ?? "");

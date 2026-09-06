@@ -9,7 +9,7 @@ export default function PropertyCard({ property }) {
 	const hasBedsBaths = property.beds != null || property.baths != null;
 
 	return (
-		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]">
+		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark">
 			<Link href={`/property/${property.slug}`}>
 				<PropertyCoverImage
 					slug={property.slug}

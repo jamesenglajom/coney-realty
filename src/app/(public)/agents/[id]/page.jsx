@@ -68,7 +68,7 @@ export default async function AgentProfilePage({ params }) {
 							{agent.listings.map((listing) => (
 								<li
 									key={listing.id}
-									className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]"
+									className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark"
 								>
 									<Link href={`/property/${listing.slug}`}>
 										<PropertyCoverImage slug={listing.slug} seed={listing.id} alt={listing.name} badge={listing.type} />

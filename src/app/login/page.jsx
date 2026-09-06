@@ -10,8 +10,8 @@ export default function LoginPage() {
 	// Auth gating (redirecting signed-in users away from /login, unauthenticated
 	// users to /login with ?next=) lives in src/proxy.js on this deployment.
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-theme-gold-light px-4 dark:bg-black">
-			<div className="w-full max-w-sm rounded-2xl border border-theme-gray/15 bg-white p-8 shadow-xl dark:border-white/10 dark:bg-white/[0.03]">
+		<main className="flex min-h-screen items-center justify-center bg-theme-gold-light px-4 dark:bg-bg-dark">
+			<div className="w-full max-w-sm rounded-2xl border border-theme-gray/15 bg-white p-8 shadow-xl dark:border-border-dark dark:bg-surface-dark">
 				<div className="flex items-center gap-2 text-lg font-semibold text-theme-blue dark:text-white">
 					<Image
 						src="/logo/conyrealty-logo.jpg"

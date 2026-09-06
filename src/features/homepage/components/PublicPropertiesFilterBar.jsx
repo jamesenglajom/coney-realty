@@ -3,7 +3,7 @@ import { PRICE_BANDS } from "@/features/homepage/data";
 import { FILTERABLE_PROPERTY_TYPES } from "@/features/properties/schemas";
 
 const FIELD_CLASSES =
-	"w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold";
+	"w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-border-dark dark:bg-surface-dark-raised dark:text-txt-primary-dark dark:focus:border-theme-gold";
 const LABEL_CLASSES = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.08em] text-txt-muted dark:text-txt-muted-dark";
 
 // A plain GET form — no client JS needed. Submitting it replaces the query
@@ -16,7 +16,7 @@ export default function PublicPropertiesFilterBar({ cities, city, propertyType, 
 	return (
 		<form
 			method="get"
-			className="grid gap-3 rounded-2xl border border-theme-gray/15 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-3 sm:items-end lg:grid-cols-[1fr_1fr_1fr_auto]"
+			className="grid gap-3 rounded-2xl border border-theme-gray/15 bg-white p-4 shadow-sm dark:border-border-dark dark:bg-surface-dark sm:grid-cols-3 sm:items-end lg:grid-cols-[1fr_1fr_1fr_auto]"
 		>
 			<div>
 				<label htmlFor="city" className={LABEL_CLASSES}>
@@ -66,7 +66,7 @@ export default function PublicPropertiesFilterBar({ cities, city, propertyType, 
 				{hasFilters ? (
 					<Link
 						href="/properties"
-						className="inline-flex h-[42px] items-center justify-center rounded-xl border border-theme-gray/30 px-4 text-sm font-medium text-txt-secondary transition-colors hover:border-theme-gray/60 dark:border-white/20 dark:text-txt-secondary-dark dark:hover:border-white/40"
+						className="inline-flex h-[42px] items-center justify-center rounded-xl border border-theme-gray/30 px-4 text-sm font-medium text-txt-secondary transition-colors hover:border-theme-gray/60 dark:border-border-dark dark:text-txt-secondary-dark dark:hover:border-theme-gold/40"
 					>
 						Clear
 					</Link>

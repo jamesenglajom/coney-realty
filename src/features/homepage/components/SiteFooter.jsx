@@ -50,7 +50,7 @@ export default async function SiteFooter() {
 	const telHref = `tel:${contactNumber.replace(/[^\d+]/g, "")}`;
 
 	return (
-		<footer className="border-t border-theme-gray/15 dark:border-white/10">
+		<footer className="border-t border-theme-gray/15 dark:border-border-dark">
 			<div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
 				<div>
 					<Link
@@ -92,7 +92,7 @@ export default async function SiteFooter() {
 				<FooterColumn title="Explore" links={EXPLORE_LINKS} />
 				<FooterColumn title="Get started" links={GET_STARTED_LINKS} />
 			</div>
-			<div className="border-t border-theme-gray/15 dark:border-white/10">
+			<div className="border-t border-theme-gray/15 dark:border-border-dark">
 				<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-txt-muted dark:text-txt-muted-dark sm:flex-row sm:px-8">
 					<p>© 2026 ConeyRealty. All rights reserved.</p>
 					<p>Equal Housing Opportunity</p>

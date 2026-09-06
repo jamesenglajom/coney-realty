@@ -98,7 +98,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 
 	if (isSubmitted) {
 		return (
-			<div className="rounded-2xl border border-theme-gold-light bg-theme-gold-light/40 p-8 text-center dark:border-border-dark dark:bg-white/[0.03]">
+			<div className="rounded-2xl border border-theme-gold-light bg-theme-gold-light/40 p-8 text-center dark:border-border-dark dark:bg-surface-dark">
 				<CheckCircle2 className="mx-auto h-10 w-10 text-theme-blue dark:text-theme-gold" aria-hidden="true" />
 				<h3 className="mt-4 font-display text-xl font-semibold text-theme-blue dark:text-white">
 					Request received
@@ -133,7 +133,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 			<div>
 				<Label>Properties you'd like to visit</Label>
 
-				<div className="mb-3 rounded-xl border border-theme-gray/20 p-3 dark:border-white/10">
+				<div className="mb-3 rounded-xl border border-theme-gray/20 p-3 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wide text-txt-muted dark:text-txt-muted-dark">
 						Selected {selectedProperties.length > 0 ? `(${selectedProperties.length})` : ""}
 					</p>
@@ -181,11 +181,11 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 				</div>
 
 				{filteredOptions.length === 0 ? (
-					<p className="rounded-xl border border-theme-gray/20 p-6 text-center text-sm text-txt-muted dark:border-white/10 dark:text-txt-muted-dark">
+					<p className="rounded-xl border border-theme-gray/20 p-6 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 						No properties match "{filterText}".
 					</p>
 				) : (
-					<div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-theme-gray/20 p-2 dark:border-white/10">
+					<div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-theme-gray/20 p-2 dark:border-border-dark">
 						{filteredOptions.map((property) => {
 							const isSelected = selectedIds.includes(property.id);
 							return (

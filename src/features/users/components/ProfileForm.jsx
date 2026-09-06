@@ -118,7 +118,7 @@ export default function ProfileForm({ user }) {
 					id="bio"
 					rows={4}
 					{...register("bio")}
-					className="w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold"
+					className="w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-border-dark dark:bg-surface-dark-raised dark:text-txt-primary-dark dark:focus:border-theme-gold"
 				/>
 				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
 					Shown on your public agent profile page.

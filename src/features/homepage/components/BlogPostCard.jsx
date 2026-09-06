@@ -7,7 +7,7 @@ export default function BlogPostCard({ post }) {
 	const readMins = estimateReadMinutes(post.content);
 
 	return (
-		<article className="relative flex flex-col overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-white/10 dark:bg-white/[0.03]">
+		<article className="relative flex flex-col overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark">
 			<div className="relative aspect-[16/10]">
 				<Image
 					src={post.cover_image_url || getBlogCoverForSeed(post.slug)}

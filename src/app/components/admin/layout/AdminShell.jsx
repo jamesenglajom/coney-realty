@@ -52,7 +52,7 @@ const AdminShell = ({ user, permissions, children }) => {
 	const hideWhenCollapsed = isCollapsed ? "lg:hidden" : "";
 
 	return (
-		<div className="h-dvh bg-[#fcfcfc] dark:bg-black flex">
+		<div className="h-dvh bg-[#fcfcfc] dark:bg-bg-dark flex">
 			{/* Sidebar - Desktop */}
 			<aside
 				className={`fixed inset-y-0 left-0 z-50 w-64 bg-theme-blue transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 ${

@@ -18,7 +18,7 @@ export default function StickyHeaderShell({ children }) {
 		<header
 			className={`sticky top-0 z-50 border-b transition-colors ${
 				isScrolled
-					? "border-theme-gray/15 bg-white/85 backdrop-blur-md dark:border-white/10 dark:bg-black/85"
+					? "border-theme-gray/15 bg-white/85 backdrop-blur-md dark:border-border-dark dark:bg-bg-dark/85"
 					: "border-transparent bg-transparent"
 			}`}
 		>

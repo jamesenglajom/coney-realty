@@ -34,7 +34,7 @@ function TestimonialCard({ testimonial }) {
 	);
 
 	return (
-		<div className="flex h-full min-h-90 flex-col justify-between overflow-hidden rounded-3xl border border-theme-gray/15 bg-white p-6 shadow-lg dark:border-white/10 dark:bg-white/[0.03] sm:p-7">
+		<div className="flex h-full min-h-90 flex-col justify-between overflow-hidden rounded-3xl border border-theme-gray/15 bg-white p-6 shadow-lg dark:border-border-dark dark:bg-surface-dark sm:p-7">
 			<figure className="m-0">
 				<span className="font-display text-5xl leading-none text-theme-gold" aria-hidden="true">
 					&ldquo;
@@ -80,7 +80,7 @@ export default function TestimonialCarouselClient({ testimonials }) {
 	return (
 		<section
 			aria-label="Client testimonials"
-			className="border-y border-theme-gray/15 bg-theme-gold-light/40 dark:border-white/10 dark:bg-white/[0.02]"
+			className="border-y border-theme-gray/15 bg-theme-gold-light/40 dark:border-border-dark dark:bg-surface-dark/50"
 		>
 			<div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
 				<SectionHeading
@@ -93,7 +93,11 @@ export default function TestimonialCarouselClient({ testimonials }) {
 				<div className="relative mt-12">
 					{/* Reels-style row — several portrait cards visible at once, each its
 					    own snap point, rather than one full-width slide at a time. */}
-					<div className="overflow-hidden" ref={emblaRef}>
+					{/* px-3 gives the first/last card its own visible margin from the
+					    section edge — without it they sat flush against the
+					    container's own padding with nothing beyond the shared
+					    inter-card gap. */}
+					<div className="overflow-hidden px-3" ref={emblaRef}>
 						<div className="flex gap-5">
 							{testimonials.map((testimonial) => (
 								<div

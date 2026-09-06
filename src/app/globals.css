@@ -2,10 +2,19 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Tells the browser which native-UI theme to render for controls Tailwind
+   classes can't reach — <select> popups, checkboxes/radios, date pickers,
+   scrollbars. Without this, a dark-styled <select> box (dark background,
+   light text via dark: classes) opens a popup the browser still renders in
+   its own default light chrome — light text landing on a white native
+   dropdown, unreadable. This is the actual switch; .dark below just flips it
+   when the class is active. */
 :root {
+	color-scheme: light;
 	--background: #ffffff;
 	--foreground: #171717;
 }
+
 
 @theme {
   --color-theme-blue: #0c2241;
@@ -13,21 +22,38 @@
   --color-theme-gold-light: #f4f2eb;
   --color-theme-gray: #6b7280;
 
+  /* Brighter gold for emphasis TEXT/fills on dark surfaces (price callouts,
+     primary CTA buttons, description subheadings) — a deliberately separate
+     token from theme-gold, not an override of it. theme-gold stays
+     mode-invariant (it's used bare, with no dark: prefix, at 100+ call
+     sites — icons, underlines, badges — that all depend on it staying
+     exactly #b6aa84 in both themes); accent-dark is opt-in per call site
+     for the specific spots that want extra pop against surface-dark. */
+  --color-accent-dark: #d4c59a;
+
   /* Text Colors */
   --color-txt-primary: #1a1a1a;
   --color-txt-secondary: #4a4a4a;
   --color-txt-muted: #757575;
 
-  /* Dark Mode Overrides (Automatic with dark: prefix) */
-  --color-txt-primary-dark: #f5f5f5;
-  --color-txt-secondary-dark: #a0a0a0;
-  --color-txt-muted-dark: #666666;
+  /* Dark Mode Overrides (Automatic with dark: prefix) — a cool, slightly
+     blue-tinted near-black scale (echoing theme-blue #0c2241) rather than a
+     neutral gray "invert the light theme" treatment, so dark mode reads as
+     its own designed surface, not a filter. */
+  --color-txt-primary-dark: #fafafa;
+  --color-txt-secondary-dark: #cbd5e1;
+  --color-txt-muted-dark: #94a3b8;
 
-  /* Dark-mode "surface" (card/panel background) and "border" — the two
-     values every admin card/table/modal was independently reaching for as
-     raw hex (bg-[#1a1a1a], border-[#333]) before being promoted here. */
-  --color-surface-dark: #1a1a1a;
-  --color-border-dark: #333333;
+  /* Dark-mode surface hierarchy: bg (the page backdrop, darkest) → surface
+     (a card/panel/table sitting on the page) → surface-raised (a nested
+     card, dropdown, or modal sitting on top of a surface) — three tiers of
+     the same blue-black family instead of one flat value, so stacked
+     panels read as actual elevation. border-dark is a soft step up from
+     surface, not a stark gray. */
+  --color-bg-dark: #0a0e14;
+  --color-surface-dark: #12171f;
+  --color-surface-dark-raised: #1a212b;
+  --color-border-dark: #262e3a;
 
   /* Semantic feedback colors for badges, form errors, and destructive
      actions — replaces ad hoc stock Tailwind red/green used independently
@@ -45,25 +71,32 @@
   /* Chart palette: validated categorical order (see dataviz skill palette.md),
      used for nominal breakdowns (property type, user role). Each slot has an
      explicit -dark pair rather than relying on a media query, matching the
-     txt-primary-dark pattern above, since this app's dark mode is class-based. */
+     txt-primary-dark pattern above, since this app's dark mode is class-based.
+     Dark variants are genuinely brightened (standard Tailwind 400-weight
+     shades of the same hue) rather than a near-copy of the light value, so
+     each series actually pops against the surface-dark background instead of
+     reading muddy. */
   --color-chart-1: #2a78d6;
-  --color-chart-1-dark: #3987e5;
+  --color-chart-1-dark: #60a5fa;
   --color-chart-2: #eb6834;
-  --color-chart-2-dark: #d95926;
+  --color-chart-2-dark: #fb923c;
   --color-chart-3: #1baf7a;
-  --color-chart-3-dark: #199e70;
+  --color-chart-3-dark: #34d399;
   --color-chart-4: #eda100;
-  --color-chart-4-dark: #c98500;
+  --color-chart-4-dark: #fbbf24;
   --color-chart-5: #e87ba4;
-  --color-chart-5-dark: #d55181;
+  --color-chart-5-dark: #f472b6;
 
   /* Status-flavored slots for the property-status chart, mirroring the badge
      colors already used in PropertiesTable so the chart reads consistently
-     with the rest of the admin UI. Status hexes are mode-invariant. */
+     with the rest of the admin UI. */
   --color-chart-status-draft: #6b7280;
   --color-chart-status-draft-dark: #9ca3af;
   --color-chart-status-published: #0ca30c;
-  --color-chart-status-published-dark: #0ca30c;
+  /* Was identical to the light value (a flat, non-brightened copy) — bumped
+     to match --color-success-dark, since "published" and "success" are the
+     same semantic green. */
+  --color-chart-status-published-dark: #4ade80;
   /* Same values as --color-warning/-dark — on_hold is a "caution" state,
      same semantics as the generic warning tone, just kept in this
      purpose-built set so it prints consistently on both the table badge
@@ -71,15 +104,20 @@
   --color-chart-status-onhold: #b45309;
   --color-chart-status-onhold-dark: #fbbf24;
   --color-chart-status-sold: #b6aa84;
-  --color-chart-status-sold-dark: #b6aa84;
+  /* Was identical to the light value too — a brightened gold specifically for
+     this status slot (not the theme-gold brand token itself, which stays
+     mode-invariant — see the note above theme-gold). */
+  --color-chart-status-sold-dark: #d4c59a;
   --color-chart-status-archived: #d03b3b;
   --color-chart-status-archived-dark: #e66767;
 
-  /* Chart chrome */
+  /* Chart chrome — grid/axis were previously too close to surface-dark
+     (#2c2c2a/#383835 against a #12171f card) to actually read; bumped to a
+     visible-but-soft slate so gridlines don't disappear. */
   --color-chart-grid: #e1e0d9;
-  --color-chart-grid-dark: #2c2c2a;
+  --color-chart-grid-dark: #334155;
   --color-chart-axis: #c3c2b7;
-  --color-chart-axis-dark: #383835;
+  --color-chart-axis-dark: #64748b;
 
   /* Public site fonts (Montserrat headings / Inter body) */
   --font-display: var(--font-montserrat);
@@ -105,11 +143,22 @@
 	--font-mono: var(--font-geist-mono);
 }
 
+/* OS-level fallback for the sliver of time before the no-flash script
+   (public/no-flash-theme.js) adds/omits the .dark class — matches its own
+   "no override, but OS prefers dark" branch. The .dark rule below is the
+   real source of truth once that class is set (e.g. an explicit
+   localStorage("theme") override that disagrees with the OS). */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
+		--background: #0a0e14;
+		--foreground: #fafafa;
 	}
+}
+
+.dark {
+	color-scheme: dark;
+	--background: #0a0e14;
+	--foreground: #fafafa;
 }
 
 /* Belt-and-suspenders against horizontal scroll on narrow viewports: a

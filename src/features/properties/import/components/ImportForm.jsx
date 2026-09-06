@@ -81,7 +81,7 @@ export default function ImportForm() {
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[560px] text-left border-collapse text-sm">
 									<thead>
-										<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-black/40">
+										<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
 											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 												Row
 											</th>
