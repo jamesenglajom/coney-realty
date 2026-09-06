@@ -113,20 +113,28 @@ export default function PropertyPhotoGallery({ slug, seed, alt, badge }) {
 			</div>
 
 			{gallery.length > 1 ? (
-				<div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-					{gallery.map((src, index) => (
-						<button
-							key={src}
-							type="button"
-							onClick={() => setActiveIndex(index)}
-							aria-label={`Show photo ${index + 1}`}
-							className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg ring-2 transition-all ${
-								index === safeIndex ? "ring-theme-gold" : "ring-transparent opacity-70 hover:opacity-100"
-							}`}
-						>
-							<Image src={src} alt="" fill sizes="80px" className="object-cover" />
-						</button>
-					))}
+				// Outer div owns the scroll/padding; the inner row is sized to its
+				// content (w-fit) and centered via mx-auto — safe unlike
+				// justify-center on the scroll container itself, which clips the
+				// far side of an overflowing row in some browsers. When the row is
+				// wider than the viewport, w-fit just lets it overflow and mx-auto
+				// collapses to 0, so it scrolls normally from the left.
+				<div className="mt-3 overflow-x-auto px-5 pb-1 sm:px-8">
+					<div className="mx-auto flex w-fit gap-2">
+						{gallery.map((src, index) => (
+							<button
+								key={src}
+								type="button"
+								onClick={() => setActiveIndex(index)}
+								aria-label={`Show photo ${index + 1}`}
+								className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg ring-2 transition-all ${
+									index === safeIndex ? "ring-theme-gold" : "ring-transparent opacity-70 hover:opacity-100"
+								}`}
+							>
+								<Image src={src} alt="" fill sizes="80px" className="object-cover" />
+							</button>
+						))}
+					</div>
 				</div>
 			) : null}
 		</div>
