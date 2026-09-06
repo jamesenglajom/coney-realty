@@ -5,11 +5,10 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { testimonialSchema } from "../schemas";
 import { createTestimonialAction, updateTestimonialAction } from "../actions";
-import { AGENT_SHOT_TYPES, AGENT_SHOT_LABELS } from "@/features/users/agentShots";
+import CopyButton from "@/components/ui/CopyButton";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -18,21 +17,20 @@ import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 
-export default function TestimonialModal({ open, onClose, testimonial, agentOptions, agentPhotosById = {} }) {
+export default function TestimonialModal({ open, onClose, testimonial, agentOptions }) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const isEdit = Boolean(testimonial);
+	const filenameKey = testimonial?.slug || testimonial?.id;
 
 	const {
 		register,
 		handleSubmit,
 		reset,
-		watch,
-		setValue,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(testimonialSchema),
-		defaultValues: { quote: "", clientName: "", agentDisplayName: "", agentTagline: "", photoUrl: "", agentId: "" },
+		defaultValues: { quote: "", clientName: "", agentDisplayName: "", agentTagline: "", slug: "", agentId: "" },
 	});
 
 	useEffect(() => {
@@ -42,17 +40,10 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 			clientName: testimonial?.clientName ?? "",
 			agentDisplayName: testimonial?.agentDisplayName ?? "",
 			agentTagline: testimonial?.agentTagline ?? "",
-			photoUrl: testimonial?.photoUrl ?? "",
+			slug: testimonial?.slug ?? "",
 			agentId: testimonial?.agentId ?? "",
 		});
 	}, [open, testimonial, reset]);
-
-	const selectedAgentId = watch("agentId");
-	const selectedPhotoUrl = watch("photoUrl");
-	const agentPhotos = agentPhotosById[selectedAgentId];
-	const availableShots = agentPhotos
-		? AGENT_SHOT_TYPES.map((shot) => ({ shot, url: agentPhotos[shot] })).filter((option) => option.url)
-		: [];
 
 	function onSubmit(values) {
 		startTransition(async () => {
@@ -72,6 +63,26 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 	return (
 		<Modal open={open} onClose={onClose} title={isEdit ? "Edit testimonial" : "Add testimonial"}>
 			<form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+				{isEdit ? (
+					<div className="flex items-center gap-3 rounded-xl border border-theme-gold-light bg-theme-gold-light/40 p-3 dark:border-border-dark dark:bg-white/5">
+						<span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
+							<Image src={testimonial.photo} alt="" fill sizes="48px" unoptimized className="object-cover" />
+						</span>
+						<div className="min-w-0 text-xs text-txt-secondary dark:text-txt-secondary-dark">
+							<p>
+								To set this testimonial&apos;s own photo, save an image as{" "}
+								<span className="font-mono">public/testimonials/{filenameKey}.webp</span> (jpg/png also work).
+							</p>
+							<div className="mt-1 flex items-center gap-1">
+								<span className="truncate font-mono text-[11px] text-txt-muted dark:text-txt-muted-dark">
+									{filenameKey}
+								</span>
+								<CopyButton value={filenameKey} label="Image filename key" />
+							</div>
+						</div>
+					</div>
+				) : null}
+
 				<div>
 					<Label htmlFor="testimonialQuote">Quote</Label>
 					<Textarea
@@ -120,56 +131,15 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 					</div>
 				</div>
 
-				{availableShots.length > 0 ? (
-					<div>
-						<Label>Pick a photo</Label>
-						<div className="grid grid-cols-3 gap-2">
-							{availableShots.map(({ shot, url }) => {
-								const isSelected = selectedPhotoUrl === url;
-								return (
-									<button
-										key={shot}
-										type="button"
-										onClick={() => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
-										className={`relative overflow-hidden rounded-lg ring-2 transition-colors ${
-											isSelected ? "ring-theme-gold" : "ring-transparent hover:ring-theme-gray/40"
-										}`}
-									>
-										<span className="relative block aspect-square w-full">
-											<Image src={url} alt={AGENT_SHOT_LABELS[shot]} fill unoptimized className="object-cover" />
-										</span>
-										{isSelected ? (
-											<span className="absolute right-1 top-1 rounded-full bg-theme-gold p-0.5 text-theme-blue">
-												<Check className="h-3 w-3" aria-hidden="true" />
-											</span>
-										) : null}
-										<span className="block truncate bg-black/60 px-1 py-0.5 text-[10px] text-white">
-											{AGENT_SHOT_LABELS[shot]}
-										</span>
-									</button>
-								);
-							})}
-						</div>
-						<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-							From this agent&apos;s photo library (public/agents/). Click one to use it, or paste a different URL
-							below.
-						</p>
-					</div>
-				) : null}
-
 				<div>
-					<Label htmlFor="testimonialPhoto">Photo URL (optional)</Label>
-					<Input
-						id="testimonialPhoto"
-						type="text"
-						placeholder="https://… or /leaderboard/name.webp"
-						{...register("photoUrl")}
-					/>
+					<Label htmlFor="testimonialSlug">Photo filename key (optional)</Label>
+					<Input id="testimonialSlug" type="text" placeholder="imelia-s" {...register("slug")} />
 					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-						An allowed-host URL, or a file placed under <span className="font-mono">public/</span>. Falls back to the
-						linked agent&apos;s photo library, then their avatar.
+						Lowercase, hyphenated — used to name the photo file (
+						<span className="font-mono">public/testimonials/{"{this}"}.webp</span>). Leave blank to use the
+						testimonial&apos;s ID instead once it&apos;s saved.
 					</p>
-					<FieldError>{errors.photoUrl?.message}</FieldError>
+					<FieldError>{errors.slug?.message}</FieldError>
 				</div>
 
 				<div className="flex justify-end gap-2 pt-1">

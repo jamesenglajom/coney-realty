@@ -16,7 +16,7 @@ function toColumns(data) {
 		client_name: data.clientName,
 		agent_display_name: data.agentDisplayName,
 		agent_tagline: data.agentTagline || null,
-		photo_url: data.photoUrl || null,
+		slug: data.slug || null,
 		agent_id: data.agentId || null,
 	};
 }

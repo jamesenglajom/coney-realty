@@ -14,14 +14,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { getAvatarForSeed } from "@/features/homepage/data";
 import Button from "@/components/ui/Button";
+import CopyButton from "@/components/ui/CopyButton";
 import TestimonialModal from "./TestimonialModal";
 import { deleteTestimonialAction, reorderTestimonialsAction } from "../actions";
-
-function photoFor(testimonial) {
-	return testimonial.photoUrl || testimonial.agentAvatarUrl || getAvatarForSeed(testimonial.id);
-}
 
 function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: testimonial.id });
@@ -49,7 +45,7 @@ function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 			</button>
 
 			<span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
-				<Image src={photoFor(testimonial)} alt="" fill sizes="44px" unoptimized className="object-cover" />
+				<Image src={testimonial.photo} alt="" fill sizes="44px" unoptimized className="object-cover" />
 			</span>
 
 			<div className="min-w-0 flex-1">
@@ -60,6 +56,15 @@ function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 					</span>
 				</p>
 				<p className="truncate text-xs text-txt-muted dark:text-txt-muted-dark">{testimonial.quote}</p>
+			</div>
+
+			{/* The exact key to name a photo file public/testimonials/<key>.webp
+			    after — the testimonial's slug if it has one, else its id. */}
+			<div className="hidden shrink-0 items-center gap-1 sm:flex">
+				<span className="max-w-28 truncate rounded bg-theme-gray/10 px-1.5 py-1 font-mono text-[10px] text-txt-muted dark:bg-white/5 dark:text-txt-muted-dark">
+					{testimonial.slug || testimonial.id}
+				</span>
+				<CopyButton value={testimonial.slug || testimonial.id} label="Image filename key" />
 			</div>
 
 			{canEdit ? (
@@ -86,7 +91,7 @@ function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 	);
 }
 
-export default function TestimonialEditor({ testimonials, agentOptions, agentPhotosById, canCreate, canEdit, canDelete }) {
+export default function TestimonialEditor({ testimonials, agentOptions, canCreate, canEdit, canDelete }) {
 	const router = useRouter();
 	const [rows, setRows] = useState(testimonials);
 	const [modalOpen, setModalOpen] = useState(false);
@@ -186,7 +191,6 @@ export default function TestimonialEditor({ testimonials, agentOptions, agentPho
 				onClose={() => setModalOpen(false)}
 				testimonial={editing}
 				agentOptions={agentOptions}
-				agentPhotosById={agentPhotosById}
 			/>
 		</div>
 	);

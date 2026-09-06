@@ -559,8 +559,10 @@ create trigger set_leaderboard_config_updated_at
 -- agent_id (optional) links to a real agent account for photo-library
 -- lookup (public/agents/<user_id>_<shot>.webp — see
 -- src/features/users/imageFs.js); agent_display_name/agent_tagline are
--- always free text (same reasoning as leaderboard_entries.name), and
--- photo_url is an explicit override that wins over the photo library.
+-- always free text (same reasoning as leaderboard_entries.name). The
+-- testimonial's own photo is a static file under public/testimonials/, named
+-- by slug (if set) or id — see src/features/testimonials/imageFs.js — not a
+-- DB-stored URL.
 -- ---------------------------------------------------------------------------
 create table if not exists public.testimonials (
   id uuid primary key default gen_random_uuid(),
@@ -568,7 +570,7 @@ create table if not exists public.testimonials (
   client_name text not null,
   agent_display_name text not null,
   agent_tagline text,
-  photo_url text,
+  slug text,
   agent_id uuid references public.users (id) on delete set null,
   display_order integer not null default 0,
   created_at timestamptz not null default now(),
@@ -578,6 +580,9 @@ create table if not exists public.testimonials (
 
 create index if not exists testimonials_order_idx
   on public.testimonials (display_order) where deleted_at is null;
+
+create unique index if not exists testimonials_slug_key
+  on public.testimonials (slug) where deleted_at is null;
 
 alter table public.testimonials enable row level security;
 -- Deny-by-default: the homepage reads this through the admin client in a
