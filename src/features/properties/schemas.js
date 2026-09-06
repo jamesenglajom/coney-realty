@@ -1,6 +1,13 @@
 import { z } from "zod";
 
 export const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Condo", "Land", "House and Lot"];
+
+// Narrower list for filter dropdowns (public PLP/homepage search, admin
+// properties list) — the business only actually deals in these two types
+// now. PROPERTY_TYPES itself stays the full historical set so existing
+// records of any type can still be viewed/edited and the create/edit form
+// isn't artificially restricted.
+export const FILTERABLE_PROPERTY_TYPES = ["House and Lot", "Land"];
 export const PROPERTY_STATUSES = ["draft", "published", "on_hold", "sold", "archived"];
 
 // Display text for statuses that aren't a single plain word — "on_hold"

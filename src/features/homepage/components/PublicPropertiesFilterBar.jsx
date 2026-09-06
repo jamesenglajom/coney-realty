@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PRICE_BANDS } from "@/features/homepage/data";
-import { PROPERTY_TYPES } from "@/features/properties/schemas";
+import { FILTERABLE_PROPERTY_TYPES } from "@/features/properties/schemas";
 
 const FIELD_CLASSES =
 	"w-full rounded-xl border border-theme-gray/30 bg-white px-3.5 py-2.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:border-theme-gold";
@@ -37,7 +37,7 @@ export default function PublicPropertiesFilterBar({ cities, city, propertyType, 
 				</label>
 				<select id="propertyType" name="propertyType" defaultValue={propertyType ?? ""} className={FIELD_CLASSES}>
 					<option value="">Any type</option>
-					{PROPERTY_TYPES.map((type) => (
+					{FILTERABLE_PROPERTY_TYPES.map((type) => (
 						<option key={type} value={type}>
 							{type}
 						</option>

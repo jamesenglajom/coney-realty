@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { PRICE_BANDS } from "@/features/homepage/data";
-import { PROPERTY_TYPES } from "@/features/properties/schemas";
+import { FILTERABLE_PROPERTY_TYPES } from "@/features/properties/schemas";
 
 const FIELD_CLASSES =
 	"w-full rounded-xl border border-white/20 bg-white/90 px-3.5 py-3 text-sm text-txt-primary outline-none focus:border-theme-gold dark:bg-white/10 dark:text-white";
@@ -53,7 +53,7 @@ export default function HomeSearchForm({ cityStates, defaultLocation, defaultTyp
 				</label>
 				<select id="type" name="propertyType" defaultValue={defaultType} className={FIELD_CLASSES}>
 					<option value="">Any type</option>
-					{PROPERTY_TYPES.map((propertyType) => (
+					{FILTERABLE_PROPERTY_TYPES.map((propertyType) => (
 						<option key={propertyType} value={propertyType}>
 							{propertyType}
 						</option>

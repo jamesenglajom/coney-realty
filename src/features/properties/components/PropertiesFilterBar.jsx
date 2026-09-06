@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
-import { PROPERTY_TYPES } from "../schemas";
+import { FILTERABLE_PROPERTY_TYPES } from "../schemas";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 
@@ -79,7 +79,7 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 					onChange={(event) => updateParam("propertyType", event.target.value)}
 				>
 					<option value="">All types</option>
-					{PROPERTY_TYPES.map((type) => (
+					{FILTERABLE_PROPERTY_TYPES.map((type) => (
 						<option key={type} value={type}>
 							{type}
 						</option>
