@@ -13,16 +13,19 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // Leaderboard.jsx), not the site-wide font-display/font-body tokens.
 const scriptFont = Ballet({ subsets: ["latin"], weight: "400" });
 
-function TestimonialSlide({ testimonial }) {
+// One "reel" card: quote fills the card, the agent's photo sits tucked into
+// the bottom-right corner (small, not a half-width hero image) — the
+// signature/tagline reads to its left so the two never collide.
+function TestimonialCard({ testimonial }) {
 	const { quote, clientName, agentDisplayName, agentTagline, photo, agentId } = testimonial;
 
 	const signature = (
 		<>
-			<p className={`${scriptFont.className} text-4xl leading-none text-theme-gold sm:text-5xl`}>
+			<p className={`${scriptFont.className} text-3xl leading-none text-theme-gold sm:text-4xl`}>
 				{agentDisplayName}
 			</p>
 			{agentTagline ? (
-				<p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-txt-muted dark:text-txt-muted-dark">
+				<p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-txt-muted dark:text-txt-muted-dark">
 					{agentTagline}
 				</p>
 			) : null}
@@ -30,30 +33,30 @@ function TestimonialSlide({ testimonial }) {
 	);
 
 	return (
-		<div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+		<div className="flex h-full min-h-90 flex-col justify-between overflow-hidden rounded-3xl border border-theme-gray/15 bg-white p-6 shadow-lg dark:border-white/10 dark:bg-white/[0.03] sm:p-7">
 			<figure className="m-0">
-				<span className="font-display text-6xl leading-none text-theme-gold" aria-hidden="true">
+				<span className="font-display text-5xl leading-none text-theme-gold" aria-hidden="true">
 					&ldquo;
 				</span>
-				<blockquote className="mt-2 font-display text-[clamp(20px,3vw,26px)] font-medium italic leading-snug text-theme-blue dark:text-white">
+				<blockquote className="mt-2 line-clamp-6 font-display text-[15px] font-medium italic leading-snug text-theme-blue dark:text-white sm:text-base">
 					{quote}
 				</blockquote>
-				<figcaption className="mt-4 text-sm text-txt-muted dark:text-txt-muted-dark">— {clientName}</figcaption>
-				<div className="mt-6">
-					{agentId ? <Link href={`/agents/${agentId}`}>{signature}</Link> : signature}
-				</div>
+				<figcaption className="mt-3 text-sm text-txt-muted dark:text-txt-muted-dark">— {clientName}</figcaption>
 			</figure>
 
-			<div className="relative mx-auto h-64 w-56 shrink-0 overflow-hidden rounded-[32px] bg-theme-gold sm:h-80 sm:w-64">
-				<Image src={photo} alt={agentDisplayName} fill sizes="256px" className="object-cover" />
+			<div className="mt-6 flex items-end justify-between gap-3">
+				<div className="min-w-0">{agentId ? <Link href={`/agents/${agentId}`}>{signature}</Link> : signature}</div>
+				<div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-4 ring-theme-gold/40 sm:h-24 sm:w-24">
+					<Image src={photo} alt={agentDisplayName} fill sizes="96px" className="object-cover" />
+				</div>
 			</div>
 		</div>
 	);
 }
 
 export default function TestimonialCarouselClient({ testimonials }) {
-	const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-		Autoplay({ delay: 7000, stopOnInteraction: false, stopOnMouseEnter: true }),
+	const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start", containScroll: "trimSnaps" }, [
+		Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }),
 	]);
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -80,11 +83,16 @@ export default function TestimonialCarouselClient({ testimonials }) {
 		>
 			<div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
 				<div className="relative">
+					{/* Reels-style row — several portrait cards visible at once, each its
+					    own snap point, rather than one full-width slide at a time. */}
 					<div className="overflow-hidden" ref={emblaRef}>
-						<div className="flex">
+						<div className="flex gap-5">
 							{testimonials.map((testimonial) => (
-								<div key={testimonial.id} className="min-w-0 flex-[0_0_100%]">
-									<TestimonialSlide testimonial={testimonial} />
+								<div
+									key={testimonial.id}
+									className="min-w-0 flex-[0_0_82%] sm:flex-[0_0_46%] lg:flex-[0_0_31%]"
+								>
+									<TestimonialCard testimonial={testimonial} />
 								</div>
 							))}
 						</div>
@@ -96,17 +104,17 @@ export default function TestimonialCarouselClient({ testimonials }) {
 								type="button"
 								onClick={() => emblaApi?.scrollPrev()}
 								aria-label="Previous testimonial"
-								className="absolute -left-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white p-2 text-theme-blue shadow-md hover:bg-theme-gold-light dark:bg-surface-dark dark:text-white dark:hover:bg-white/10 sm:-left-5 sm:flex"
+								className="absolute -left-2 top-1/2 flex -translate-y-1/2 rounded-full bg-white p-1.5 text-theme-blue shadow-md hover:bg-theme-gold-light dark:bg-surface-dark dark:text-white dark:hover:bg-white/10 sm:-left-5 sm:p-2"
 							>
-								<ChevronLeft className="h-5 w-5" aria-hidden="true" />
+								<ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
 							</button>
 							<button
 								type="button"
 								onClick={() => emblaApi?.scrollNext()}
 								aria-label="Next testimonial"
-								className="absolute -right-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white p-2 text-theme-blue shadow-md hover:bg-theme-gold-light dark:bg-surface-dark dark:text-white dark:hover:bg-white/10 sm:-right-5 sm:flex"
+								className="absolute -right-2 top-1/2 flex -translate-y-1/2 rounded-full bg-white p-1.5 text-theme-blue shadow-md hover:bg-theme-gold-light dark:bg-surface-dark dark:text-white dark:hover:bg-white/10 sm:-right-5 sm:p-2"
 							>
-								<ChevronRight className="h-5 w-5" aria-hidden="true" />
+								<ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
 							</button>
 						</>
 					) : null}
