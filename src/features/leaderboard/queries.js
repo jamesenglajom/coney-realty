@@ -1,6 +1,7 @@
 import "server-only";
 import fs from "node:fs";
 import path from "node:path";
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAvatarForSeed } from "@/features/homepage/data";
 
@@ -67,8 +68,10 @@ const HIDDEN_LEADERBOARD = {
 // Homepage read — config plus entries with a resolved photo (own photo →
 // linked agent avatar → deterministic placeholder). Degrades to "hidden"
 // on any error (e.g. the migration hasn't been run yet) so a leaderboard
-// problem never takes down the public site.
-export async function getPublicLeaderboard() {
+// problem never takes down the public site. cache()'d since the homepage
+// now reads this twice (the poster grid and the experimental panorama
+// section both want the same top-5) — dedupes to one DB round trip.
+export const getPublicLeaderboard = cache(async function getPublicLeaderboard() {
 	try {
 		const [config, entries] = await Promise.all([getLeaderboardConfig(), listLeaderboardEntries()]);
 
@@ -86,4 +89,4 @@ export async function getPublicLeaderboard() {
 	} catch {
 		return HIDDEN_LEADERBOARD;
 	}
-}
+});
