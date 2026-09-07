@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { hasPropertyImage } from "@/features/properties/imageFs";
 import { PRICE_BANDS } from "./data";
 
 // Public property data (PLP-equivalent: homepage search/featured sections)
@@ -90,6 +91,16 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 // Featured listings for the homepage, with whichever agent (if any) is
 // assigned first. Uses the admin client to cross into user_property/users
 // for the same trust-boundary reasons as the other homepage queries here.
+//
+// Published only — on-hold and sold listings shouldn't headline the
+// showcase — and only properties that actually have a real uploaded photo
+// (public/properties/{slug}_img_1.webp), so this doesn't lead with the
+// deterministic placeholder pool. No row limit on the initial fetch: we
+// don't know in advance which of the (published, has-a-photo) properties
+// are the top-priced ones, so this filters the full published set first,
+// then trims to `limit` by price — a LIMIT before the photo-existence
+// filter risks cutting a photographed listing that just isn't cheap enough
+// to rank in an arbitrary top-N-by-price slice.
 async function _listFeaturedProperties(limit = 6) {
 	const supabase = createAdminClient();
 
@@ -98,29 +109,31 @@ async function _listFeaturedProperties(limit = 6) {
 		.select(
 			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, user_property(users(id, full_name))",
 		)
-		.in("status", ["published", "on_hold"])
+		.eq("status", "published")
 		.is("deleted_at", null)
-		.order("price", { ascending: false })
-		.limit(limit);
+		.order("price", { ascending: false });
 
 	if (error) throw new Error(error.message);
 
-	return (data ?? []).map((property) => {
-		const agent = property.user_property?.[0]?.users ?? null;
-		return {
-			id: property.id,
-			slug: property.slug,
-			name: property.screen_name || property.title,
-			city: property.city_state,
-			price: property.price,
-			type: property.property_type,
-			isOnHold: property.status === "on_hold",
-			beds: property.custom_fields?.beds ?? null,
-			baths: property.custom_fields?.baths ?? null,
-			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
-			agent: agent ? { id: agent.id, name: agent.full_name } : null,
-		};
-	});
+	return (data ?? [])
+		.filter((property) => hasPropertyImage(property.slug))
+		.slice(0, limit)
+		.map((property) => {
+			const agent = property.user_property?.[0]?.users ?? null;
+			return {
+				id: property.id,
+				slug: property.slug,
+				name: property.screen_name || property.title,
+				city: property.city_state,
+				price: property.price,
+				type: property.property_type,
+				isOnHold: property.status === "on_hold",
+				beds: property.custom_fields?.beds ?? null,
+				baths: property.custom_fields?.baths ?? null,
+				lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
+				agent: agent ? { id: agent.id, name: agent.full_name } : null,
+			};
+		});
 }
 
 export const listFeaturedProperties = unstable_cache(_listFeaturedProperties, ["list-featured-properties"], {
