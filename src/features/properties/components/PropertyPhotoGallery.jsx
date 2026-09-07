@@ -76,7 +76,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt, badge }) {
 					fill
 					priority
 					sizes="100vw"
-					className="object-cover"
+					className="object-contain"
 				/>
 
 				{badge ? <div className="absolute left-4 top-4 sm:left-6 sm:top-6">{badge}</div> : null}
