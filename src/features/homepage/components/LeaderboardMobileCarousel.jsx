@@ -32,14 +32,14 @@ function FeaturedCard({ entry }) {
 				className="relative block aspect-2/3 w-full overflow-hidden p-1.5"
 				style={{ backgroundImage: SUNBURST_BACKGROUND }}
 			>
-				<span className="relative block h-full w-full overflow-hidden">
+				<span className="relative block h-full w-full overflow-hidden shadow-[inset_2px_2px_4px_rgba(255,255,255,0.35),inset_-3px_-3px_6px_rgba(0,0,0,0.65)]">
 					<Image src={entry.photo} alt={entry.name} fill sizes="45vw" className="object-cover" />
 					<span className="pointer-events-none absolute inset-0 bg-linear-to-b from-theme-gold/35 via-transparent to-black/60 mix-blend-overlay" />
 					<span className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
 				</span>
 			</span>
-			<span className="bg-[#726b59] px-1.5 py-2.5">
-				<span className={`${namesFont.className} block truncate text-[11px] uppercase tracking-wide text-white`}>
+			<span className="flex flex-1 items-center justify-center bg-[#726b59] px-2 py-2.5 text-center">
+				<span className={`${namesFont.className} block truncate text-xs uppercase tracking-wide text-white`}>
 					{entry.name}
 				</span>
 			</span>

@@ -37,22 +37,29 @@ function EntryFigure({ entry, children, className }) {
 	return <div className={className}>{children}</div>;
 }
 
-// Photo + name-bar for one top-5 entry — shared between the mobile carousel
-// and the desktop poster grid so the two layouts never drift out of sync.
+// Photo + name-bar for one top-5 entry (desktop/tablet poster grid — the
+// mobile carousel keeps its own copy in LeaderboardMobileCarousel.jsx since
+// it can't share a "use client" module with this server component).
+// Individually rounded/shadowed/ringed now that the grid uses a real gap
+// instead of touching hairline-divided cells, with a hover "float" — the
+// card lifts and its shadow/ring bloom while the photo zooms in.
 function FeaturedCard({ entry }) {
 	return (
-		<EntryFigure entry={entry} className="group flex h-full flex-col">
+		<EntryFigure
+			entry={entry}
+			className="group flex h-full flex-col overflow-hidden rounded-2xl bg-black shadow-[0_12px_28px_-16px_rgba(0,0,0,0.9)] ring-1 ring-theme-gold/20 transition-all duration-300 ease-out hover:-translate-y-2.5 hover:shadow-[0_24px_45px_-16px_rgba(182,170,132,0.55)] hover:ring-theme-gold/60"
+		>
 			<span
 				className="relative block aspect-2/3 w-full overflow-hidden p-1.5"
 				style={{ backgroundImage: SUNBURST_BACKGROUND }}
 			>
-				<span className="relative block h-full w-full overflow-hidden">
+				<span className="relative block h-full w-full overflow-hidden rounded-sm shadow-[inset_2px_2px_4px_rgba(255,255,255,0.35),inset_-3px_-3px_6px_rgba(0,0,0,0.65)]">
 					<Image
 						src={entry.photo}
 						alt={entry.name}
 						fill
 						sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 200px"
-						className="object-cover transition-transform duration-500 group-hover:scale-105"
+						className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
 					/>
 					{/* Warm gold cast up top (matching the poster's color grade),
 					    fading to a dark base so the name bar below reads clean. */}
@@ -60,10 +67,8 @@ function FeaturedCard({ entry }) {
 					<span className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
 				</span>
 			</span>
-			<span className="bg-[#726b59] px-1.5 py-2.5">
-				<span
-					className={`${namesFont.className} block truncate text-[11px] uppercase tracking-wide text-white sm:text-xs`}
-				>
+			<span className="flex flex-1 items-center justify-center bg-[#726b59] px-2 py-3.5 text-center">
+				<span className={`${namesFont.className} block truncate text-sm uppercase tracking-wide text-white sm:text-base`}>
 					{entry.name}
 				</span>
 			</span>
@@ -128,8 +133,10 @@ export default async function Leaderboard() {
 				    sm: and up. */}
 				<LeaderboardMobileCarousel featured={featured} />
 
-				{/* Tablet/desktop: the original printed-poster grid. */}
-				<div className="mx-auto mt-14 hidden max-w-4xl grid-cols-5 gap-px overflow-hidden bg-black shadow-[0_0_100px_-20px_rgba(182,170,132,0.55)] ring-1 ring-theme-gold/20 sm:grid">
+				{/* Tablet/desktop: the printed-poster grid, now with real gaps between
+				    cards (each is its own floating, shadowed tile) instead of the
+				    touching hairline-divided cells this started as. */}
+				<div className="mx-auto mt-14 hidden max-w-4xl grid-cols-5 gap-5 sm:grid">
 					{featured.map((entry) => (
 						<FeaturedCard key={entry.id} entry={entry} />
 					))}
