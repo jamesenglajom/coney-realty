@@ -96,7 +96,10 @@ export default function TopPerformersPanoramaClient({ entries, heading, periodLa
 	const restWidth = (100 - ACTIVE_WIDTH) / Math.max(entries.length - 1, 1);
 
 	return (
-		<section aria-label="Top performers panorama" className="py-20 sm:py-28">
+		<section
+			aria-label="Top performers panorama"
+			className="border-t border-theme-gray/15 py-20 dark:border-border-dark sm:py-28"
+		>
 			<div className="mx-auto max-w-6xl px-5 sm:px-8">
 				<SectionHeading
 					eyebrow={periodLabel || "Meet the team"}
