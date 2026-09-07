@@ -20,13 +20,19 @@ export default function Modal({ open, onClose, title, children }) {
 	return (
 		<div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
 			<div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+			{/* max-h + flex column, with only the middle section scrolling — on a
+			    short viewport (phone landscape, tablet) a tall form used to spill
+			    past the bottom of the screen with no way to scroll down to its own
+			    Save button. Header/footer (title bar here; each form's own submit
+			    row lives in `children`, so it scrolls with the body — see below)
+			    stay reachable either way. */}
 			<div
 				role="dialog"
 				aria-modal="true"
 				aria-label={title}
-				className="relative w-full max-w-sm rounded-2xl border border-theme-gold-light bg-white p-6 shadow-2xl dark:border-border-dark dark:bg-surface-dark"
+				className="relative flex max-h-[85vh] w-full max-w-sm flex-col rounded-2xl border border-theme-gold-light bg-white shadow-2xl dark:border-border-dark dark:bg-surface-dark"
 			>
-				<div className="mb-4 flex items-center justify-between">
+				<div className="flex shrink-0 items-center justify-between px-6 pb-4 pt-6">
 					<h2 className="text-lg font-semibold text-theme-blue dark:text-white">{title}</h2>
 					<button
 						type="button"
@@ -37,7 +43,7 @@ export default function Modal({ open, onClose, title, children }) {
 						<X className="h-4 w-4" aria-hidden="true" />
 					</button>
 				</div>
-				{children}
+				<div className="overflow-y-auto px-6 pb-6">{children}</div>
 			</div>
 		</div>
 	);
