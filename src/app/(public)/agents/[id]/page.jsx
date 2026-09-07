@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Bed, Bath, Ruler } from "lucide-react";
 import { getAgentProfile } from "@/features/homepage/queries";
 import { getAvatarForSeed, formatPrice } from "@/features/homepage/data";
-import Button from "@/components/ui/Button";
 import PropertyCoverImage from "@/features/properties/components/PropertyCoverImage";
 
 export async function generateMetadata({ params }) {
@@ -48,11 +47,6 @@ export default async function AgentProfilePage({ params }) {
 						{agent.bio ? (
 							<p className="mt-4 max-w-2xl text-base text-txt-secondary dark:text-txt-secondary-dark">{agent.bio}</p>
 						) : null}
-						<div className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
-							<Button href="/schedule-viewing" variant="primary" size="sm">
-								Schedule a viewing with {agent.name.split(" ")[0]}
-							</Button>
-						</div>
 					</div>
 				</div>
 
