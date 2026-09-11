@@ -1,6 +1,5 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
 import { getPropertyImageForSeed } from "@/features/homepage/data";
 
 // Public-safe read (used by the /schedule-viewing form) — goes through the
@@ -11,7 +10,7 @@ export async function listPropertyOptionsForViewingForm() {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("properties")
-		.select("id, slug, screen_name, title, city_state, price")
+		.select("id, slug, screen_name, title, city_state, price, image_urls")
 		.eq("status", "published")
 		.is("deleted_at", null)
 		.order("screen_name", { ascending: true });
@@ -27,7 +26,7 @@ export async function listPropertyOptionsForViewingForm() {
 		// Real photo when one exists — same fallback pool the PLP/PDP use, so
 		// a property without photos yet still gets a plausible preview instead
 		// of a broken image.
-		image: hasPropertyImage(property.slug) ? propertyImagePath(property.slug) : getPropertyImageForSeed(property.id),
+		image: property.image_urls?.[0] ?? getPropertyImageForSeed(property.id),
 	}));
 }
 

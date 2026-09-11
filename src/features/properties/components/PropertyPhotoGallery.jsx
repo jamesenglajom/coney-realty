@@ -1,60 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getPropertyImageForSeed } from "@/features/homepage/data";
 
-const MAX_IMAGES = 20;
-
-// Photos are static files an admin drops into public/properties/ named
-// {slug}_img_1.webp, {slug}_img_2.webp, ... — there's no DB column tracking
-// how many exist, so this probes sequentially (HEAD request, no image
-// decode) and stops at the first missing index. Falls back to the
-// deterministic placeholder pool if none exist yet.
-function usePropertyImages(slug) {
-	const [images, setImages] = useState(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		setImages(null);
-
-		async function probe() {
-			const found = [];
-			for (let i = 1; i <= MAX_IMAGES; i += 1) {
-				const url = `/properties/${slug}_img_${i}.webp`;
-				try {
-					const res = await fetch(url, { method: "HEAD" });
-					if (!res.ok) break;
-					found.push(url);
-				} catch {
-					break;
-				}
-			}
-			if (!cancelled) setImages(found);
-		}
-
-		if (slug) probe();
-		else setImages([]);
-
-		return () => {
-			cancelled = true;
-		};
-	}, [slug]);
-
-	return images;
-}
-
+// `images` is the property's image_urls column (an ordered array of
+// Supabase Storage public URLs, picked via the admin media library) — the
+// page passes it straight through, no probing or Storage calls needed.
+//
 // `badge` renders top-left over the main image (property type / on-hold
 // pills) — title/price live in the page itself now, not composed onto the
 // photo, so this component only ever needs to know about the badge slot.
-export default function PropertyPhotoGallery({ slug, seed, alt, badge }) {
-	const images = usePropertyImages(slug);
+export default function PropertyPhotoGallery({ images, seed, alt, badge }) {
 	const [activeIndex, setActiveIndex] = useState(0);
-
-	if (images === null) {
-		return <div className="aspect-video max-h-[70vh] w-full animate-pulse bg-theme-gray/15 dark:bg-white/5" />;
-	}
 
 	const gallery = images.length > 0 ? images : [getPropertyImageForSeed(seed)];
 	const safeIndex = Math.min(activeIndex, gallery.length - 1);
@@ -75,6 +34,7 @@ export default function PropertyPhotoGallery({ slug, seed, alt, badge }) {
 					alt={alt}
 					fill
 					priority
+					quality={90}
 					sizes="100vw"
 					className="object-contain"
 				/>

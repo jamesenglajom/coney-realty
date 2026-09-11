@@ -2,7 +2,6 @@ import "server-only";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasPropertyImage } from "@/features/properties/imageFs";
 import { PRICE_BANDS } from "./data";
 
 // Public property data (PLP-equivalent: homepage search/featured sections)
@@ -56,7 +55,7 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 	const { data: links, error: linksError } = await supabase
 		.from("user_property")
 		.select(
-			"properties(id, slug, title, screen_name, property_type, price, city_state, city, region, district, custom_fields, status, deleted_at)",
+			"properties(id, slug, title, screen_name, property_type, price, city_state, city, region, district, custom_fields, status, deleted_at, image_urls)",
 		)
 		.eq("user_id", id);
 
@@ -72,6 +71,7 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 			city: property.city_state,
 			price: property.price,
 			type: property.property_type,
+			imageUrl: property.image_urls?.[0] ?? null,
 			beds: property.custom_fields?.beds ?? null,
 			baths: property.custom_fields?.baths ?? null,
 			lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
@@ -93,21 +93,21 @@ export const getAgentProfile = cache(async function getAgentProfile(id) {
 // for the same trust-boundary reasons as the other homepage queries here.
 //
 // Published only — on-hold and sold listings shouldn't headline the
-// showcase — and only properties that actually have a real uploaded photo
-// (public/properties/{slug}_img_1.webp), so this doesn't lead with the
-// deterministic placeholder pool. No row limit on the initial fetch: we
-// don't know in advance which of the (published, has-a-photo) properties
-// are the top-priced ones, so this filters the full published set first,
-// then trims to `limit` by price — a LIMIT before the photo-existence
-// filter risks cutting a photographed listing that just isn't cheap enough
-// to rank in an arbitrary top-N-by-price slice.
+// showcase — and only properties that actually have a real uploaded photo,
+// so this doesn't lead with the deterministic placeholder pool. No row
+// limit on the initial fetch: we don't know in advance which of the
+// (published, has-a-photo) properties are the top-priced ones, so this
+// filters the full published set first, then trims to `limit` by price —
+// a LIMIT before the photo-existence filter risks cutting a photographed
+// listing that just isn't cheap enough to rank in an arbitrary
+// top-N-by-price slice.
 async function _listFeaturedProperties(limit = 6) {
 	const supabase = createAdminClient();
 
 	const { data, error } = await supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, user_property(users(id, full_name))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, image_urls, user_property(users(id, full_name))",
 		)
 		.eq("status", "published")
 		.is("deleted_at", null)
@@ -116,7 +116,7 @@ async function _listFeaturedProperties(limit = 6) {
 	if (error) throw new Error(error.message);
 
 	return (data ?? [])
-		.filter((property) => hasPropertyImage(property.slug))
+		.filter((property) => property.image_urls?.length > 0)
 		.slice(0, limit)
 		.map((property) => {
 			const agent = property.user_property?.[0]?.users ?? null;
@@ -128,6 +128,7 @@ async function _listFeaturedProperties(limit = 6) {
 				price: property.price,
 				type: property.property_type,
 				isOnHold: property.status === "on_hold",
+				imageUrl: property.image_urls[0],
 				beds: property.custom_fields?.beds ?? null,
 				baths: property.custom_fields?.baths ?? null,
 				lotAreaSqm: property.custom_fields?.lot?.lot_area_sqm ?? null,
@@ -152,7 +153,7 @@ async function _listPublicProperties({ city, propertyType, price, page = 1 } = {
 	let query = supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, user_property(users(id, full_name))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, custom_fields, image_urls, user_property(users(id, full_name))",
 			{ count: "exact" },
 		)
 		.in("status", ["published", "on_hold"])
@@ -186,6 +187,7 @@ async function _listPublicProperties({ city, propertyType, price, page = 1 } = {
 			price: property.price,
 			type: property.property_type,
 			isOnHold: property.status === "on_hold",
+			imageUrl: property.image_urls?.[0] ?? null,
 			beds: property.custom_fields?.beds ?? null,
 			baths: property.custom_fields?.baths ?? null,
 			carpark: property.custom_fields?.carpark ?? null,
@@ -216,7 +218,7 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 	const { data: property, error } = await supabase
 		.from("properties")
 		.select(
-			"id, slug, title, screen_name, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, html_body, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
+			"id, slug, title, screen_name, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, custom_fields, html_body, image_urls, user_property(users(id, full_name, email, user_info(phone, avatar_url)))",
 		)
 		.eq("slug", slug)
 		.in("status", ["published", "on_hold"])
@@ -248,6 +250,7 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 		...rest,
 		name: rest.screen_name || rest.title,
 		isOnHold: rest.status === "on_hold",
+		imageUrls: rest.image_urls ?? [],
 		location: rest.city_state || [rest.city, rest.region, rest.district].filter(Boolean).join(", ") || null,
 		beds: customFields.beds ?? null,
 		baths: customFields.baths ?? null,

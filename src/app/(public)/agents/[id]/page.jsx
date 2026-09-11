@@ -65,7 +65,7 @@ export default async function AgentProfilePage({ params }) {
 									className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark"
 								>
 									<Link href={`/property/${listing.slug}`}>
-										<PropertyCoverImage slug={listing.slug} seed={listing.id} alt={listing.name} badge={listing.type} />
+										<PropertyCoverImage imageUrl={listing.imageUrl} seed={listing.id} alt={listing.name} badge={listing.type} />
 									</Link>
 									<div className="p-5">
 										<div className="flex items-baseline justify-between gap-3">

@@ -4,14 +4,15 @@ import { useState } from "react";
 import Image from "next/image";
 import { getPropertyImageForSeed } from "@/features/homepage/data";
 
-// Real per-property photos are static files an admin drops into
-// public/properties/ (see PropertyPhotoGallery), not something the DB knows
-// about — so the only way to know whether one exists is to try loading it
-// and fall back on error. Every property always has *a* photo either way:
-// the deterministic placeholder pool covers listings with no real photos yet.
-export default function PropertyCoverImage({ slug, seed, alt, badge, sizes, className = "aspect-[4/3]" }) {
+// `imageUrl` is the property's first Storage URL (image_urls[0], picked via
+// the admin media library) — passed straight through from an already-run
+// query, no guessing or Storage call needed here. `onError` stays as a
+// safety net in case the DB points at a file that's since been deleted from
+// the library. Every property always has *a* photo either way: the
+// deterministic placeholder pool covers listings with no real photos yet.
+export default function PropertyCoverImage({ imageUrl, seed, alt, badge, sizes, className = "aspect-[4/3]" }) {
 	const [errored, setErrored] = useState(false);
-	const src = !errored && slug ? `/properties/${slug}_img_1.webp` : getPropertyImageForSeed(seed);
+	const src = !errored && imageUrl ? imageUrl : getPropertyImageForSeed(seed);
 
 	return (
 		<div className={`relative ${className}`}>
@@ -28,7 +29,7 @@ export default function PropertyCoverImage({ slug, seed, alt, badge, sizes, clas
 					{badge}
 				</span>
 			) : null}
-			{!slug || errored ? (
+			{!imageUrl || errored ? (
 				<span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
 					No photos yet
 				</span>

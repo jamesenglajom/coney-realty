@@ -5,7 +5,6 @@ import { ArrowLeft, BedDouble, Bath, Ruler, SquareStack, Car, Pencil } from "luc
 import { getCurrentUser, getPagePermissions } from "@/features/auth/permissions";
 import { getPublicPropertyBySlug } from "@/features/homepage/queries";
 import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
-import { hasPropertyImage, propertyImagePath } from "@/features/properties/imageFs";
 import PropertyPhotoGallery from "@/features/properties/components/PropertyPhotoGallery";
 import GetMyUrlButton from "@/features/viewings/components/GetMyUrlButton";
 import Button from "@/components/ui/Button";
@@ -22,7 +21,7 @@ export async function generateMetadata({ params }) {
 	// Real photo when one exists — falls back to the same deterministic
 	// placeholder the page itself shows, so the share preview never mismatches
 	// what a visitor actually sees when they click through.
-	const ogImage = hasPropertyImage(property.slug) ? propertyImagePath(property.slug) : getPropertyImageForSeed(property.id);
+	const ogImage = property.imageUrls?.[0] ?? getPropertyImageForSeed(property.id);
 
 	return {
 		title: property.name,
@@ -109,7 +108,7 @@ export default async function PublicPropertyPage({ params }) {
 			    width, not just the content column. */}
 			<div className="mt-4">
 				<PropertyPhotoGallery
-					slug={property.slug}
+					images={property.imageUrls}
 					seed={property.id}
 					alt={property.name}
 					badge={

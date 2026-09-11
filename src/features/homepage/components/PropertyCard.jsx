@@ -12,7 +12,7 @@ export default function PropertyCard({ property }) {
 		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark">
 			<Link href={`/property/${property.slug}`}>
 				<PropertyCoverImage
-					slug={property.slug}
+					imageUrl={property.imageUrl}
 					seed={property.id}
 					alt={`${property.name}${property.city ? ` in ${property.city}` : ""}`}
 					badge={property.type}

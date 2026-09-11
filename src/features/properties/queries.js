@@ -1,9 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasPropertyImage } from "./imageFs";
 
 const LIST_COLUMNS =
-	"id, title, screen_name, code_name, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at";
+	"id, title, screen_name, code_name, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at, image_urls";
 const AGENT_JOIN = "users(id, full_name, user_info(avatar_url))";
 
 // Agents only ever see their own assigned properties — pass their id to
@@ -51,7 +50,7 @@ export async function listProperties({
 			.filter(Boolean)
 			.map((agent) => ({ id: agent.id, name: agent.full_name, avatarUrl: agent.user_info?.avatar_url ?? null }));
 
-		return { ...rest, assignedAgents, hasImage: hasPropertyImage(rest.slug) };
+		return { ...rest, assignedAgents, hasImage: (rest.image_urls?.length ?? 0) > 0 };
 	});
 }
 
