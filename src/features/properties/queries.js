@@ -175,10 +175,16 @@ export async function listAssignableUsers() {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("users")
-		.select("id, full_name, email, role")
+		.select("id, full_name, email, role, user_info(avatar_url)")
 		.is("deleted_at", null)
 		.order("full_name", { ascending: true });
 
 	if (error) throw new Error(error.message);
-	return data;
+	return (data ?? []).map((user) => ({
+		id: user.id,
+		full_name: user.full_name,
+		email: user.email,
+		role: user.role,
+		avatarUrl: user.user_info?.avatar_url ?? null,
+	}));
 }

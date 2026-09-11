@@ -24,6 +24,7 @@ import Button from "@/components/ui/Button";
 import AdditionalFieldsEditor from "./AdditionalFieldsEditor";
 import HtmlBodyEditor from "./HtmlBodyEditor";
 import PropertyPhotosField from "./PropertyPhotosField";
+import AssignedAgentsField from "./AssignedAgentsField";
 
 function slugify(value) {
 	return value
@@ -404,16 +405,13 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 
 			<div>
 				<Label htmlFor="assignedUserIds">Assigned agents</Label>
-				<Select id="assignedUserIds" multiple size={5} {...register("assignedUserIds")}>
-					{assignableUsers.map((user) => (
-						<option key={user.id} value={user.id}>
-							{user.full_name || user.email} ({user.role})
-						</option>
-					))}
-				</Select>
-				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-					Cmd/Ctrl-click to select more than one.
-				</p>
+				<Controller
+					name="assignedUserIds"
+					control={control}
+					render={({ field }) => (
+						<AssignedAgentsField value={field.value} onChange={field.onChange} agents={assignableUsers} />
+					)}
+				/>
 				<FieldError>{errors.assignedUserIds?.message}</FieldError>
 			</div>
 
