@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requirePermission } from "@/features/auth/permissions";
 import { getPropertyBySlug } from "@/features/properties/queries";
+import { getActiveFieldSetsByType } from "@/features/propertyTypes/queries";
+import { pickPaths, omitPaths, flattenToPairs } from "@/features/propertyTypes/fieldPaths";
 import Badge from "@/components/ui/Badge";
 
 // Same chart-status-* tokens as the admin Properties table and dashboard
@@ -67,6 +69,32 @@ function CustomFieldValue({ value }) {
 	return <span>{String(value)}</span>;
 }
 
+// A property type's standard fields (Admin > Property Types) are flattened
+// out of custom_fields the same way the properties export does — every
+// field the type defines gets its own row, in the order it's configured,
+// showing "—" for the ones this listing hasn't been given a value for yet.
+// Anything left in custom_fields after that (freeform extras, or leftover
+// keys from a type this property used to be) still falls through to the
+// generic "Additional details" section below, unchanged from before.
+function StandardFieldValue({ value, unit }) {
+	if (value === undefined) return <span className="text-txt-muted dark:text-txt-muted-dark">—</span>;
+
+	if (/^https?:\/\//.test(value)) {
+		return (
+			<a href={value} target="_blank" rel="noreferrer" className="text-theme-blue underline dark:text-theme-gold">
+				{value}
+			</a>
+		);
+	}
+
+	return (
+		<span>
+			{value}
+			{unit ? ` ${unit}` : ""}
+		</span>
+	);
+}
+
 export async function generateMetadata({ params }) {
 	const { slug } = await params;
 	const property = await getPropertyBySlug(slug);
@@ -77,7 +105,7 @@ export async function generateMetadata({ params }) {
 export default async function PropertyPreviewPage({ params }) {
 	const { slug } = await params;
 	const user = await requirePermission("properties", "view");
-	const property = await getPropertyBySlug(slug);
+	const [property, fieldSetsByType] = await Promise.all([getPropertyBySlug(slug), getActiveFieldSetsByType()]);
 
 	if (!property) notFound();
 	// Agents can only preview properties assigned to them — not found (not a
@@ -87,7 +115,14 @@ export default async function PropertyPreviewPage({ params }) {
 	const location =
 		property.city_state || [property.city, property.region, property.district].filter(Boolean).join(", ") || "—";
 
-	const customFieldEntries = Object.entries(property.custom_fields ?? {}).filter(
+	const customFields = property.custom_fields ?? {};
+	const typeFields = fieldSetsByType[property.property_type] ?? [];
+	const typeFieldKeys = typeFields.map((field) => field.key);
+	const standardFieldValues = Object.fromEntries(
+		flattenToPairs(pickPaths(customFields, typeFieldKeys)).map((pair) => [pair.key, pair.value]),
+	);
+
+	const customFieldEntries = Object.entries(omitPaths(customFields, typeFieldKeys)).filter(
 		([, value]) => value !== "" && value != null,
 	);
 
@@ -193,6 +228,27 @@ export default async function PropertyPreviewPage({ params }) {
 							</li>
 						))}
 					</ul>
+				</div>
+			) : null}
+
+			{typeFields.length > 0 ? (
+				<div className="mt-8">
+					<h2 className="text-sm font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+						Standard fields for {property.property_type}
+					</h2>
+					<dl className="mt-3 grid gap-3 sm:grid-cols-2">
+						{typeFields.map((field) => (
+							<div key={field.key} className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+								<dt className="text-xs font-semibold text-txt-muted dark:text-txt-muted-dark">
+									{field.label}
+									{field.unit ? <span className="font-normal normal-case"> ({field.unit})</span> : null}
+								</dt>
+								<dd className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">
+									<StandardFieldValue value={standardFieldValues[field.key]} unit={field.unit} />
+								</dd>
+							</div>
+						))}
+					</dl>
 				</div>
 			) : null}
 

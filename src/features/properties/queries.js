@@ -50,7 +50,7 @@ export async function listProperties({
 			.filter(Boolean)
 			.map((agent) => ({ id: agent.id, name: agent.full_name, avatarUrl: agent.user_info?.avatar_url ?? null }));
 
-		return { ...rest, assignedAgents, hasImage: (rest.image_urls?.length ?? 0) > 0 };
+		return { ...rest, assignedAgents };
 	});
 }
 

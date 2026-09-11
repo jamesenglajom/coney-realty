@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { User } from "lucide-react";
+import { ImageOff, User } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import PropertyRowActions from "./PropertyRowActions";
 import { PROPERTY_STATUS_LABELS } from "../schemas";
@@ -70,6 +70,25 @@ const priceFormatter = new Intl.NumberFormat("en-PH", {
 	maximumFractionDigits: 0,
 });
 
+function CoverThumbnail({ url, title }) {
+	if (!url) {
+		return (
+			<div
+				title="No image"
+				className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-theme-gray/30 text-txt-muted dark:border-border-dark dark:text-txt-muted-dark"
+			>
+				<ImageOff className="h-4 w-4" aria-hidden="true" />
+			</div>
+		);
+	}
+
+	return (
+		<div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-theme-gold-light dark:border-border-dark">
+			<Image src={url} alt={title} fill sizes="48px" unoptimized className="object-cover" />
+		</div>
+	);
+}
+
 export default function PropertiesTable({ properties, canEdit, canDelete }) {
 	if (properties.length === 0) {
 		return (
@@ -85,6 +104,9 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 				<table className="w-full min-w-[960px] text-left border-collapse">
 				<thead>
 					<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
+						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+							Photo
+						</th>
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Agent
 						</th>
@@ -115,17 +137,13 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 					{properties.map((property) => (
 						<tr key={property.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
 							<td className="p-4">
+								<CoverThumbnail url={property.image_urls?.[0]} title={property.title} />
+							</td>
+							<td className="p-4">
 								<AgentAvatars agents={property.assignedAgents ?? []} />
 							</td>
 							<td className="p-4">
-								<div className="flex items-center gap-2">
-									<p className="text-sm font-semibold text-theme-blue dark:text-white">{property.title}</p>
-									{!property.hasImage ? (
-										<Badge tone="warning" className="shrink-0">
-											No image
-										</Badge>
-									) : null}
-								</div>
+								<p className="text-sm font-semibold text-theme-blue dark:text-white">{property.title}</p>
 								{property.screen_name ? (
 									<p className="text-xs text-txt-secondary dark:text-txt-secondary-dark">{property.screen_name}</p>
 								) : null}
