@@ -35,11 +35,11 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.startsWith("http")
 export const metadata = {
 	metadataBase: new URL(baseUrl),
 	title: {
-		default: "ConeyRealty — Meet the agent, not the listing feed",
+		default: "ConeyRealty — Find Your Next Home in Davao",
 		template: "%s | ConeyRealty",
 	},
 	description:
-		"Search homes by location, budget, and type, see the agent behind each listing, and book a viewing online.",
+		"Browse house and lot and land listings in Davao City by location, budget, and type, then schedule a viewing online.",
 };
 
 export default function RootLayout({ children }) {
