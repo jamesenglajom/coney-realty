@@ -57,6 +57,14 @@ const propertyBaseSchema = z.object({
 	lat: z.string().trim().optional(),
 	lng: z.string().trim().optional(),
 	customFields: jsonObjectString,
+	// Client-only working state PropertyForm merges into `customFields`
+	// right before submit (see onSubmit in PropertyForm.jsx) — not itself
+	// persisted. Zod strips any key not declared here by default, so
+	// without these two entries zodResolver silently dropped both from the
+	// values onSubmit receives, making every edit to a standard field (or
+	// the freeform additional-fields editor) submit as empty.
+	standardFields: z.record(z.string(), z.any()).optional(),
+	additionalFieldPairs: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
 	htmlBody: z.string().optional(),
 	assignedUserIds: z.array(z.string()).default([]),
 	// Ordered Storage URLs, picked from the media library's properties/
