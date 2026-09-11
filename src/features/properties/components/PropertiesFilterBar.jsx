@@ -51,7 +51,7 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 	}
 
 	return (
-		<div className="mb-4 rounded-xl border border-theme-gold-light bg-white p-4 dark:border-border-dark dark:bg-surface-dark">
+		<div className="mb-4 rounded-2xl border border-theme-gold-light/70 bg-white p-4 dark:border-border-dark dark:bg-surface-dark">
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
 				<Select value={searchParams.get("city") ?? ""} onChange={(event) => updateParam("city", event.target.value)}>
 					<option value="">All cities</option>

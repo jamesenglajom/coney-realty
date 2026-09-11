@@ -82,19 +82,19 @@ export default async function UserPreviewPage({ params }) {
 			</div>
 
 			<div className="mt-8 grid gap-4 sm:grid-cols-2">
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Email</p>
 					<p className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">{user.email}</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Phone</p>
 					<p className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">{user.phone || "—"}</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Role</p>
 					<p className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">{user.role}</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Joined</p>
 					<p className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 						{user.created_at ? dateFormatter.format(new Date(user.created_at)) : "—"}
@@ -117,21 +117,21 @@ export default async function UserPreviewPage({ params }) {
 
 					{stats ? (
 						<dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<div className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Total assigned</dt>
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{stats.totalAssigned}</dd>
 							</div>
-							<div className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Sold (lifetime)</dt>
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
 									{stats.lifetime.count}
 								</dd>
 							</div>
-							<div className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Sold (this month)</dt>
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{stats.thisMonth.count}</dd>
 							</div>
-							<div className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Lifetime volume</dt>
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
 									{priceFormatter.format(stats.lifetime.volume)}
@@ -143,7 +143,7 @@ export default async function UserPreviewPage({ params }) {
 					{assignedProperties.length === 0 ? (
 						<p className="mt-3 text-sm text-txt-muted dark:text-txt-muted-dark">No properties assigned yet.</p>
 					) : (
-						<ul className="mt-3 divide-y divide-theme-gold-light rounded-xl border border-theme-gold-light dark:divide-border-dark dark:border-border-dark">
+						<ul className="mt-3 divide-y divide-theme-gold-light rounded-2xl border border-theme-gold-light/70 dark:divide-border-dark dark:border-border-dark">
 							{assignedProperties.map((property) => (
 								<li key={property.id} className="flex items-center justify-between gap-3 p-3">
 									<Link

@@ -36,7 +36,7 @@ function SortableRow({ entry, rank, canEdit, canDelete, onEdit, onDelete }) {
 		<li
 			ref={setNodeRef}
 			style={style}
-			className="flex items-center gap-3 rounded-xl border border-theme-gold-light bg-white p-3 dark:border-border-dark dark:bg-surface-dark"
+			className="flex items-center gap-3 rounded-2xl border border-theme-gold-light/70 bg-white p-3 shadow-[0_1px_2px_rgba(20,20,20,.04)] transition-shadow hover:shadow-[0_4px_14px_-8px_rgba(20,20,20,.15)] dark:border-border-dark dark:bg-surface-dark"
 		>
 			<button
 				type="button"
@@ -158,7 +158,7 @@ export default function LeaderboardEditor({ entries, agentOptions, canCreate, ca
 			</div>
 
 			{rows.length === 0 ? (
-				<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
+				<div className="rounded-2xl border border-dashed border-theme-gold-light/80 p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 					No producers yet.
 				</div>
 			) : (

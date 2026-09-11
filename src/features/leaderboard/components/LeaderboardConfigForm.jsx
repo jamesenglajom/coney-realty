@@ -46,7 +46,7 @@ export default function LeaderboardConfigForm({ config }) {
 		<form
 			onSubmit={handleSubmit(onSubmit)}
 			noValidate
-			className="max-w-lg space-y-4 rounded-xl border border-theme-gold-light p-5 dark:border-border-dark"
+			className="max-w-lg space-y-4 rounded-2xl border border-theme-gold-light/70 p-5 dark:border-border-dark"
 		>
 			<div>
 				<Label htmlFor="heading">Heading</Label>

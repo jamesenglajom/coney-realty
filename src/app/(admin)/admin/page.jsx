@@ -38,7 +38,7 @@ async function AgentDashboard({ userId }) {
 				{Object.entries(stats.byStatus).map(([status, count]) => (
 					<div
 						key={status}
-						className="rounded-xl border border-theme-gold-light p-4 text-center dark:border-border-dark"
+						className="rounded-2xl border border-theme-gold-light/70 p-4 text-center dark:border-border-dark"
 					>
 						<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							{(PROPERTY_STATUS_LABELS[status] ?? status).replace(/_/g, " ")}
@@ -60,5 +60,5 @@ export default async function DashboardPage() {
 		return <AgentDashboard userId={user.id} />;
 	}
 
-	return <AdminDashboard userId={user.id} />;
+	return <AdminDashboard userId={user.id} role={user.role} />;
 }

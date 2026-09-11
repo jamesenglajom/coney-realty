@@ -52,57 +52,59 @@ const AdminShell = ({ user, permissions, children }) => {
 	const hideWhenCollapsed = isCollapsed ? "lg:hidden" : "";
 
 	return (
-		<div className="h-dvh bg-[#fcfcfc] dark:bg-bg-dark flex">
+		<div className="h-dvh bg-bg-light dark:bg-bg-dark flex">
+			{/* Mobile scrim — closes the drawer on outside tap, mirrors the desktop
+			    sidebar's own translate transition so it fades in lockstep. */}
+			<div
+				onClick={() => setSidebarOpen(false)}
+				aria-hidden="true"
+				className={`fixed inset-0 z-40 bg-theme-blue-deep/60 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+					isSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+				}`}
+			/>
+
 			{/* Sidebar - Desktop */}
 			<aside
-				className={`fixed inset-y-0 left-0 z-50 w-64 bg-theme-blue transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+				className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-linear-to-b from-theme-blue via-theme-blue to-theme-blue-deep shadow-[8px_0_32px_-12px_rgba(6,21,39,.35)] transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 lg:shadow-none ${
 					isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-				} ${isCollapsed ? "lg:w-20" : "lg:w-64"}`}
+				} ${isCollapsed ? "lg:w-[84px]" : "lg:w-72"}`}
 			>
-				<div className="h-full flex flex-col">
-					{/* Logo Section */}
-					<div className={`relative flex items-center gap-3 p-6 ${isCollapsed ? "lg:justify-center lg:px-3" : ""}`}>
+				<div className="flex h-full flex-col">
+					{/* Brand */}
+					<div className={`relative flex items-center gap-3 px-5 pb-5 pt-6 ${isCollapsed ? "lg:justify-center lg:px-3" : ""}`}>
 						<button
 							onClick={() => setSidebarOpen(false)}
 							className="lg:hidden absolute top-4 right-4 p-2 text-theme-gold-light/70 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-95"
 							aria-label="Close sidebar"
 						>
-							<X size={24} strokeWidth={2.5} />
+							<X size={22} strokeWidth={2.5} />
 						</button>
 						<Image
 							src="/logo/conyrealty-logo.jpg"
 							alt="ConeyRealty"
-							width={32}
-							height={32}
-							className="w-8 h-8 shrink-0 rounded-md"
+							width={36}
+							height={36}
+							className="h-9 w-9 shrink-0 rounded-xl ring-1 ring-white/10"
 						/>
-						<span className={`text-white font-bold tracking-tight text-lg ${hideWhenCollapsed}`}>ConeyRealty</span>
+						<div className={`min-w-0 ${hideWhenCollapsed}`}>
+							<p className="truncate text-[15px] font-bold tracking-tight text-white">ConeyRealty</p>
+							<p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-theme-gold-light/45">Admin</p>
+						</div>
 					</div>
 
-					{/* Collapse toggle — desktop only */}
-					<button
-						type="button"
-						onClick={toggleCollapsed}
-						aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-						className={`hidden lg:flex items-center gap-2 mx-4 mb-2 px-3 py-2 text-theme-gold-light/60 hover:text-white hover:bg-white/5 rounded-lg transition-all ${
-							isCollapsed ? "lg:mx-auto lg:justify-center" : ""
-						}`}
-					>
-						{isCollapsed ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
-						<span className={hideWhenCollapsed}>Collapse</span>
-					</button>
+					<div className="mx-5 border-t border-white/[0.07]" />
 
 					{/* Nav Links */}
-					<nav className="flex-1 px-4 space-y-5 overflow-y-auto">
+					<nav className="flex-1 space-y-6 overflow-y-auto px-3.5 py-5">
 						{visibleGroups.map((group) => (
 							<div key={group.label}>
 								<p
-									className={`px-4 mb-1 text-[11px] font-semibold uppercase tracking-wider text-theme-gold-light/40 ${hideWhenCollapsed}`}
+									className={`mb-2 px-3 text-[10.5px] font-bold uppercase tracking-[0.12em] text-theme-gold-light/35 ${hideWhenCollapsed}`}
 								>
 									{group.label}
 								</p>
-								{isCollapsed ? <div className="hidden lg:block mx-4 border-t border-white/10 mb-2" /> : null}
-								<div className="space-y-1">
+								{isCollapsed ? <div className="hidden lg:block mx-2 border-t border-white/[0.07] mb-2.5" /> : null}
+								<div className="space-y-0.5">
 									{group.items.map((item) => {
 										const active = isItemActive(item.href, pathname);
 										return (
@@ -110,19 +112,28 @@ const AdminShell = ({ user, permissions, children }) => {
 												key={item.name}
 												href={item.href}
 												title={item.name}
-												className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${
+												className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
 													isCollapsed ? "lg:justify-center lg:px-0" : ""
 												} ${
 													active
-														? "bg-theme-gold text-theme-blue font-semibold"
-														: "text-theme-gold-light/70 hover:text-theme-gold hover:bg-white/5"
+														? "bg-theme-gold/[0.14] text-white"
+														: "text-theme-gold-light/60 hover:bg-white/[0.06] hover:text-white"
 												}`}
 											>
+												{active ? (
+													<span
+														className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-theme-gold"
+														aria-hidden="true"
+													/>
+												) : null}
 												<item.icon
-													size={20}
-													className={active ? "" : "group-hover:scale-110 transition-transform"}
+													size={19}
+													strokeWidth={active ? 2.25 : 1.9}
+													className={`shrink-0 ${active ? "text-theme-gold" : "transition-transform group-hover:scale-110"}`}
 												/>
-												<span className={`font-medium ${hideWhenCollapsed}`}>{item.name}</span>
+												<span className={`truncate text-[13.5px] ${active ? "font-semibold" : "font-medium"} ${hideWhenCollapsed}`}>
+													{item.name}
+												</span>
 											</Link>
 										);
 									})}
@@ -131,20 +142,33 @@ const AdminShell = ({ user, permissions, children }) => {
 						))}
 					</nav>
 
-					{/* User Profile Mini */}
-					<div className="p-4 border-t border-white/10">
-						<div className={`flex items-center gap-3 p-2 ${isCollapsed ? "lg:flex-col lg:gap-2" : ""}`}>
-							<Link
-								href="/admin/settings"
-								title="My profile"
-								className="flex flex-1 min-w-0 items-center gap-3 rounded-lg transition-colors hover:bg-white/5"
-							>
-								<div className="w-10 h-10 shrink-0 rounded-full bg-theme-gold flex items-center justify-center font-bold text-theme-blue">
+					<div className="mx-5 border-t border-white/[0.07]" />
+
+					{/* Collapse toggle — desktop only */}
+					<button
+						type="button"
+						onClick={toggleCollapsed}
+						aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+						className={`hidden lg:flex items-center gap-2 mx-3.5 mt-3 mb-1 px-3 py-2 text-[12px] font-semibold text-theme-gold-light/45 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all ${
+							isCollapsed ? "lg:mx-auto lg:justify-center lg:px-2.5" : ""
+						}`}
+					>
+						{isCollapsed ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
+						<span className={hideWhenCollapsed}>Collapse</span>
+					</button>
+
+					{/* Account chip */}
+					<div className="p-3.5">
+						<div
+							className={`flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-white/[0.06] ${isCollapsed ? "lg:flex-col lg:gap-2" : ""}`}
+						>
+							<Link href="/admin/settings" title="My profile" className="flex min-w-0 flex-1 items-center gap-3">
+								<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-theme-gold text-[13px] font-bold text-theme-blue">
 									{(user.full_name || user.email)[0]?.toUpperCase()}
 								</div>
-								<div className={`overflow-hidden flex-1 min-w-0 ${hideWhenCollapsed}`}>
-									<p className="text-white text-sm font-medium truncate">{user.full_name || user.email}</p>
-									<p className="text-theme-gold-light/50 text-xs truncate">{user.role}</p>
+								<div className={`min-w-0 flex-1 overflow-hidden ${hideWhenCollapsed}`}>
+									<p className="truncate text-[13px] font-semibold text-white">{user.full_name || user.email}</p>
+									<p className="truncate text-[11px] text-theme-gold-light/45">{user.role}</p>
 								</div>
 							</Link>
 							<button
@@ -152,9 +176,9 @@ const AdminShell = ({ user, permissions, children }) => {
 								onClick={() => startLogout(() => logoutAction())}
 								disabled={isLoggingOut}
 								aria-label="Sign out"
-								className="p-2 text-theme-gold-light/70 hover:text-white hover:bg-white/10 rounded-full transition-all disabled:opacity-50"
+								className="rounded-full p-2 text-theme-gold-light/60 transition-all hover:bg-white/10 hover:text-white disabled:opacity-50"
 							>
-								<LogOut size={16} />
+								<LogOut size={15} />
 							</button>
 						</div>
 					</div>

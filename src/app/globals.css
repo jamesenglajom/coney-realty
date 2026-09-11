@@ -22,6 +22,11 @@
   --color-theme-gold-light: #f4f2eb;
   --color-theme-gray: #6b7280;
 
+  /* A deliberately darker navy, used only as a gradient endpoint (the admin
+     sidebar) — never on its own. theme-blue itself stays the flat, literal
+     brand value used everywhere else (buttons, headings, links). */
+  --color-theme-blue-deep: #061527;
+
   /* Brighter gold for emphasis TEXT/fills on dark surfaces (price callouts,
      primary CTA buttons, description subheadings) — a deliberately separate
      token from theme-gold, not an override of it. theme-gold stays
@@ -54,6 +59,12 @@
   --color-surface-dark: #12171f;
   --color-surface-dark-raised: #1a212b;
   --color-border-dark: #262e3a;
+
+  /* Light-mode counterpart to bg-dark — a subtly warm off-white page
+     backdrop (not pure white) so a white Card reads as elevated by tone
+     alone, the same elevation trick the dark scale already does with its
+     bg/surface/surface-raised tiers. */
+  --color-bg-light: #f8f7f4;
 
   /* Semantic feedback colors for badges, form errors, and destructive
      actions — replaces ad hoc stock Tailwind red/green used independently

@@ -77,11 +77,11 @@ export default function ImportForm() {
 						{result.errorCount ? `, ${result.errorCount} row(s) skipped` : ""}.
 					</p>
 					{result.rows.length > 0 ? (
-						<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
+						<div className="overflow-hidden rounded-2xl border border-theme-gold-light/70 bg-white shadow-[0_1px_2px_rgba(20,20,20,.04),0_10px_24px_-16px_rgba(20,20,20,.10)] dark:border-border-dark dark:bg-surface-dark dark:shadow-[0_1px_2px_rgba(0,0,0,.3),0_12px_28px_-16px_rgba(0,0,0,.5)]">
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[560px] text-left border-collapse text-sm">
 									<thead>
-										<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
+										<tr className="border-b border-theme-gold-light/70 bg-bg-light dark:border-border-dark dark:bg-surface-dark-raised">
 											<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 												Row
 											</th>
@@ -96,9 +96,9 @@ export default function ImportForm() {
 											</th>
 										</tr>
 									</thead>
-									<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
+									<tbody className="divide-y divide-theme-gold-light/70 dark:divide-border-dark">
 										{result.rows.map((row) => (
-											<tr key={row.rowNumber} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
+											<tr key={row.rowNumber} className="hover:bg-bg-light dark:hover:bg-white/[0.02]">
 												<td className="p-4 text-txt-secondary dark:text-txt-secondary-dark">{row.rowNumber}</td>
 												<td className="p-4 font-mono text-xs text-txt-secondary dark:text-txt-secondary-dark">
 													{row.slug || "—"}

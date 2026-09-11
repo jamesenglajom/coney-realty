@@ -64,28 +64,28 @@ export default function Breadcrumbs() {
 	const crumbs = buildCrumbs(pathname);
 
 	return (
-		<nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
+		<nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-[13.5px]">
 			<Link
 				href="/admin"
-				className="flex shrink-0 items-center gap-1 text-txt-secondary hover:text-theme-blue dark:text-txt-secondary-dark dark:hover:text-white"
+				className="flex shrink-0 items-center gap-1.5 text-txt-secondary transition-colors hover:text-theme-blue dark:text-txt-secondary-dark dark:hover:text-white"
 			>
-				<Home className="h-4 w-4" aria-hidden="true" />
-				{crumbs.length === 0 ? <span className="font-medium text-theme-blue dark:text-white">Dashboard</span> : null}
+				<Home className="h-3.75 w-3.75" aria-hidden="true" />
+				{crumbs.length === 0 ? <span className="font-semibold text-theme-blue dark:text-white">Dashboard</span> : null}
 			</Link>
 			{crumbs.map((crumb, index) => {
 				const isLast = index === crumbs.length - 1;
 				return (
 					<span key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1.5">
-						<ChevronRight className="h-3.5 w-3.5 shrink-0 text-txt-muted dark:text-txt-muted-dark" aria-hidden="true" />
+						<ChevronRight className="h-3.5 w-3.5 shrink-0 text-txt-muted/70 dark:text-txt-muted-dark/70" aria-hidden="true" />
 						{crumb.href && !isLast ? (
 							<Link
 								href={crumb.href}
-								className="truncate text-txt-secondary hover:text-theme-blue dark:text-txt-secondary-dark dark:hover:text-white"
+								className="truncate text-txt-secondary transition-colors hover:text-theme-blue dark:text-txt-secondary-dark dark:hover:text-white"
 							>
 								{crumb.label}
 							</Link>
 						) : (
-							<span className="truncate font-medium text-theme-blue dark:text-white">{crumb.label}</span>
+							<span className="truncate font-semibold text-theme-blue dark:text-white">{crumb.label}</span>
 						)}
 					</span>
 				);

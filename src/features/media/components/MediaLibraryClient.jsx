@@ -154,7 +154,7 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 						{files.map((file) => (
 							<div
 								key={file.name}
-								className="group relative aspect-square overflow-hidden rounded-xl border border-theme-gold-light bg-theme-gray/5 dark:border-border-dark dark:bg-white/5"
+								className="group relative aspect-square overflow-hidden rounded-2xl border border-theme-gold-light/70 bg-theme-gray/5 dark:border-border-dark dark:bg-white/5"
 							>
 								<Image src={file.url} alt="" fill sizes="200px" className="object-cover" unoptimized />
 								<div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />

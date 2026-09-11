@@ -2,10 +2,11 @@ import Link from "next/link";
 
 const VARIANT_CLASSES = {
 	primary:
-		"bg-theme-blue text-white hover:bg-theme-blue/90 dark:bg-accent-dark dark:text-theme-blue dark:hover:bg-accent-dark/90",
-	brass: "bg-theme-gold text-theme-blue hover:brightness-105 dark:hover:brightness-110",
+		"bg-theme-blue text-white shadow-[0_1px_2px_rgba(12,34,65,.2)] hover:bg-theme-blue/90 hover:shadow-[0_4px_14px_-4px_rgba(12,34,65,.45)] dark:bg-accent-dark dark:text-theme-blue dark:shadow-none dark:hover:bg-accent-dark/90",
+	brass:
+		"bg-theme-gold text-theme-blue shadow-[0_1px_2px_rgba(182,170,132,.25)] hover:brightness-105 hover:shadow-[0_4px_14px_-4px_rgba(182,170,132,.55)] dark:hover:brightness-110",
 	ghost:
-		"border border-theme-gray/30 text-current hover:border-theme-gray/60 dark:border-border-dark dark:hover:border-theme-gold/40",
+		"border border-theme-gray/30 text-current hover:border-theme-gold hover:bg-theme-gold-light/60 dark:border-border-dark dark:hover:border-theme-gold/40 dark:hover:bg-white/5",
 	danger: "bg-danger text-white hover:bg-danger/90 dark:bg-danger-dark dark:text-theme-blue dark:hover:bg-danger-dark/90",
 };
 
@@ -29,7 +30,7 @@ const DEFAULT_SHAPE_BY_SIZE = {
 };
 
 const BASE_CLASSES =
-	"inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-bg-dark";
+	"inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 ease-out active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-bg-dark";
 
 function isRawAnchorHref(href) {
 	return /^(https?:|tel:|mailto:)/.test(href ?? "");

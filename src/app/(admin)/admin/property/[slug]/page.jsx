@@ -138,7 +138,7 @@ export default async function PropertyPreviewPage({ params }) {
 
 			{property.lat != null && property.lng != null ? (
 				<div className="mt-6">
-					<div className="overflow-hidden rounded-xl border border-theme-gold-light dark:border-border-dark">
+					<div className="overflow-hidden rounded-2xl border border-theme-gold-light/70 dark:border-border-dark">
 						<iframe
 							title="Property location map"
 							src={`https://www.google.com/maps?q=${property.lat},${property.lng}&z=16&output=embed`}
@@ -169,17 +169,17 @@ export default async function PropertyPreviewPage({ params }) {
 			</div>
 
 			<div className="mt-8 grid gap-4 sm:grid-cols-2">
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Price</p>
 					<p className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
 						{property.price != null ? priceFormatter.format(property.price) : "Price on request"}
 					</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">Location</p>
 					<p className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{location}</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 						Full address
 					</p>
@@ -187,7 +187,7 @@ export default async function PropertyPreviewPage({ params }) {
 						{property.address_line || "—"}
 					</p>
 				</div>
-				<div className="rounded-xl border border-theme-gold-light p-4 dark:border-border-dark">
+				<div className="rounded-2xl border border-theme-gold-light/70 p-4 dark:border-border-dark">
 					<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 						Zone / Payment
 					</p>
@@ -238,7 +238,7 @@ export default async function PropertyPreviewPage({ params }) {
 					</h2>
 					<dl className="mt-3 grid gap-3 sm:grid-cols-2">
 						{typeFields.map((field) => (
-							<div key={field.key} className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div key={field.key} className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs font-semibold text-txt-muted dark:text-txt-muted-dark">
 									{field.label}
 									{field.unit ? <span className="font-normal normal-case"> ({field.unit})</span> : null}
@@ -259,7 +259,7 @@ export default async function PropertyPreviewPage({ params }) {
 					</h2>
 					<dl className="mt-3 grid gap-3 sm:grid-cols-2">
 						{customFieldEntries.map(([key, value]) => (
-							<div key={key} className="rounded-xl border border-theme-gold-light p-3 dark:border-border-dark">
+							<div key={key} className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
 								<dt className="text-xs font-semibold text-txt-muted dark:text-txt-muted-dark">{humanizeKey(key)}</dt>
 								<dd className="mt-1 text-sm text-txt-secondary dark:text-txt-secondary-dark">
 									<CustomFieldValue value={value} />

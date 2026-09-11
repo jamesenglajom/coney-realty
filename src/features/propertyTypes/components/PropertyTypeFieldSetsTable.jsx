@@ -6,18 +6,18 @@ import DeleteFieldSetButton from "./DeleteFieldSetButton";
 export default function PropertyTypeFieldSetsTable({ fieldSets, canEdit, canDelete }) {
 	if (fieldSets.length === 0) {
 		return (
-			<div className="rounded-xl border border-theme-gold-light p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
+			<div className="rounded-2xl border border-dashed border-theme-gold-light/80 p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
 				No property types configured yet.
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
+		<div className="overflow-hidden rounded-2xl border border-theme-gold-light/70 bg-white shadow-[0_1px_2px_rgba(20,20,20,.04),0_10px_24px_-16px_rgba(20,20,20,.10)] dark:border-border-dark dark:bg-surface-dark dark:shadow-[0_1px_2px_rgba(0,0,0,.3),0_12px_28px_-16px_rgba(0,0,0,.5)]">
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[560px] text-left border-collapse">
 					<thead>
-						<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
+						<tr className="border-b border-theme-gold-light/70 bg-bg-light dark:border-border-dark dark:bg-surface-dark-raised">
 							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								Property type
 							</th>
@@ -29,9 +29,9 @@ export default function PropertyTypeFieldSetsTable({ fieldSets, canEdit, canDele
 							</th>
 						</tr>
 					</thead>
-					<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
+					<tbody className="divide-y divide-theme-gold-light/70 dark:divide-border-dark">
 						{fieldSets.map((fieldSet) => (
-							<tr key={fieldSet.id} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
+							<tr key={fieldSet.id} className="hover:bg-bg-light dark:hover:bg-white/[0.02]">
 								<td className="p-4 text-sm font-semibold text-theme-blue dark:text-white">{fieldSet.property_type}</td>
 								<td className="p-4">
 									{fieldSet.fields.length === 0 ? (

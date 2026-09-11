@@ -42,7 +42,7 @@ export default function PermissionsMatrix({ initialPermissions }) {
 
 	return (
 		<div className="space-y-8">
-			<div className="rounded-xl border border-theme-gold-light bg-theme-gold-light/40 p-4 text-sm text-txt-secondary dark:border-border-dark dark:bg-surface-dark dark:text-txt-secondary-dark">
+			<div className="rounded-2xl border border-theme-gold-light/70 bg-theme-gold-light/40 p-4 text-sm text-txt-secondary dark:border-border-dark dark:bg-surface-dark dark:text-txt-secondary-dark">
 				SAdmin always has full access to every page — it&apos;s built into the app and can&apos;t be changed here.
 				Changes below take effect immediately.
 			</div>
@@ -50,11 +50,11 @@ export default function PermissionsMatrix({ initialPermissions }) {
 			{EDITABLE_ROLES.map((role) => (
 				<div key={role}>
 					<h2 className="mb-3 text-lg font-semibold text-theme-blue dark:text-white">{role}</h2>
-					<div className="overflow-hidden rounded-xl border border-theme-gold-light bg-white shadow-sm dark:border-border-dark dark:bg-surface-dark">
+					<div className="overflow-hidden rounded-2xl border border-theme-gold-light/70 bg-white shadow-[0_1px_2px_rgba(20,20,20,.04),0_10px_24px_-16px_rgba(20,20,20,.10)] dark:border-border-dark dark:bg-surface-dark dark:shadow-[0_1px_2px_rgba(0,0,0,.3),0_12px_28px_-16px_rgba(0,0,0,.5)]">
 						<div className="overflow-x-auto">
 							<table className="w-full min-w-[420px] text-left border-collapse">
 								<thead>
-									<tr className="border-b border-theme-gold-light bg-[#fcfcfc] dark:border-border-dark dark:bg-surface-dark-raised">
+									<tr className="border-b border-theme-gold-light/70 bg-bg-light dark:border-border-dark dark:bg-surface-dark-raised">
 										<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 											Page
 										</th>
@@ -68,11 +68,11 @@ export default function PermissionsMatrix({ initialPermissions }) {
 										))}
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-theme-gold-light dark:divide-border-dark">
+								<tbody className="divide-y divide-theme-gold-light/70 dark:divide-border-dark">
 									{PAGES.map((page) => {
 										const row = permissions[keyOf(role, page)] ?? {};
 										return (
-											<tr key={page} className="hover:bg-[#fcfcfc] dark:hover:bg-white/[0.02]">
+											<tr key={page} className="hover:bg-bg-light dark:hover:bg-white/[0.02]">
 												<td className="p-4 text-sm font-medium capitalize text-theme-blue dark:text-white">{page}</td>
 												{PERMISSION_ACTIONS.map((action) => (
 													<td key={action} className="p-4 text-center">

@@ -1,10 +1,17 @@
+import { Building2, CheckCircle2, Users, Wallet } from "lucide-react";
 import { PROPERTY_TYPES, PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
 import { USER_ROLES } from "@/features/users/schemas";
+import { getRolePermissions } from "@/features/auth/permissions";
+import { listProperties } from "@/features/properties/queries";
+import { listLeaderboardEntries } from "@/features/leaderboard/queries";
+import { listTestimonials } from "@/features/testimonials/queries";
+import { listViewingRequests } from "@/features/viewings/queries";
 import { getAdminDashboardStats, getTopAgentsByListings } from "../queries";
 import BarChart from "./BarChart";
 import TrendChart from "./TrendChart";
 import KpiTile from "./KpiTile";
 import ChartPanel from "./ChartPanel";
+import { PropertiesWidget, LeaderboardWidget, TestimonialsWidget, ViewingsWidget } from "./DashboardWidgets";
 import MyReferredViewingRequests from "@/features/viewings/components/MyReferredViewingRequests";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
@@ -31,8 +38,28 @@ const CATEGORICAL_COLOR_CLASSES = [
 	"bg-chart-5 dark:bg-chart-5-dark",
 ];
 
-export default async function AdminDashboard({ userId }) {
-	const [stats, topAgents] = await Promise.all([getAdminDashboardStats(), getTopAgentsByListings(5)]);
+export default async function AdminDashboard({ userId, role }) {
+	const [stats, topAgents, permissions] = await Promise.all([
+		getAdminDashboardStats(),
+		getTopAgentsByListings(5),
+		getRolePermissions(role),
+	]);
+
+	// Shortcut widgets only fetch/render for pages this role can actually
+	// open — same gate the sidebar nav uses — so there's never a "View all"
+	// button pointing at a page that immediately bounces the viewer back out.
+	const canViewProperties = Boolean(permissions?.properties?.can_view);
+	const canViewLeaderboard = Boolean(permissions?.leaderboard?.can_view);
+	const canViewTestimonials = Boolean(permissions?.testimonials?.can_view);
+	const canViewViewings = Boolean(permissions?.viewings?.can_view);
+	const hasAnyWidget = canViewProperties || canViewLeaderboard || canViewTestimonials || canViewViewings;
+
+	const [recentProperties, leaderboardEntries, testimonials, viewingRequests] = await Promise.all([
+		canViewProperties ? listProperties() : Promise.resolve([]),
+		canViewLeaderboard ? listLeaderboardEntries() : Promise.resolve([]),
+		canViewTestimonials ? listTestimonials() : Promise.resolve([]),
+		canViewViewings ? listViewingRequests() : Promise.resolve([]),
+	]);
 
 	const statusData = PROPERTY_STATUSES.map((status) => ({
 		label: PROPERTY_STATUS_LABELS[status] ?? status,
@@ -65,15 +92,37 @@ export default async function AdminDashboard({ userId }) {
 			<PageHeader title="Dashboard" description="Overview across all properties and users." />
 
 			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-				<KpiTile label="Total properties" value={stats.totalProperties.toLocaleString()} />
-				<KpiTile label="Published listings" value={stats.byStatus.published.toLocaleString()} />
-				<KpiTile label="Total users" value={stats.totalUsers.toLocaleString()} />
+				<KpiTile label="Total properties" value={stats.totalProperties.toLocaleString()} icon={Building2} tone="blue" />
+				<KpiTile
+					label="Published listings"
+					value={stats.byStatus.published.toLocaleString()}
+					icon={CheckCircle2}
+					tone="success"
+				/>
+				<KpiTile label="Total users" value={stats.totalUsers.toLocaleString()} icon={Users} tone="gold" />
 				<KpiTile
 					label="Sold (lifetime)"
 					value={stats.lifetime.count.toLocaleString()}
 					sublabel={priceFormatter.format(stats.lifetime.volume)}
+					icon={Wallet}
+					tone="warning"
 				/>
 			</div>
+
+			{hasAnyWidget ? (
+				<div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					{canViewProperties ? (
+						<PropertiesWidget
+							properties={recentProperties.slice(0, 3)}
+							statusCounts={stats.byStatus}
+							totalCount={stats.totalProperties}
+						/>
+					) : null}
+					{canViewLeaderboard ? <LeaderboardWidget entries={leaderboardEntries} /> : null}
+					{canViewTestimonials ? <TestimonialsWidget testimonials={testimonials} /> : null}
+					{canViewViewings ? <ViewingsWidget requests={viewingRequests} /> : null}
+				</div>
+			) : null}
 
 			<div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
 				<ChartPanel title="Properties by status">

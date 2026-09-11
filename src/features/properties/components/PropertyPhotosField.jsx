@@ -27,7 +27,7 @@ function SortablePhoto({ url, index, onRemove }) {
 		<div
 			ref={setNodeRef}
 			style={style}
-			className="group relative aspect-square overflow-hidden rounded-xl border border-theme-gold-light dark:border-border-dark"
+			className="group relative aspect-square overflow-hidden rounded-2xl border border-theme-gold-light/70 dark:border-border-dark"
 		>
 			<Image src={url} alt="" fill sizes="150px" unoptimized className="object-cover" />
 			{index === 0 ? (
