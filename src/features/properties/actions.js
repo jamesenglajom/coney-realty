@@ -197,18 +197,26 @@ export async function updatePropertyAction(values) {
 		.eq("id", parsed.data.id)
 		.maybeSingle();
 	if (existingError) return { error: existingError.message };
+	if (!existing) return { error: "Property not found — it may have been deleted." };
 
 	let soldAt = existing?.sold_at ?? null;
 	if (parsed.data.status === "sold" && existing?.status !== "sold") soldAt = new Date().toISOString();
 	else if (parsed.data.status !== "sold") soldAt = null;
 
-	const { error } = await supabase
+	// .select("id") turns a 0-row update (stale/mismatched id — Supabase
+	// doesn't error on that, it just matches nothing) into a real error
+	// instead of a silent no-op that still reports success to the form.
+	const { data: updatedRows, error } = await supabase
 		.from("properties")
 		.update({ ...toColumns(parsed.data), sold_at: soldAt })
-		.eq("id", parsed.data.id);
+		.eq("id", parsed.data.id)
+		.select("id");
 
 	if (error) {
 		return { error: slugConflictMessage(error) };
+	}
+	if (!updatedRows || updatedRows.length === 0) {
+		return { error: "Update didn't apply — the property may have been deleted. Please refresh and try again." };
 	}
 
 	const assignError = await syncAssignments(supabase, parsed.data.id, parsed.data.assignedUserIds);
