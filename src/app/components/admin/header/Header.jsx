@@ -1,19 +1,30 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Menu, X, LogOut, Sun, Moon } from "lucide-react";
+import { Menu, X, LogOut, Sun, Moon, Clock } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions";
 import Breadcrumbs from "./Breadcrumbs";
 
 function Header({ isOpen, setOpen }) {
 	const [isLoggingOut, startLogout] = useTransition();
 	const [isDark, setIsDark] = useState(false);
+	// Starts null and only gets a real Date after mount — the server has no
+	// notion of "now" for a static render, so seeding this with new Date()
+	// during render would mismatch the client's first paint and trigger a
+	// hydration warning, same reasoning as isDark below.
+	const [now, setNow] = useState(null);
 
 	// Reflect the class the no-flash script in layout.jsx already applied,
 	// after mount only — reading document.documentElement during render would
 	// mismatch the server-rendered output.
 	useEffect(() => {
 		setIsDark(document.documentElement.classList.contains("dark"));
+	}, []);
+
+	useEffect(() => {
+		setNow(new Date());
+		const interval = setInterval(() => setNow(new Date()), 1000);
+		return () => clearInterval(interval);
 	}, []);
 
 	function toggleDarkMode() {
@@ -37,6 +48,18 @@ function Header({ isOpen, setOpen }) {
 			</div>
 
 			<div className="flex shrink-0 items-center gap-1.5">
+				{now ? (
+					<div className="mr-1 hidden items-center gap-1.5 rounded-full bg-theme-gold-light/60 px-3 py-1.5 text-xs font-semibold text-txt-secondary dark:bg-white/5 dark:text-txt-secondary-dark md:flex">
+						<Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+						<span className="whitespace-nowrap">
+							{now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+						</span>
+						<span className="h-3 w-px bg-theme-gray/30 dark:bg-border-dark" aria-hidden="true" />
+						<span className="whitespace-nowrap tabular-nums">
+							{now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
+						</span>
+					</div>
+				) : null}
 				<button
 					type="button"
 					onClick={toggleDarkMode}

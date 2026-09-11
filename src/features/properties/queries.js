@@ -19,6 +19,7 @@ export async function listProperties({
 	zoneType,
 	priceMin,
 	priceMax,
+	status,
 } = {}) {
 	const supabase = createAdminClient();
 
@@ -39,6 +40,7 @@ export async function listProperties({
 	if (zoneType) query = query.eq("zone_type", zoneType);
 	if (priceMin) query = query.gte("price", priceMin);
 	if (priceMax) query = query.lte("price", priceMax);
+	if (status) query = query.eq("status", status);
 
 	const { data, error } = await query;
 	if (error) throw new Error(error.message);

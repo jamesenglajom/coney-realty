@@ -2,8 +2,32 @@
 
 import { useState } from "react";
 
-// Single-series line + area trend. One hue (sequential default), so no
-// legend — the chart title already names what's plotted.
+// Catmull-Rom -> cubic Bezier conversion (tension 6, the standard default) —
+// turns the straight-segment polyline the chart used to draw into the smooth
+// flowing curve the rest of the dashboard's charts now use.
+function smoothPath(points) {
+	if (points.length < 2) return "";
+	if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+
+	let path = `M ${points[0].x} ${points[0].y}`;
+	for (let i = 0; i < points.length - 1; i += 1) {
+		const p0 = points[i - 1] ?? points[i];
+		const p1 = points[i];
+		const p2 = points[i + 1];
+		const p3 = points[i + 2] ?? p2;
+
+		const cp1x = p1.x + (p2.x - p0.x) / 6;
+		const cp1y = p1.y + (p2.y - p0.y) / 6;
+		const cp2x = p2.x - (p3.x - p1.x) / 6;
+		const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+		path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+	}
+	return path;
+}
+
+// Single-series smooth trend line + soft area fill. One hue (sequential
+// default), so no legend — the chart title already names what's plotted.
 export default function TrendChart({ data, height = 220, formatValue = (value) => value.toLocaleString() }) {
 	const maxValue = Math.max(1, ...data.map((item) => item.value));
 	const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -11,10 +35,10 @@ export default function TrendChart({ data, height = 220, formatValue = (value) =
 	const points = data.map((item, index) => ({
 		...item,
 		x: data.length === 1 ? 50 : (index / (data.length - 1)) * 100,
-		y: 100 - (item.value / maxValue) * 85,
+		y: 92 - (item.value / maxValue) * 78,
 	}));
 
-	const linePath = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+	const linePath = smoothPath(points);
 	const areaPath = `${linePath} L ${points[points.length - 1].x} 100 L ${points[0].x} 100 Z`;
 
 	return (
@@ -33,12 +57,12 @@ export default function TrendChart({ data, height = 220, formatValue = (value) =
 							vectorEffect="non-scaling-stroke"
 						/>
 					))}
-					<path d={areaPath} className="fill-chart-1 dark:fill-chart-1-dark" opacity="0.1" stroke="none" />
+					<path d={areaPath} className="fill-chart-1 dark:fill-chart-1-dark" opacity="0.12" stroke="none" />
 					<path
 						d={linePath}
 						fill="none"
 						className="stroke-chart-1 dark:stroke-chart-1-dark"
-						strokeWidth="2"
+						strokeWidth="2.5"
 						vectorEffect="non-scaling-stroke"
 						strokeLinejoin="round"
 						strokeLinecap="round"
@@ -48,9 +72,9 @@ export default function TrendChart({ data, height = 220, formatValue = (value) =
 							key={point.label}
 							cx={point.x}
 							cy={point.y}
-							r={hoveredIndex === index ? 5 : 4}
-							className="fill-chart-1 stroke-white dark:fill-chart-1-dark dark:stroke-[#1a1a1a]"
-							strokeWidth="2"
+							r={hoveredIndex === index ? 5 : 3.5}
+							className="fill-white stroke-chart-1 dark:fill-surface-dark dark:stroke-chart-1-dark"
+							strokeWidth="2.5"
 							vectorEffect="non-scaling-stroke"
 							style={{ cursor: "pointer" }}
 							onMouseEnter={() => setHoveredIndex(index)}

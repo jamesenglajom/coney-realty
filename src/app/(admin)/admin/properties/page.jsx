@@ -26,6 +26,7 @@ export default async function PropertiesPage({ searchParams }) {
 			zoneType: params.zoneType || undefined,
 			priceMin: params.priceMin || undefined,
 			priceMax: params.priceMax || undefined,
+			status: params.status || undefined,
 		}),
 		getPagePermissions(user.role, "properties"),
 		listPropertyFilterOptions(),

@@ -14,8 +14,8 @@ export async function getAdminDashboardStats() {
 	const supabase = createAdminClient();
 
 	const [{ data: properties, error: propertiesError }, { data: users, error: usersError }] = await Promise.all([
-		supabase.from("properties").select("id, price, status, property_type, sold_at").is("deleted_at", null),
-		supabase.from("users").select("id, role").is("deleted_at", null),
+		supabase.from("properties").select("id, price, status, property_type, sold_at, created_at").is("deleted_at", null),
+		supabase.from("users").select("id, role, created_at").is("deleted_at", null),
 	]);
 
 	if (propertiesError) throw new Error(propertiesError.message);
@@ -38,9 +38,28 @@ export async function getAdminDashboardStats() {
 	});
 	const monthIndexByKey = new Map(months.map((month, index) => [month.key, index]));
 
+	// "New this month" counts for the KPI tiles' sparklines below — a
+	// separate pass from `months` above (which counts sold deals, already
+	// used by the existing "Sales trend" chart) since these track when a
+	// property/user was *created*, not sold.
+	const newPropertiesByMonth = months.map((month) => ({ ...month, count: 0 }));
+	const newPublishedByMonth = months.map((month) => ({ ...month, count: 0 }));
+	const newUsersByMonth = months.map((month) => ({ ...month, count: 0 }));
+
+	function bucketByCreatedAt(createdAt, series) {
+		if (!createdAt) return;
+		const date = new Date(createdAt);
+		const key = `${date.getFullYear()}-${date.getMonth()}`;
+		const monthIndex = monthIndexByKey.get(key);
+		if (monthIndex !== undefined) series[monthIndex].count += 1;
+	}
+
 	for (const property of properties ?? []) {
 		if (byStatus[property.status] !== undefined) byStatus[property.status] += 1;
 		if (byType[property.property_type] !== undefined) byType[property.property_type] += 1;
+
+		bucketByCreatedAt(property.created_at, newPropertiesByMonth);
+		if (property.status === "published") bucketByCreatedAt(property.created_at, newPublishedByMonth);
 
 		if (property.status === "sold") {
 			const price = Number(property.price) || 0;
@@ -62,6 +81,20 @@ export async function getAdminDashboardStats() {
 	const byRole = emptyCountMap(USER_ROLES);
 	for (const user of users ?? []) {
 		if (byRole[user.role] !== undefined) byRole[user.role] += 1;
+		bucketByCreatedAt(user.created_at, newUsersByMonth);
+	}
+
+	// Running totals rather than raw monthly counts — this data set was
+	// bulk-imported (nearly everything created in one or two months), so a
+	// "new this month" chart would mostly read as a single spike surrounded
+	// by zeros. A cumulative total is honest about the same underlying
+	// numbers (nothing invented) while actually reading as a trend.
+	function toCumulative(series) {
+		let running = 0;
+		return series.map((month) => {
+			running += month.count;
+			return { ...month, count: running };
+		});
 	}
 
 	return {
@@ -72,6 +105,10 @@ export async function getAdminDashboardStats() {
 		byRole,
 		lifetime: { count: lifetimeSoldCount, volume: lifetimeSoldVolume },
 		monthlyTrend: months,
+		propertiesTrend: toCumulative(newPropertiesByMonth),
+		publishedTrend: toCumulative(newPublishedByMonth),
+		usersTrend: toCumulative(newUsersByMonth),
+		soldTrend: toCumulative(months.map((month) => ({ label: month.label, count: month.count }))),
 	};
 }
 

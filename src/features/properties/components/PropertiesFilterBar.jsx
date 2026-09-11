@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
-import { FILTERABLE_PROPERTY_TYPES } from "../schemas";
+import { FILTERABLE_PROPERTY_TYPES, PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "../schemas";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 
@@ -40,9 +40,16 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [priceMax]);
 
-	const hasFilters = ["city", "district", "propertyType", "zoneType", "agentId", "priceMin", "priceMax"].some((key) =>
-		searchParams.get(key),
-	);
+	const hasFilters = [
+		"city",
+		"district",
+		"propertyType",
+		"zoneType",
+		"status",
+		"agentId",
+		"priceMin",
+		"priceMax",
+	].some((key) => searchParams.get(key));
 
 	function clearFilters() {
 		setPriceMin("");
@@ -94,6 +101,18 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 					{zoneTypes.map((zoneType) => (
 						<option key={zoneType} value={zoneType}>
 							{zoneType}
+						</option>
+					))}
+				</Select>
+
+				<Select
+					value={searchParams.get("status") ?? ""}
+					onChange={(event) => updateParam("status", event.target.value)}
+				>
+					<option value="">All statuses</option>
+					{PROPERTY_STATUSES.map((status) => (
+						<option key={status} value={status} className="capitalize">
+							{PROPERTY_STATUS_LABELS[status] ?? status}
 						</option>
 					))}
 				</Select>

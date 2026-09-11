@@ -32,8 +32,8 @@ export default function BarChart({ data, height = 220, formatValue = (value) => 
 								{formatValue(item.value)}
 							</span>
 							<div
-								className={`w-full max-w-6 rounded-t-[4px] transition-opacity ${item.colorClassName} ${
-									isHovered ? "opacity-100" : "opacity-90"
+								className={`w-full max-w-8 rounded-t-lg transition-all ${item.colorClassName} ${
+									isHovered ? "opacity-100 brightness-105" : "opacity-85"
 								}`}
 								style={{ height: `${barHeightPct}%` }}
 							/>

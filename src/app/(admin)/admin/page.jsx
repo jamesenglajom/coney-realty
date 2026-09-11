@@ -3,6 +3,7 @@ import { getAgentPropertyStats } from "@/features/properties/queries";
 import { PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
 import AdminDashboard from "@/features/dashboard/components/AdminDashboard";
 import KpiTile from "@/features/dashboard/components/KpiTile";
+import DashboardCalendar from "@/features/dashboard/components/DashboardCalendar";
 import MyReferredViewingRequests from "@/features/viewings/components/MyReferredViewingRequests";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
@@ -34,18 +35,21 @@ async function AgentDashboard({ userId }) {
 				/>
 			</div>
 
-			<div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
-				{Object.entries(stats.byStatus).map(([status, count]) => (
-					<div
-						key={status}
-						className="rounded-2xl border border-theme-gold-light/70 p-4 text-center dark:border-border-dark"
-					>
-						<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-							{(PROPERTY_STATUS_LABELS[status] ?? status).replace(/_/g, " ")}
-						</p>
-						<p className="mt-1 text-lg font-bold text-theme-blue dark:text-white">{count}</p>
-					</div>
-				))}
+			<div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+				<div className="grid grid-cols-2 gap-4 sm:grid-cols-5 lg:self-start">
+					{Object.entries(stats.byStatus).map(([status, count]) => (
+						<div
+							key={status}
+							className="rounded-2xl border border-theme-gold-light/70 p-4 text-center dark:border-border-dark"
+						>
+							<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
+								{(PROPERTY_STATUS_LABELS[status] ?? status).replace(/_/g, " ")}
+							</p>
+							<p className="mt-1 text-lg font-bold text-theme-blue dark:text-white">{count}</p>
+						</div>
+					))}
+				</div>
+				<DashboardCalendar />
 			</div>
 
 			<MyReferredViewingRequests userId={userId} />
