@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { MoreVertical, Eye, Pencil, BadgeCheck } from "lucide-react";
+import { MoreVertical, Eye, Pencil, BadgeCheck, Link2 } from "lucide-react";
+import { toast } from "sonner";
 import UnmarkSoldButton from "./UnmarkSoldButton";
 import MarkOnHoldButton from "./MarkOnHoldButton";
 import UnmarkOnHoldButton from "./UnmarkOnHoldButton";
@@ -13,8 +14,9 @@ import MarkSoldModal from "./MarkSoldModal";
 const MENU_ITEM_CLASSES =
 	"flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-theme-blue hover:bg-theme-gold-light dark:text-theme-gold dark:hover:bg-white/5";
 const MENU_WIDTH = 176; // matches w-44
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-export default function PropertyRowActions({ property, canEdit, canDelete }) {
+export default function PropertyRowActions({ property, canEdit, canDelete, currentUserId }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	// Lives outside the dropdown's own open/closed state so closing the menu
 	// (to open this modal) never unmounts the modal along with it.
@@ -34,6 +36,22 @@ export default function PropertyRowActions({ property, canEdit, canDelete }) {
 
 	function closeMenu() {
 		setIsMenuOpen(false);
+	}
+
+	// A shareable link to this listing with the current user's id attached as
+	// ?agent=, so a visit through it gets attributed back to whoever copied it
+	// (see src/features/viewings/referral.js) — available to every role this
+	// table renders for, not just roles that can edit/delete.
+	async function handleCopyMyUrl() {
+		const url = `${BASE_URL}/property/${property.slug}?agent=${currentUserId}`;
+		closeMenu();
+
+		try {
+			await navigator.clipboard.writeText(url);
+			toast.success("Property link copied — includes your referral ID.");
+		} catch {
+			toast.error(`Couldn't copy — copy it manually: ${url}`);
+		}
 	}
 
 	useEffect(() => {
@@ -97,6 +115,10 @@ export default function PropertyRowActions({ property, canEdit, canDelete }) {
 								<Eye className="h-3.5 w-3.5" aria-hidden="true" />
 								Preview
 							</Link>
+							<button type="button" role="menuitem" className={MENU_ITEM_CLASSES} onClick={handleCopyMyUrl}>
+								<Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+								Get my URL
+							</button>
 							{canEdit ? (
 								<Link
 									href={`/admin/properties/${property.id}/edit`}

@@ -89,7 +89,7 @@ function CoverThumbnail({ url, title }) {
 	);
 }
 
-export default function PropertiesTable({ properties, canEdit, canDelete }) {
+export default function PropertiesTable({ properties, canEdit, canDelete, currentUserId }) {
 	if (properties.length === 0) {
 		return (
 			<div className="rounded-2xl border border-dashed border-theme-gold-light/80 p-12 text-center text-sm text-txt-muted dark:border-border-dark dark:text-txt-muted-dark">
@@ -168,7 +168,12 @@ export default function PropertiesTable({ properties, canEdit, canDelete }) {
 								{property.city_state || [property.city, property.region, property.district].filter(Boolean).join(", ") || "—"}
 							</td>
 							<td className="p-4 text-right">
-								<PropertyRowActions property={property} canEdit={canEdit} canDelete={canDelete} />
+								<PropertyRowActions
+								property={property}
+								canEdit={canEdit}
+								canDelete={canDelete}
+								currentUserId={currentUserId}
+							/>
 							</td>
 						</tr>
 					))}

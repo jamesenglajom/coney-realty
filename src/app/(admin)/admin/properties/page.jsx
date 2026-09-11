@@ -57,7 +57,12 @@ export default async function PropertiesPage({ searchParams }) {
 				agents={assignableUsers.filter((assignableUser) => assignableUser.role === "Agent")}
 				showAgentFilter={!isAgent}
 			/>
-			<PropertiesTable properties={properties} canEdit={permissions.can_edit} canDelete={permissions.can_delete} />
+			<PropertiesTable
+				properties={properties}
+				canEdit={permissions.can_edit}
+				canDelete={permissions.can_delete}
+				currentUserId={user.id}
+			/>
 		</div>
 	);
 }
