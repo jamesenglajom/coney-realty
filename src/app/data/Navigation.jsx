@@ -14,6 +14,7 @@ import {
   Quote,
   ListChecks,
   Image as ImageIcon,
+  BellRing,
 } from "lucide-react";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -27,6 +28,16 @@ export const navigationGroups = [
         icon: LayoutDashboardIcon,
         href: `${BASE_URL}/admin`,
         pageKey: "dashboard",
+      },
+      {
+        name: "My Referrals",
+        icon: BellRing,
+        href: `${BASE_URL}/admin/my-referrals`,
+        // Every role can refer a visitor via their own ?agent= link (see
+        // features/viewings/referral.js) and should be able to see/act on
+        // it regardless of whether their role has the "viewings" page
+        // permission — same as MyReferredViewingRequests on the dashboard.
+        alwaysVisible: true,
       },
     ],
   },
