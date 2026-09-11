@@ -191,7 +191,7 @@ export default function UserForm({ mode, user, assignableRoles }) {
 			<MediaPickerModal
 				open={pickerOpen}
 				onClose={() => setPickerOpen(false)}
-				folders={["agent-headshots", "agent-half-body"]}
+				folders={["agent-half-body"]}
 				onSelect={([url]) => setValue("avatarUrl", url, { shouldValidate: true, shouldDirty: true })}
 			/>
 		</form>

@@ -132,7 +132,7 @@ export default function LeaderboardEntryModal({ open, onClose, entry, agentOptio
 			<MediaPickerModal
 				open={pickerOpen}
 				onClose={() => setPickerOpen(false)}
-				folders={["agent-headshots", "agent-half-body"]}
+				folders={["agent-half-body"]}
 				onSelect={([url]) => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
 			/>
 		</Modal>

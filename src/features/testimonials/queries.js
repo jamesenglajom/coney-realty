@@ -22,7 +22,7 @@ function mapTestimonialRow(row) {
 
 // Photo resolution, shared by the admin list and the public homepage read:
 // the testimonial's own photo_url (set via the media library picker in
-// TestimonialModal — browses agent-headshots) wins, then the linked
+// TestimonialModal — browses agent-half-body) wins, then the linked
 // agent's account avatar, then a deterministic placeholder. There's no
 // "search the agent's photo library automatically" tier anymore — once
 // library filenames are arbitrary (not {user_id}_<shot>.webp), there's no

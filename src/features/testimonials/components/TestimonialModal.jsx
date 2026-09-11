@@ -91,7 +91,7 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 						) : null}
 					</div>
 					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-						Picked from the agent-headshots media library. Leave blank to fall back to the linked agent&apos;s
+						Picked from the agent-half-body media library. Leave blank to fall back to the linked agent&apos;s
 						account avatar.
 					</p>
 				</div>
@@ -157,7 +157,7 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 			<MediaPickerModal
 				open={pickerOpen}
 				onClose={() => setPickerOpen(false)}
-				folders={["agent-headshots"]}
+				folders={["agent-half-body"]}
 				onSelect={([url]) => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
 			/>
 		</Modal>

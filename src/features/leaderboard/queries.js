@@ -9,8 +9,8 @@ import { getAvatarForSeed } from "@/features/homepage/data";
 // drop public/top_10/rank1.jpg .. rank10.jpg and whoever currently sits at
 // that position (drag-and-drop order, 1-indexed) picks it up automatically.
 // Still only a fallback — an entry's own photo_url (picked from the media
-// library's agent-headshots/agent-half-body folders — see
-// LeaderboardEntryModal) wins if set.
+// library's agent-half-body folder — see LeaderboardEntryModal) wins if
+// set.
 function rankPhotoIfExists(rank) {
 	try {
 		const filePath = path.join(process.cwd(), "public", "top_10", `rank${rank}.jpg`);
