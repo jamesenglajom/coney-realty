@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ImagePlus } from "lucide-react";
 import { testimonialSchema } from "../schemas";
 import { createTestimonialAction, updateTestimonialAction } from "../actions";
-import CopyButton from "@/components/ui/CopyButton";
+import MediaPickerModal from "@/features/media/components/MediaPickerModal";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -20,17 +21,19 @@ import Button from "@/components/ui/Button";
 export default function TestimonialModal({ open, onClose, testimonial, agentOptions }) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
+	const [pickerOpen, setPickerOpen] = useState(false);
 	const isEdit = Boolean(testimonial);
-	const filenameKey = testimonial?.slug || testimonial?.id;
 
 	const {
 		register,
 		handleSubmit,
 		reset,
+		watch,
+		setValue,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(testimonialSchema),
-		defaultValues: { quote: "", clientName: "", agentDisplayName: "", agentTagline: "", slug: "", agentId: "" },
+		defaultValues: { quote: "", clientName: "", agentDisplayName: "", agentTagline: "", photoUrl: "", agentId: "" },
 	});
 
 	useEffect(() => {
@@ -40,10 +43,12 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 			clientName: testimonial?.clientName ?? "",
 			agentDisplayName: testimonial?.agentDisplayName ?? "",
 			agentTagline: testimonial?.agentTagline ?? "",
-			slug: testimonial?.slug ?? "",
+			photoUrl: testimonial?.photoUrl ?? "",
 			agentId: testimonial?.agentId ?? "",
 		});
 	}, [open, testimonial, reset]);
+
+	const photoUrl = watch("photoUrl");
 
 	function onSubmit(values) {
 		startTransition(async () => {
@@ -63,25 +68,33 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 	return (
 		<Modal open={open} onClose={onClose} title={isEdit ? "Edit testimonial" : "Add testimonial"}>
 			<form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-				{isEdit ? (
-					<div className="flex items-center gap-3 rounded-xl border border-theme-gold-light bg-theme-gold-light/40 p-3 dark:border-border-dark dark:bg-white/5">
-						<span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
-							<Image src={testimonial.photo} alt="" fill sizes="48px" unoptimized className="object-cover" />
+				<div>
+					<Label>Photo</Label>
+					<div className="flex items-center gap-3">
+						<span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
+							{photoUrl ? (
+								<Image src={photoUrl} alt="" fill sizes="56px" unoptimized className="object-cover" />
+							) : null}
 						</span>
-						<div className="min-w-0 text-xs text-txt-secondary dark:text-txt-secondary-dark">
-							<p>
-								To set this testimonial&apos;s own photo, save an image as{" "}
-								<span className="font-mono">public/testimonials/{filenameKey}.webp</span> (jpg/png also work).
-							</p>
-							<div className="mt-1 flex items-center gap-1">
-								<span className="truncate font-mono text-[11px] text-txt-muted dark:text-txt-muted-dark">
-									{filenameKey}
-								</span>
-								<CopyButton value={filenameKey} label="Image filename key" />
-							</div>
-						</div>
+						<Button type="button" variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>
+							<ImagePlus className="h-4 w-4" aria-hidden="true" />
+							{photoUrl ? "Change photo" : "Choose photo"}
+						</Button>
+						{photoUrl ? (
+							<button
+								type="button"
+								onClick={() => setValue("photoUrl", "", { shouldDirty: true })}
+								className="text-xs text-txt-muted hover:text-danger dark:text-txt-muted-dark"
+							>
+								Remove
+							</button>
+						) : null}
 					</div>
-				) : null}
+					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+						Picked from the agent-headshots media library. Leave blank to fall back to the linked agent&apos;s
+						account avatar.
+					</p>
+				</div>
 
 				<div>
 					<Label htmlFor="testimonialQuote">Quote</Label>
@@ -131,17 +144,6 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 					</div>
 				</div>
 
-				<div>
-					<Label htmlFor="testimonialSlug">Photo filename key (optional)</Label>
-					<Input id="testimonialSlug" type="text" placeholder="imelia-s" {...register("slug")} />
-					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-						Lowercase, hyphenated — used to name the photo file (
-						<span className="font-mono">public/testimonials/{"{this}"}.webp</span>). Leave blank to use the
-						testimonial&apos;s ID instead once it&apos;s saved.
-					</p>
-					<FieldError>{errors.slug?.message}</FieldError>
-				</div>
-
 				<div className="flex justify-end gap-2 pt-1">
 					<Button type="button" variant="ghost" onClick={onClose}>
 						Cancel
@@ -151,6 +153,13 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 					</Button>
 				</div>
 			</form>
+
+			<MediaPickerModal
+				open={pickerOpen}
+				onClose={() => setPickerOpen(false)}
+				folders={["agent-headshots"]}
+				onSelect={([url]) => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
+			/>
 		</Modal>
 	);
 }

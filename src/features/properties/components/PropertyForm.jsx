@@ -23,6 +23,7 @@ import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 import AdditionalFieldsEditor from "./AdditionalFieldsEditor";
 import HtmlBodyEditor from "./HtmlBodyEditor";
+import PropertyPhotosField from "./PropertyPhotosField";
 
 function slugify(value) {
 	return value
@@ -89,6 +90,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 						),
 					),
 					assignedUserIds: property.assignedUserIds ?? [],
+					imageUrls: property.image_urls ?? [],
 				}
 			: {
 					title: "",
@@ -113,6 +115,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 					standardFields: {},
 					additionalFieldPairs: [],
 					assignedUserIds: [],
+					imageUrls: [],
 				},
 	});
 
@@ -388,6 +391,16 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 			) : null}
 
 			<AdditionalFieldsEditor control={control} register={register} />
+
+			<div>
+				<Label>Photos</Label>
+				<Controller
+					name="imageUrls"
+					control={control}
+					render={({ field }) => <PropertyPhotosField value={field.value} onChange={field.onChange} />}
+				/>
+				<FieldError>{errors.imageUrls?.message}</FieldError>
+			</div>
 
 			<div>
 				<Label htmlFor="assignedUserIds">Assigned agents</Label>

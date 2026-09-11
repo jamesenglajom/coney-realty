@@ -15,7 +15,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Button from "@/components/ui/Button";
-import CopyButton from "@/components/ui/CopyButton";
 import TestimonialModal from "./TestimonialModal";
 import { deleteTestimonialAction, reorderTestimonialsAction } from "../actions";
 
@@ -56,15 +55,6 @@ function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 					</span>
 				</p>
 				<p className="truncate text-xs text-txt-muted dark:text-txt-muted-dark">{testimonial.quote}</p>
-			</div>
-
-			{/* The exact key to name a photo file public/testimonials/<key>.webp
-			    after — the testimonial's slug if it has one, else its id. */}
-			<div className="hidden shrink-0 items-center gap-1 sm:flex">
-				<span className="max-w-28 truncate rounded bg-theme-gray/10 px-1.5 py-1 font-mono text-[10px] text-txt-muted dark:bg-white/5 dark:text-txt-muted-dark">
-					{testimonial.slug || testimonial.id}
-				</span>
-				<CopyButton value={testimonial.slug || testimonial.id} label="Image filename key" />
 			</div>
 
 			{canEdit ? (

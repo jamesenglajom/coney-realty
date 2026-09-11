@@ -3,7 +3,13 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 
-export default function Modal({ open, onClose, title, children }) {
+const SIZE_CLASSES = {
+	sm: "max-w-sm",
+	lg: "max-w-2xl",
+	xl: "max-w-4xl",
+};
+
+export default function Modal({ open, onClose, title, children, size = "sm" }) {
 	useEffect(() => {
 		if (!open) return undefined;
 
@@ -30,7 +36,7 @@ export default function Modal({ open, onClose, title, children }) {
 				role="dialog"
 				aria-modal="true"
 				aria-label={title}
-				className="relative flex max-h-[85vh] w-full max-w-sm flex-col rounded-2xl border border-theme-gold-light bg-white shadow-2xl dark:border-border-dark dark:bg-surface-dark"
+				className={`relative flex max-h-[85vh] w-full ${SIZE_CLASSES[size]} flex-col rounded-2xl border border-theme-gold-light bg-white shadow-2xl dark:border-border-dark dark:bg-surface-dark`}
 			>
 				<div className="flex shrink-0 items-center justify-between px-6 pb-4 pt-6">
 					<h2 className="text-lg font-semibold text-theme-blue dark:text-white">{title}</h2>

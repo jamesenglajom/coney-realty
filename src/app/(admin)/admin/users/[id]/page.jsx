@@ -6,7 +6,6 @@ import { requirePermission } from "@/features/auth/permissions";
 import { getUserById } from "@/features/users/queries";
 import { listProperties, getAgentPropertyStats } from "@/features/properties/queries";
 import { PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
-import { getAgentPhotos } from "@/features/users/imageFs";
 import { getAvatarForSeed } from "@/features/homepage/data";
 import Badge from "@/components/ui/Badge";
 
@@ -52,8 +51,7 @@ export default async function UserPreviewPage({ params }) {
 
 	if (!user) notFound();
 
-	const photos = getAgentPhotos(user.id);
-	const photo = photos.medium || photos.three_quarter || photos.face || user.avatarUrl || getAvatarForSeed(user.id);
+	const photo = user.avatarUrl || getAvatarForSeed(user.id);
 
 	const isAgent = user.role === "Agent";
 	const [assignedProperties, stats] = isAgent

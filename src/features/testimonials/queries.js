@@ -1,11 +1,9 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAgentPhotos } from "@/features/users/imageFs";
 import { getAvatarForSeed } from "@/features/homepage/data";
-import { getTestimonialPhoto } from "./imageFs";
 
 const TESTIMONIAL_COLUMNS =
-	"id, quote, client_name, agent_display_name, agent_tagline, slug, agent_id, display_order, users(id, full_name, user_info(avatar_url))";
+	"id, quote, client_name, agent_display_name, agent_tagline, photo_url, agent_id, display_order, users(id, full_name, user_info(avatar_url))";
 
 function mapTestimonialRow(row) {
 	return {
@@ -14,7 +12,7 @@ function mapTestimonialRow(row) {
 		clientName: row.client_name,
 		agentDisplayName: row.agent_display_name,
 		agentTagline: row.agent_tagline,
-		slug: row.slug,
+		photoUrl: row.photo_url,
 		agentId: row.agent_id,
 		displayOrder: row.display_order,
 		agentName: row.users?.full_name ?? null,
@@ -22,22 +20,16 @@ function mapTestimonialRow(row) {
 	};
 }
 
-// Photo resolution, shared by the admin list and the public homepage read so
-// the two never disagree on which photo a testimonial shows: the
-// testimonial's own static file (public/testimonials/, named by slug or id —
-// see ./imageFs) wins, then the linked agent's photo library (medium ->
-// three_quarter -> face, whichever exists first — see
-// src/features/users/imageFs.js), then their account avatar, then a
-// deterministic placeholder.
+// Photo resolution, shared by the admin list and the public homepage read:
+// the testimonial's own photo_url (set via the media library picker in
+// TestimonialModal — browses agent-headshots) wins, then the linked
+// agent's account avatar, then a deterministic placeholder. There's no
+// "search the agent's photo library automatically" tier anymore — once
+// library filenames are arbitrary (not {user_id}_<shot>.webp), there's no
+// reliable way to know which library photo belongs to which agent without
+// it being explicitly picked.
 function resolvePhoto(testimonial) {
-	let photo = getTestimonialPhoto(testimonial);
-
-	if (!photo && testimonial.agentId) {
-		const libraryPhotos = getAgentPhotos(testimonial.agentId);
-		photo = libraryPhotos.medium || libraryPhotos.three_quarter || libraryPhotos.face || null;
-	}
-
-	return photo || testimonial.agentAvatarUrl || getAvatarForSeed(testimonial.id);
+	return testimonial.photoUrl || testimonial.agentAvatarUrl || getAvatarForSeed(testimonial.id);
 }
 
 // Admin view — every non-deleted testimonial in carousel order, with its

@@ -10,6 +10,7 @@ export const PAGES = [
 	"leaderboard",
 	"testimonials",
 	"propertyTypes",
+	"media",
 ];
 export const EDITABLE_ROLES = ["Admin", "Manager", "Agent"];
 export const PERMISSION_ACTIONS = ["view", "create", "edit", "delete"];

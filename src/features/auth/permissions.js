@@ -90,6 +90,7 @@ export async function getRolePermissions(role) {
 			"leaderboard",
 			"testimonials",
 			"propertyTypes",
+			"media",
 		].forEach((page) => pages.add(page));
 		return Object.fromEntries([...pages].map((page) => [page, SADMIN_ALL_ALLOWED]));
 	}

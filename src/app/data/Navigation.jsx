@@ -13,6 +13,7 @@ import {
   Trophy,
   Quote,
   ListChecks,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -73,6 +74,12 @@ export const navigationGroups = [
         icon: ListChecks,
         href: `${BASE_URL}/admin/property-types`,
         pageKey: "propertyTypes",
+      },
+      {
+        name: "Media",
+        icon: ImageIcon,
+        href: `${BASE_URL}/admin/media`,
+        pageKey: "media",
       },
     ],
   },

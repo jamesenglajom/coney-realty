@@ -128,6 +128,7 @@ function toColumns(data) {
 		lng: toNumberOrNull(data.lng),
 		custom_fields: toCustomFields(data.customFields),
 		html_body: data.htmlBody || null,
+		image_urls: data.imageUrls ?? [],
 	};
 }
 

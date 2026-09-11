@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { leaderboardEntrySchema } from "../schemas";
 import { createLeaderboardEntryAction, updateLeaderboardEntryAction } from "../actions";
-import { AGENT_SHOT_TYPES, AGENT_SHOT_LABELS } from "@/features/users/agentShots";
+import MediaPickerModal from "@/features/media/components/MediaPickerModal";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -17,9 +17,10 @@ import Select from "@/components/ui/Select";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
 
-export default function LeaderboardEntryModal({ open, onClose, entry, agentOptions, agentPhotosById = {} }) {
+export default function LeaderboardEntryModal({ open, onClose, entry, agentOptions }) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
+	const [pickerOpen, setPickerOpen] = useState(false);
 	const isEdit = Boolean(entry);
 
 	const {
@@ -34,12 +35,7 @@ export default function LeaderboardEntryModal({ open, onClose, entry, agentOptio
 		defaultValues: { name: "", title: "", photoUrl: "", agentId: "" },
 	});
 
-	const selectedAgentId = watch("agentId");
-	const selectedPhotoUrl = watch("photoUrl");
-	const agentPhotos = agentPhotosById[selectedAgentId];
-	const availableShots = agentPhotos
-		? AGENT_SHOT_TYPES.map((shot) => ({ shot, url: agentPhotos[shot] })).filter((option) => option.url)
-		: [];
+	const photoUrl = watch("photoUrl");
 
 	useEffect(() => {
 		if (!open) return;
@@ -94,49 +90,31 @@ export default function LeaderboardEntryModal({ open, onClose, entry, agentOptio
 					<FieldError>{errors.agentId?.message}</FieldError>
 				</div>
 
-				{availableShots.length > 0 ? (
-					<div>
-						<Label>Pick a photo</Label>
-						<div className="grid grid-cols-3 gap-2">
-							{availableShots.map(({ shot, url }) => {
-								const isSelected = selectedPhotoUrl === url;
-								return (
-									<button
-										key={shot}
-										type="button"
-										onClick={() => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
-										className={`relative overflow-hidden rounded-lg ring-2 transition-colors ${
-											isSelected ? "ring-theme-gold" : "ring-transparent hover:ring-theme-gray/40"
-										}`}
-									>
-										<span className="relative block aspect-square w-full">
-											<Image src={url} alt={AGENT_SHOT_LABELS[shot]} fill unoptimized className="object-cover" />
-										</span>
-										{isSelected ? (
-											<span className="absolute right-1 top-1 rounded-full bg-theme-gold p-0.5 text-theme-blue">
-												<Check className="h-3 w-3" aria-hidden="true" />
-											</span>
-										) : null}
-										<span className="block truncate bg-black/60 px-1 py-0.5 text-[10px] text-white">
-											{AGENT_SHOT_LABELS[shot]}
-										</span>
-									</button>
-								);
-							})}
-						</div>
-						<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-							From this agent&apos;s photo library (public/agents/). Click one to use it, or paste a different URL
-							below.
-						</p>
-					</div>
-				) : null}
-
 				<div>
-					<Label htmlFor="entryPhoto">Photo URL (optional)</Label>
-					<Input id="entryPhoto" type="text" placeholder="https://… or /leaderboard/name.webp" {...register("photoUrl")} />
+					<Label>Photo</Label>
+					<div className="flex items-center gap-3">
+						<span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
+							{photoUrl ? (
+								<Image src={photoUrl} alt="" fill sizes="56px" unoptimized className="object-cover" />
+							) : null}
+						</span>
+						<Button type="button" variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>
+							<ImagePlus className="h-4 w-4" aria-hidden="true" />
+							{photoUrl ? "Change photo" : "Choose photo"}
+						</Button>
+						{photoUrl ? (
+							<button
+								type="button"
+								onClick={() => setValue("photoUrl", "", { shouldDirty: true })}
+								className="text-xs text-txt-muted hover:text-danger dark:text-txt-muted-dark"
+							>
+								Remove
+							</button>
+						) : null}
+					</div>
 					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-						An allowed-host URL, or a file placed in <span className="font-mono">public/leaderboard/</span>. Falls back
-						to the linked agent&apos;s avatar.
+						Browse both headshot and half-body shots to pick whichever looks better here. Falls back to a rank
+						photo, then the linked agent&apos;s avatar, if left blank.
 					</p>
 					<FieldError>{errors.photoUrl?.message}</FieldError>
 				</div>
@@ -150,6 +128,13 @@ export default function LeaderboardEntryModal({ open, onClose, entry, agentOptio
 					</Button>
 				</div>
 			</form>
+
+			<MediaPickerModal
+				open={pickerOpen}
+				onClose={() => setPickerOpen(false)}
+				folders={["agent-headshots", "agent-half-body"]}
+				onSelect={([url]) => setValue("photoUrl", url, { shouldValidate: true, shouldDirty: true })}
+			/>
 		</Modal>
 	);
 }

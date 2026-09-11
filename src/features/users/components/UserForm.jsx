@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ImagePlus } from "lucide-react";
 import { createUserSchema, updateUserSchema, computeDefaultPassword } from "../schemas";
 import { createUserAction, updateUserAction, checkEmailAvailabilityAction } from "../actions";
+import MediaPickerModal from "@/features/media/components/MediaPickerModal";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
@@ -20,10 +23,13 @@ export default function UserForm({ mode, user, assignableRoles }) {
 	const [serverError, setServerError] = useState("");
 	const isEdit = mode === "edit";
 
+	const [pickerOpen, setPickerOpen] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
 		watch,
+		setValue,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(isEdit ? updateUserSchema : createUserSchema),
@@ -40,6 +46,7 @@ export default function UserForm({ mode, user, assignableRoles }) {
 	});
 
 	const emailValue = watch("email");
+	const avatarUrl = watch("avatarUrl");
 	const [duplicate, setDuplicate] = useState(null);
 
 	// Live duplicate-check as the admin types, so they find out before
@@ -128,17 +135,37 @@ export default function UserForm({ mode, user, assignableRoles }) {
 				<FieldError>{errors.role?.message}</FieldError>
 			</div>
 
-			<div className="grid gap-4 sm:grid-cols-2">
-				<div>
-					<Label htmlFor="phone">Phone (public)</Label>
-					<Input id="phone" type="tel" placeholder="+63 912 345 6789" {...register("phone")} />
-					<FieldError>{errors.phone?.message}</FieldError>
+			<div>
+				<Label htmlFor="phone">Phone (public)</Label>
+				<Input id="phone" type="tel" placeholder="+63 912 345 6789" {...register("phone")} />
+				<FieldError>{errors.phone?.message}</FieldError>
+			</div>
+
+			<div>
+				<Label>Avatar</Label>
+				<div className="flex items-center gap-3">
+					<span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
+						{avatarUrl ? <Image src={avatarUrl} alt="" fill sizes="56px" unoptimized className="object-cover" /> : null}
+					</span>
+					<Button type="button" variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>
+						<ImagePlus className="h-4 w-4" aria-hidden="true" />
+						{avatarUrl ? "Change photo" : "Choose photo"}
+					</Button>
+					{avatarUrl ? (
+						<button
+							type="button"
+							onClick={() => setValue("avatarUrl", "", { shouldDirty: true })}
+							className="text-xs text-txt-muted hover:text-danger dark:text-txt-muted-dark"
+						>
+							Remove
+						</button>
+					) : null}
 				</div>
-				<div>
-					<Label htmlFor="avatarUrl">Avatar URL</Label>
-					<Input id="avatarUrl" type="text" placeholder="https://…" {...register("avatarUrl")} />
-					<FieldError>{errors.avatarUrl?.message}</FieldError>
-				</div>
+				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
+					Picked from the media library — shown on this agent&apos;s public profile page.
+				</p>
+				<FieldError>{errors.avatarUrl?.message}</FieldError>
+				<input type="hidden" {...register("avatarUrl")} />
 			</div>
 
 			<div>
@@ -160,6 +187,13 @@ export default function UserForm({ mode, user, assignableRoles }) {
 					Cancel
 				</Button>
 			</div>
+
+			<MediaPickerModal
+				open={pickerOpen}
+				onClose={() => setPickerOpen(false)}
+				folders={["agent-headshots", "agent-half-body"]}
+				onSelect={([url]) => setValue("avatarUrl", url, { shouldValidate: true, shouldDirty: true })}
+			/>
 		</form>
 	);
 }

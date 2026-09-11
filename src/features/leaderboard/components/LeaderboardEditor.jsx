@@ -85,7 +85,7 @@ function SortableRow({ entry, rank, canEdit, canDelete, onEdit, onDelete }) {
 	);
 }
 
-export default function LeaderboardEditor({ entries, agentOptions, agentPhotosById, canCreate, canEdit, canDelete }) {
+export default function LeaderboardEditor({ entries, agentOptions, canCreate, canEdit, canDelete }) {
 	const router = useRouter();
 	const [rows, setRows] = useState(entries);
 	const [modalOpen, setModalOpen] = useState(false);
@@ -186,7 +186,6 @@ export default function LeaderboardEditor({ entries, agentOptions, agentPhotosBy
 				onClose={() => setModalOpen(false)}
 				entry={editing}
 				agentOptions={agentOptions}
-				agentPhotosById={agentPhotosById}
 			/>
 		</div>
 	);

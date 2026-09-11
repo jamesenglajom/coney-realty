@@ -59,6 +59,10 @@ const propertyBaseSchema = z.object({
 	customFields: jsonObjectString,
 	htmlBody: z.string().optional(),
 	assignedUserIds: z.array(z.string()).default([]),
+	// Ordered Storage URLs, picked from the media library's properties/
+	// folder — see PropertyPhotosField. First one is the cover photo shown
+	// everywhere the property appears as a card.
+	imageUrls: z.array(z.string()).default([]),
 });
 
 export const createPropertySchema = propertyBaseSchema;
