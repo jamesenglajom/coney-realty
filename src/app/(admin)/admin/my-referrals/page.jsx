@@ -1,6 +1,7 @@
 import { requireUser } from "@/features/auth/permissions";
 import { listViewingRequestsForAgent } from "@/features/viewings/queries";
 import SiteViewingsTable from "@/features/viewings/components/SiteViewingsTable";
+import CopyReferralLinkButton from "@/features/viewings/components/CopyReferralLinkButton";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
@@ -24,9 +25,10 @@ export default async function MyReferralsPage() {
 				title="My Referrals"
 				description={
 					pendingCount > 0
-						? `Clients referred to you via your ?agent= link — ${pendingCount} awaiting a status update.`
-						: "Clients referred to you via your ?agent= link."
+						? `Clients referred to you via your link — ${pendingCount} awaiting a status update.`
+						: "Clients referred to you via your link."
 				}
+				actions={<CopyReferralLinkButton agentId={user.id} />}
 			/>
 			<SiteViewingsTable requests={requests} />
 		</div>
