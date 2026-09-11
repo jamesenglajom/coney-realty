@@ -17,6 +17,7 @@ export default async function TopPerformersPanorama() {
 	return (
 		<TopPerformersPanoramaClient
 			entries={entries.slice(0, 5)}
+			rest={config.showRanks6To10 ? entries.slice(5, 10) : []}
 			heading={config.heading}
 			periodLabel={config.periodLabel}
 		/>

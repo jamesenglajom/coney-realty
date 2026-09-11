@@ -88,10 +88,56 @@ function Panel({ entry, index, isActive, restWidth, onActivate }) {
 	);
 }
 
+// Ranks 6-10, below the panorama — same "hidden until hover" idea as the
+// poster grid's circles, adapted to this section's own theme-adaptive
+// editorial look (light/dark, not the poster's mode-invariant black) rather
+// than reusing its printed-poster gold sunburst styling.
+function RestRow({ entries }) {
+	if (entries.length === 0) return null;
+
+	return (
+		<ul className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-x-8 gap-y-10">
+			{entries.map((entry, index) => {
+				const avatar = (
+					<span className="relative block">
+						<span className="relative block h-16 w-16 overflow-hidden rounded-full ring-2 ring-theme-gold transition-transform duration-300 ease-out group-hover:scale-105 sm:h-24 sm:w-24">
+							<Image
+								src={entry.photo}
+								alt={entry.name}
+								fill
+								sizes="96px"
+								className="object-cover object-top"
+							/>
+						</span>
+						<span className="absolute -left-1 -top-1 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-theme-blue text-[10px] font-bold text-theme-gold ring-2 ring-white dark:ring-surface-dark">
+							{index + 6}
+						</span>
+					</span>
+				);
+
+				return (
+					<li key={entry.id} className="group relative">
+						{entry.agentId ? (
+							<Link href={`/agents/${entry.agentId}`} className="block">
+								{avatar}
+							</Link>
+						) : (
+							<div className="block">{avatar}</div>
+						)}
+						<span className="pointer-events-none absolute left-1/2 top-full z-10 mt-2.5 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full bg-theme-blue px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white opacity-0 shadow-lg transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 dark:bg-white dark:text-theme-blue">
+							{entry.name}
+						</span>
+					</li>
+				);
+			})}
+		</ul>
+	);
+}
+
 // heading/periodLabel come from the same admin-managed leaderboard_config
 // row the original poster section reads (src/app/(admin)/admin/leaderboard)
 // — one backend source, whichever homepage section is live shows it.
-export default function TopPerformersPanoramaClient({ entries, heading, periodLabel }) {
+export default function TopPerformersPanoramaClient({ entries, rest = [], heading, periodLabel }) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const restWidth = (100 - ACTIVE_WIDTH) / Math.max(entries.length - 1, 1);
 
@@ -104,7 +150,6 @@ export default function TopPerformersPanoramaClient({ entries, heading, periodLa
 				<SectionHeading
 					eyebrow={periodLabel || "Meet the team"}
 					title={heading}
-					description="Hover a panel to bring it forward — the rest step back to make room."
 					className="mx-auto max-w-2xl text-center [&_p]:mx-auto"
 				/>
 
@@ -123,6 +168,8 @@ export default function TopPerformersPanoramaClient({ entries, heading, periodLa
 						/>
 					))}
 				</div>
+
+				<RestRow entries={rest} />
 			</div>
 		</section>
 	);
