@@ -59,7 +59,7 @@ function FeaturedCard({ entry }) {
 						alt={entry.name}
 						fill
 						sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 200px"
-						className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+						className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
 					/>
 					{/* Warm gold cast up top (matching the poster's color grade),
 					    fading to a dark base so the name bar below reads clean. */}
@@ -149,7 +149,7 @@ export default async function Leaderboard() {
 								<EntryFigure entry={entry} className="flex flex-col items-center">
 									<span className="rounded-full bg-theme-gold p-1">
 										<span className="relative block h-18 w-18 overflow-hidden rounded-full ring-2 ring-black sm:h-22 sm:w-22">
-											<Image src={entry.photo} alt={entry.name} fill sizes="96px" className="object-cover" />
+											<Image src={entry.photo} alt={entry.name} fill sizes="96px" className="object-cover object-top" />
 										</span>
 									</span>
 									<span className="mt-2.5 max-w-28 truncate text-xs font-semibold uppercase tracking-wide text-white/85">

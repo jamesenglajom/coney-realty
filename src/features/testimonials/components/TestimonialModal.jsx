@@ -73,7 +73,7 @@ export default function TestimonialModal({ open, onClose, testimonial, agentOpti
 					<div className="flex items-center gap-3">
 						<span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
 							{photoUrl ? (
-								<Image src={photoUrl} alt="" fill sizes="56px" unoptimized className="object-cover" />
+								<Image src={photoUrl} alt="" fill sizes="56px" unoptimized className="object-cover object-top" />
 							) : null}
 						</span>
 						<Button type="button" variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>

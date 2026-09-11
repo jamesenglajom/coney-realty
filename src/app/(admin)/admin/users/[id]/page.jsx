@@ -71,7 +71,7 @@ export default async function UserPreviewPage({ params }) {
 			<div className="mt-6 flex flex-wrap items-start justify-between gap-3">
 				<div className="flex items-center gap-4">
 					<div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-theme-gold-light dark:ring-border-dark">
-						<Image src={photo} alt={user.full_name || user.email} fill sizes="64px" className="object-cover" />
+						<Image src={photo} alt={user.full_name || user.email} fill sizes="64px" className="object-cover object-top" />
 					</div>
 					<div>
 						<h1 className="text-2xl font-bold text-theme-blue dark:text-white">{user.full_name || "—"}</h1>

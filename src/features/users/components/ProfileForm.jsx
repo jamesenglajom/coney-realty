@@ -86,7 +86,7 @@ export default function ProfileForm({ user }) {
 									fill
 									unoptimized
 									sizes="44px"
-									className="object-cover"
+									className="object-cover object-top"
 									onError={() => setAvatarLoadFailed(true)}
 									onLoad={() => setAvatarLoadFailed(false)}
 								/>

@@ -51,7 +51,7 @@ function SortableRow({ entry, rank, canEdit, canDelete, onEdit, onDelete }) {
 			<span className="w-6 text-center font-display text-lg font-semibold text-theme-blue dark:text-white">{rank}</span>
 
 			<span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
-				<Image src={photoFor(entry)} alt="" fill sizes="44px" unoptimized className="object-cover" />
+				<Image src={photoFor(entry)} alt="" fill sizes="44px" unoptimized className="object-cover object-top" />
 			</span>
 
 			<div className="min-w-0 flex-1">

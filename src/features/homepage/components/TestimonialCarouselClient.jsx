@@ -48,7 +48,7 @@ function TestimonialCard({ testimonial }) {
 			<div className="mt-6 flex items-end justify-between gap-3">
 				<div className="min-w-0">{agentId ? <Link href={`/agents/${agentId}`}>{signature}</Link> : signature}</div>
 				<div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-4 ring-theme-gold/40 sm:h-24 sm:w-24">
-					<Image src={photo} alt={agentDisplayName} fill sizes="96px" className="object-cover" />
+					<Image src={photo} alt={agentDisplayName} fill sizes="96px" className="object-cover object-top" />
 				</div>
 			</div>
 		</div>

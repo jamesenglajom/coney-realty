@@ -44,7 +44,7 @@ function SortableRow({ testimonial, canEdit, canDelete, onEdit, onDelete }) {
 			</button>
 
 			<span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-theme-gray/10 dark:bg-white/5">
-				<Image src={testimonial.photo} alt="" fill sizes="44px" unoptimized className="object-cover" />
+				<Image src={testimonial.photo} alt="" fill sizes="44px" unoptimized className="object-cover object-top" />
 			</span>
 
 			<div className="min-w-0 flex-1">

@@ -232,7 +232,7 @@ export default async function PublicPropertyPage({ params }) {
 													alt={agent.name}
 													fill
 													sizes="44px"
-													className="object-cover"
+													className="object-cover object-top"
 												/>
 											</div>
 											<span className="min-w-0 truncate font-semibold text-theme-blue dark:text-white">{agent.name}</span>

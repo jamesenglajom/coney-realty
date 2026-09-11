@@ -30,7 +30,7 @@ function AgentAvatars({ agents }) {
 					className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-surface-dark"
 				>
 					{agent.avatarUrl ? (
-						<Image src={agent.avatarUrl} alt={agent.name} fill sizes="32px" className="object-cover" />
+						<Image src={agent.avatarUrl} alt={agent.name} fill sizes="32px" className="object-cover object-top" />
 					) : (
 						<div className="flex h-full w-full items-center justify-center bg-theme-gold text-xs font-bold text-theme-blue">
 							{agent.name?.[0]?.toUpperCase() ?? "?"}

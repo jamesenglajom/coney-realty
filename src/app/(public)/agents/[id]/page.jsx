@@ -34,7 +34,7 @@ export default async function AgentProfilePage({ params }) {
 							alt={agent.name}
 							fill
 							sizes="112px"
-							className="object-cover"
+							className="object-cover object-top"
 						/>
 					</div>
 					<div className="min-w-0">
