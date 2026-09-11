@@ -143,19 +143,34 @@ export default async function Leaderboard() {
 				</div>
 
 				{config.showRanks6To10 && rest.length > 0 ? (
-					<ul className="mt-14 flex flex-wrap justify-center gap-6 sm:gap-10">
-						{rest.map((entry) => (
-							<li key={entry.id}>
-								<EntryFigure entry={entry} className="flex flex-col items-center">
-									<span className="rounded-full bg-theme-gold p-1">
+					<ul className="mx-auto mt-16 flex max-w-3xl flex-wrap justify-center gap-x-8 gap-y-12 sm:gap-x-12 sm:gap-y-14">
+						{rest.map((entry, index) => (
+							<li key={entry.id} className="group relative">
+								<EntryFigure entry={entry} className="block">
+									<span
+										className="relative block rounded-full p-0.75 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.85)] transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_32px_-10px_rgba(182,170,132,0.7)]"
+										style={{ backgroundImage: SUNBURST_BACKGROUND }}
+									>
 										<span className="relative block h-18 w-18 overflow-hidden rounded-full ring-2 ring-black sm:h-22 sm:w-22">
-											<Image src={entry.photo} alt={entry.name} fill sizes="96px" className="object-cover object-top" />
+											<Image
+												src={entry.photo}
+												alt={entry.name}
+												fill
+												sizes="88px"
+												className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
+											/>
+										</span>
+										<span className="absolute -left-1 -top-1 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-black text-[10px] font-bold text-theme-gold ring-1 ring-theme-gold/70">
+											{index + 6}
 										</span>
 									</span>
-									<span className="mt-2.5 max-w-28 truncate text-xs font-semibold uppercase tracking-wide text-white/85">
-										{entry.name}
-									</span>
 								</EntryFigure>
+								{/* Floats over the section instead of taking up layout space, so
+								    the name only appears (fading + rising in) on hover, leaving
+								    the resting state clean — just the ringed photo and its rank. */}
+								<span className="pointer-events-none absolute left-1/2 top-full z-20 mt-3 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full border border-theme-gold/40 bg-black/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-theme-gold opacity-0 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.8)] transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+									{entry.name}
+								</span>
 							</li>
 						))}
 					</ul>
