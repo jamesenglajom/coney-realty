@@ -4,7 +4,7 @@ import { Eye, Pencil } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import DeleteUserButton from "./DeleteUserButton";
 import ResetPasswordButton from "./ResetPasswordButton";
-import CopyUserIdButton from "./CopyUserIdButton";
+// import CopyUserIdButton from "./CopyUserIdButton"; // only used by the commented-out User ID column below
 
 const ROLE_BADGE_CLASSES = {
 	SAdmin: "bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue",
@@ -58,11 +58,13 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 						<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 							Role
 						</th>
+						{/* User ID column — commented out, not deleted, in case it's wanted back.
 						{showUserId ? (
 							<th className="p-4 text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								User ID
 							</th>
 						) : null}
+						*/}
 						{hasActionsColumn ? (
 							<th className="p-4 text-right text-xs font-bold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
 								Actions
@@ -86,6 +88,7 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 							<td className="p-4">
 								<Badge className={ROLE_BADGE_CLASSES[user.role]}>{user.role}</Badge>
 							</td>
+							{/* User ID column — commented out, not deleted, in case it's wanted back.
 							{showUserId ? (
 								<td className="p-4">
 									<div className="flex items-center gap-1.5">
@@ -94,6 +97,7 @@ export default function UsersTable({ users, canEdit, canDelete, showUserId = fal
 									</div>
 								</td>
 							) : null}
+							*/}
 							{hasActionsColumn ? (
 								<td className="p-4 text-right">
 									<div className="flex justify-end gap-2">
