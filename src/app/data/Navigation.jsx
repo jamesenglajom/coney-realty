@@ -20,9 +20,23 @@ import {
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
+// Grouped by actual role reach, not just topic — checked against the live
+// permissions matrix (SAdmin/Admin/Manager/Agent) rather than guessed:
+//   - Overview: every role that can sign in sees both (My Referrals is
+//     alwaysVisible; Dashboard is can_view for all four roles).
+//   - Properties: the core listings workflow — Agent only ever sees
+//     Properties itself (view-only); Property Types/Site Viewings need
+//     Admin/SAdmin (or Manager for Property Types).
+//   - Content: public-site content — Manager gets Blogs + Media, everything
+//     else here is Admin/SAdmin only; Agent sees none of it, so this whole
+//     group disappears from an Agent's sidebar (see AdminShell's group
+//     filter, which drops a group once every item in it is hidden).
+//   - Administration: people + site-wide config — Users needs Admin/SAdmin,
+//     Brand is SAdmin-only, Settings is alwaysVisible (personal account
+//     tabs live there for every role too).
 export const navigationGroups = [
   {
-    label: "Analytics",
+    label: "Overview",
     items: [
       {
         name: "Dashboard",
@@ -43,20 +57,8 @@ export const navigationGroups = [
     ],
   },
   {
-    label: "Manage",
+    label: "Properties",
     items: [
-      {
-        name: "Users",
-        icon: Users,
-        href: `${BASE_URL}/admin/users`,
-        pageKey: "users",
-      },
-      {
-        name: "Blogs",
-        icon: FileText,
-        href: `${BASE_URL}/admin/blogs`,
-        pageKey: "blogs",
-      },
       {
         name: "Properties",
         icon: Building2,
@@ -64,10 +66,27 @@ export const navigationGroups = [
         pageKey: "properties",
       },
       {
+        name: "Property Types",
+        icon: ListChecks,
+        href: `${BASE_URL}/admin/property-types`,
+        pageKey: "propertyTypes",
+      },
+      {
         name: "Site Viewings",
         icon: CalendarCheck,
         href: `${BASE_URL}/admin/site-viewings`,
         pageKey: "viewings",
+      },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      {
+        name: "Blogs",
+        icon: FileText,
+        href: `${BASE_URL}/admin/blogs`,
+        pageKey: "blogs",
       },
       {
         name: "Leaderboard",
@@ -82,12 +101,6 @@ export const navigationGroups = [
         pageKey: "testimonials",
       },
       {
-        name: "Property Types",
-        icon: ListChecks,
-        href: `${BASE_URL}/admin/property-types`,
-        pageKey: "propertyTypes",
-      },
-      {
         name: "Media",
         icon: ImageIcon,
         href: `${BASE_URL}/admin/media`,
@@ -96,8 +109,14 @@ export const navigationGroups = [
     ],
   },
   {
-    label: "Settings",
+    label: "Administration",
     items: [
+      {
+        name: "Users",
+        icon: Users,
+        href: `${BASE_URL}/admin/users`,
+        pageKey: "users",
+      },
       {
         name: "Brand",
         icon: Palette,
