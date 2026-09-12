@@ -5,30 +5,24 @@ const LIST_COLUMNS =
 	"id, title, screen_name, code_name, slug, property_type, status, price, city_state, city, region, district, zone_type, payment_type, payment_terms, created_at, image_urls";
 const AGENT_JOIN = "users(id, full_name, user_info(avatar_url))";
 
-// Agents only ever see their own assigned properties — pass their id to
-// scope the list; everyone else (Admin/Manager/SAdmin) calls this with no
-// argument and sees everything, optionally narrowed by the filter bar
-// (city/district/propertyType/zoneType/price range, or picking an agent).
-// Either way, each row's assigned agent(s) — for the table's avatar column —
-// come along in the same query.
-export async function listProperties({
-	agentId,
-	city,
-	district,
-	propertyType,
-	zoneType,
-	priceMin,
-	priceMax,
-	status,
-} = {}) {
-	const supabase = createAdminClient();
+function mapPropertyRow(property) {
+	const { user_property, ...rest } = property;
+	const assignedAgents = (user_property ?? [])
+		.map((link) => link.users)
+		.filter(Boolean)
+		.map((agent) => ({ id: agent.id, name: agent.full_name, avatarUrl: agent.user_info?.avatar_url ?? null }));
 
+	return { ...rest, assignedAgents };
+}
+
+function buildPropertiesQuery(supabase, { agentId, city, district, propertyType, zoneType, priceMin, priceMax, status }) {
 	let query = supabase
 		.from("properties")
 		.select(
 			agentId
 				? `${LIST_COLUMNS}, user_property!inner(user_id, ${AGENT_JOIN})`
 				: `${LIST_COLUMNS}, user_property(${AGENT_JOIN})`,
+			{ count: "exact" },
 		)
 		.is("deleted_at", null)
 		.order("created_at", { ascending: false });
@@ -42,18 +36,38 @@ export async function listProperties({
 	if (priceMax) query = query.lte("price", priceMax);
 	if (status) query = query.eq("status", status);
 
-	const { data, error } = await query;
+	return query;
+}
+
+// Agents only ever see their own assigned properties — pass their id to
+// scope the list; everyone else (Admin/Manager/SAdmin) calls this with no
+// argument and sees everything, optionally narrowed by the filter bar
+// (city/district/propertyType/zoneType/price range, or picking an agent).
+// Either way, each row's assigned agent(s) — for the table's avatar column —
+// come along in the same query. Unpaginated — used by the dashboard widget
+// and the agent-preview page, which both want the whole (small) result set,
+// not a page of it. See listPropertiesPaginated below for the admin list.
+export async function listProperties(filters = {}) {
+	const supabase = createAdminClient();
+	const { data, error } = await buildPropertiesQuery(supabase, filters);
+	if (error) throw new Error(error.message);
+	return (data ?? []).map(mapPropertyRow);
+}
+
+// Same filters, plus page/pageSize — used by the admin properties list,
+// which can run into the hundreds of rows. Returns the total matching count
+// alongside the page of rows so the caller can render real page numbers
+// (Supabase's { count: "exact" } computes it in the same query, not a
+// second round-trip).
+export async function listPropertiesPaginated({ page = 1, pageSize = 20, ...filters } = {}) {
+	const supabase = createAdminClient();
+	const from = (page - 1) * pageSize;
+	const to = from + pageSize - 1;
+
+	const { data, error, count } = await buildPropertiesQuery(supabase, filters).range(from, to);
 	if (error) throw new Error(error.message);
 
-	return (data ?? []).map((property) => {
-		const { user_property, ...rest } = property;
-		const assignedAgents = (user_property ?? [])
-			.map((link) => link.users)
-			.filter(Boolean)
-			.map((agent) => ({ id: agent.id, name: agent.full_name, avatarUrl: agent.user_info?.avatar_url ?? null }));
-
-		return { ...rest, assignedAgents };
-	});
+	return { properties: (data ?? []).map(mapPropertyRow), totalCount: count ?? 0 };
 }
 
 // Distinct city/district/zone_type values currently in use, for the filter

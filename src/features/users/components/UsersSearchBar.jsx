@@ -21,6 +21,9 @@ export default function UsersSearchBar() {
 			const params = new URLSearchParams(searchParams.toString());
 			if (value) params.set("q", value);
 			else params.delete("q");
+			// A new search term can easily land past however many pages it
+			// now matches — always back to page 1 for a fresh query.
+			params.delete("page");
 			router.replace(`${pathname}?${params.toString()}`);
 		}, 300);
 

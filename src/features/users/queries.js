@@ -5,6 +5,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // gated by requirePermission() at the page level, so this goes through the
 // admin client (bypasses RLS) rather than the per-user session client.
 
+function mapUserRow({ user_info, ...user }) {
+	return {
+		...user,
+		phone: user_info?.phone ?? "",
+		avatarUrl: user_info?.avatar_url ?? "",
+	};
+}
+
+// Unpaginated — used wherever the caller wants the whole set (agent/author
+// pickers on the leaderboard, testimonials, and blog forms). See
+// listUsersPaginated below for the admin users list, which can run long
+// enough to actually need pages.
 export async function listUsers({ query } = {}) {
 	const supabase = createAdminClient();
 	let request = supabase
@@ -21,11 +33,29 @@ export async function listUsers({ query } = {}) {
 	const { data, error } = await request;
 	if (error) throw new Error(error.message);
 
-	return data.map(({ user_info, ...user }) => ({
-		...user,
-		phone: user_info?.phone ?? "",
-		avatarUrl: user_info?.avatar_url ?? "",
-	}));
+	return data.map(mapUserRow);
+}
+
+export async function listUsersPaginated({ query, page = 1, pageSize = 20 } = {}) {
+	const supabase = createAdminClient();
+	const from = (page - 1) * pageSize;
+	const to = from + pageSize - 1;
+
+	let request = supabase
+		.from("users")
+		.select("id, email, full_name, role, created_at, user_info(phone, avatar_url)", { count: "exact" })
+		.is("deleted_at", null)
+		.order("created_at", { ascending: false });
+
+	if (query) {
+		const escaped = query.replace(/[%_]/g, (match) => `\\${match}`);
+		request = request.or(`full_name.ilike.%${escaped}%,email.ilike.%${escaped}%`);
+	}
+
+	const { data, error, count } = await request.range(from, to);
+	if (error) throw new Error(error.message);
+
+	return { users: (data ?? []).map(mapUserRow), totalCount: count ?? 0 };
 }
 
 // For the create-user form's live duplicate check. Deliberately does NOT

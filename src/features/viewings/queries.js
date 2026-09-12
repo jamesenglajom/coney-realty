@@ -54,6 +54,9 @@ function mapViewingRequestRow(request) {
 	};
 }
 
+// Unpaginated — used by the admin dashboard widget, which only ever wants
+// the newest handful. See listViewingRequestsPaginated below for the admin
+// site-viewings list.
 export async function listViewingRequests() {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
@@ -64,6 +67,22 @@ export async function listViewingRequests() {
 
 	if (error) throw new Error(error.message);
 	return (data ?? []).map(mapViewingRequestRow);
+}
+
+export async function listViewingRequestsPaginated({ page = 1, pageSize = 20 } = {}) {
+	const supabase = createAdminClient();
+	const from = (page - 1) * pageSize;
+	const to = from + pageSize - 1;
+
+	const { data, error, count } = await supabase
+		.from("viewing_requests")
+		.select(VIEWING_REQUEST_COLUMNS, { count: "exact" })
+		.is("deleted_at", null)
+		.order("created_at", { ascending: false })
+		.range(from, to);
+
+	if (error) throw new Error(error.message);
+	return { requests: (data ?? []).map(mapViewingRequestRow), totalCount: count ?? 0 };
 }
 
 // Scoped to whichever requests this agent was actually referred (via

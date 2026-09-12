@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Check, ImageOff, Search, Upload, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ImageOff, Search, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { listMediaAction, uploadMediaAction } from "../actions";
 import Modal from "@/components/ui/Modal";
@@ -14,20 +14,16 @@ const FOLDER_LABELS = {
 	"agent-half-body": "Agent half-body",
 };
 
-// Reusable "pick from the media library" modal — embedded in a feature's own
-// form (testimonials, leaderboard, properties, user profile) rather than
-// requiring a trip to /admin/media. `folders` controls what's browsable (one
-// folder, or several shown as tabs — e.g. leaderboard wants both agent shot
-// folders so an admin can compare and pick whichever looks better);
-// `multiple` switches between single-select (click confirms immediately)
-// and multi-select (checkboxes + a confirm button, order = click order).
-// Uploading lives here too — no need to leave the form, go to /admin/media,
-// upload, then come back and re-open the picker.
+const PAGE_SIZE = 24;
+
 export default function MediaPickerModal({ open, onClose, folders, multiple = false, onSelect }) {
 	const [activeFolder, setActiveFolder] = useState(folders[0]);
 	const [files, setFiles] = useState(null);
+	const [totalCount, setTotalCount] = useState(0);
+	const [page, setPage] = useState(1);
 	const [selected, setSelected] = useState([]);
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [isUploading, setIsUploading] = useState(false);
 
 	useEffect(() => {
@@ -35,25 +31,48 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 		setActiveFolder(folders[0]);
 		setSelected([]);
 		setQuery("");
+		setDebouncedQuery("");
+		setPage(1);
 	}, [open, folders]);
 
+	// Search is server-side (see listMediaAction) so it can be paginated too
+	// — a folder with hundreds of files was otherwise loaded (and every
+	// thumbnail requested) in one shot just to filter it client-side.
+	// Debounced so typing doesn't fire a fetch per keystroke.
+	useEffect(() => {
+		if (!open) return undefined;
+		const timeout = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+		return () => clearTimeout(timeout);
+	}, [open, query]);
+
+	// A folder switch or a new search term can both land past however many
+	// pages the new result set actually has — always back to page 1.
 	useEffect(() => {
 		if (!open) return;
+		setPage(1);
+	}, [open, activeFolder, debouncedQuery]);
+
+	function loadPage() {
 		setFiles(null);
-		listMediaAction(activeFolder)
-			.then(setFiles)
+		listMediaAction(activeFolder, { page, pageSize: PAGE_SIZE, search: debouncedQuery })
+			.then((result) => {
+				setFiles(result.files);
+				setTotalCount(result.totalCount);
+			})
 			.catch(() => {
 				toast.error("Couldn't load the media library.");
 				setFiles([]);
+				setTotalCount(0);
 			});
-	}, [open, activeFolder]);
+	}
 
-	const visibleFiles = useMemo(() => {
-		if (!files) return null;
-		const needle = query.trim().toLowerCase();
-		if (!needle) return files;
-		return files.filter((file) => file.name.toLowerCase().includes(needle));
-	}, [files, query]);
+	useEffect(() => {
+		if (!open) return;
+		loadPage();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open, activeFolder, page, debouncedQuery]);
+
+	const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
 	function toggle(url) {
 		if (!multiple) {
@@ -61,20 +80,13 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 			onClose();
 			return;
 		}
-		setSelected((current) =>
-			current.includes(url) ? current.filter((u) => u !== url) : [...current, url],
-		);
+		setSelected((current) => (current.includes(url) ? current.filter((u) => u !== url) : [...current, url]));
 	}
 
 	function confirmSelection() {
 		if (selected.length === 0) return;
 		onSelect(selected);
 		onClose();
-	}
-
-	async function refresh() {
-		const result = await listMediaAction(activeFolder);
-		setFiles(result);
 	}
 
 	async function handleFileSelect(event) {
@@ -96,7 +108,10 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 		}
 		if (result.uploaded.length > 0) {
 			toast.success(`Uploaded ${result.uploaded.length} image${result.uploaded.length === 1 ? "" : "s"}.`);
-			await refresh();
+			// New uploads sort first (most recent), so page 1 is where they'll
+			// actually show up — re-fetches there even if already on page 1.
+			if (page === 1) loadPage();
+			else setPage(1);
 		}
 		if (result.failed.length > 0) {
 			toast.error(`${result.failed.length} file(s) skipped — only .webp is accepted.`);
@@ -111,16 +126,12 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 				{folders.length > 1 ? (
 					<div className="flex gap-2">
 						{folders.map((folder) => (
-							<button
-								key={folder}
-								type="button"
-								onClick={() => setActiveFolder(folder)}
+							<button key={folder} type="button" onClick={() => setActiveFolder(folder)}
 								className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
 									folder === activeFolder
 										? "bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue"
 										: "border border-theme-gold-light text-txt-secondary hover:bg-theme-gold-light dark:border-border-dark dark:text-txt-secondary-dark dark:hover:bg-white/5"
-								}`}
-							>
+								}`}>
 								{FOLDER_LABELS[folder] ?? folder}
 							</button>
 						))}
@@ -168,33 +179,29 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 			</div>
 
 			<div className="mt-4">
-				{visibleFiles === null ? (
+				{files === null ? (
 					<div className="grid h-64 place-items-center text-sm text-txt-muted dark:text-txt-muted-dark">
 						Loading…
 					</div>
-				) : visibleFiles.length === 0 ? (
+				) : files.length === 0 ? (
 					<div className="flex h-64 flex-col items-center justify-center gap-2 text-center">
 						<ImageOff className="h-6 w-6 text-txt-muted dark:text-txt-muted-dark" aria-hidden="true" />
 						<p className="text-sm text-txt-muted dark:text-txt-muted-dark">
-							{query
-								? `No filenames match "${query}".`
+							{debouncedQuery
+								? `No filenames match "${debouncedQuery}".`
 								: `No images in ${FOLDER_LABELS[activeFolder] ?? activeFolder} yet — upload some above.`}
 						</p>
 					</div>
 				) : (
 					<div className="grid max-h-[52vh] grid-cols-4 gap-2.5 overflow-y-auto sm:grid-cols-6">
-						{visibleFiles.map((file) => {
+						{files.map((file) => {
 							const isSelected = selected.includes(file.url);
 							return (
-								<button
-									key={file.url}
-									type="button"
-									onClick={() => toggle(file.url)}
+								<button key={file.url} type="button" onClick={() => toggle(file.url)}
 									title={file.name}
 									className={`relative aspect-square overflow-hidden rounded-lg ring-2 transition-all ${
 										isSelected ? "ring-theme-gold" : "ring-transparent hover:ring-theme-gray/40"
-									}`}
-								>
+									}`}>
 									<Image src={file.url} alt="" fill sizes="150px" unoptimized className="object-cover" />
 									{isSelected ? (
 										<span className="absolute right-1 top-1 rounded-full bg-theme-gold p-0.5 text-theme-blue">
@@ -208,16 +215,41 @@ export default function MediaPickerModal({ open, onClose, folders, multiple = fa
 				)}
 			</div>
 
+			{totalPages > 1 ? (
+				<div className="mt-3 flex items-center justify-between gap-2 border-t border-theme-gold-light/70 pt-3 dark:border-border-dark">
+					<p className="text-xs text-txt-muted dark:text-txt-muted-dark">{totalCount} total</p>
+					<div className="flex items-center gap-1">
+						<button
+							type="button"
+							onClick={() => setPage((current) => Math.max(1, current - 1))}
+							disabled={page <= 1}
+							aria-label="Previous page"
+							className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-txt-secondary transition-colors hover:bg-theme-gold-light disabled:pointer-events-none disabled:opacity-40 dark:text-txt-secondary-dark dark:hover:bg-white/5"
+						>
+							<ChevronLeft className="h-4 w-4" aria-hidden="true" />
+						</button>
+						<span className="px-1 text-xs font-semibold text-txt-secondary dark:text-txt-secondary-dark">
+							{page} / {totalPages}
+						</span>
+						<button
+							type="button"
+							onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+							disabled={page >= totalPages}
+							aria-label="Next page"
+							className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-txt-secondary transition-colors hover:bg-theme-gold-light disabled:pointer-events-none disabled:opacity-40 dark:text-txt-secondary-dark dark:hover:bg-white/5"
+						>
+							<ChevronRight className="h-4 w-4" aria-hidden="true" />
+						</button>
+					</div>
+				</div>
+			) : null}
+
 			{multiple ? (
-				<div className="mt-4 flex items-center justify-between gap-2 border-t border-theme-gold-light pt-4 dark:border-border-dark">
+				<div className="mt-4 flex items-center justify-between gap-2">
 					<p className="text-xs text-txt-muted dark:text-txt-muted-dark">{selected.length} selected</p>
 					<div className="flex gap-2">
-						<Button type="button" variant="ghost" size="sm" onClick={onClose}>
-							Cancel
-						</Button>
-						<Button type="button" size="sm" disabled={selected.length === 0} onClick={confirmSelection}>
-							Use selected
-						</Button>
+						<Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
+						<Button type="button" size="sm" disabled={selected.length === 0} onClick={confirmSelection}>Use selected</Button>
 					</div>
 				</div>
 			) : null}

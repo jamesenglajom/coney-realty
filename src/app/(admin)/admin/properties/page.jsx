@@ -1,13 +1,16 @@
 import { requirePermission, getPagePermissions } from "@/features/auth/permissions";
-import { listProperties, listPropertyFilterOptions, listAssignableUsers } from "@/features/properties/queries";
+import { listPropertiesPaginated, listPropertyFilterOptions, listAssignableUsers } from "@/features/properties/queries";
 import PropertiesTable from "@/features/properties/components/PropertiesTable";
 import PropertiesFilterBar from "@/features/properties/components/PropertiesFilterBar";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
+import Pagination from "@/components/ui/Pagination";
 
 export const metadata = {
 	title: "Properties",
 };
+
+const PAGE_SIZE = 20;
 
 export default async function PropertiesPage({ searchParams }) {
 	const params = await searchParams;
@@ -16,9 +19,10 @@ export default async function PropertiesPage({ searchParams }) {
 	// Agents are always scoped to their own listings; the agent filter is
 	// only meaningful (and only shown) for the other roles.
 	const agentIdFilter = isAgent ? user.id : params.agentId || undefined;
+	const page = Math.max(1, Number(params.page) || 1);
 
-	const [properties, permissions, filterOptions, assignableUsers] = await Promise.all([
-		listProperties({
+	const [{ properties, totalCount }, permissions, filterOptions, assignableUsers] = await Promise.all([
+		listPropertiesPaginated({
 			agentId: agentIdFilter,
 			city: params.city || undefined,
 			district: params.district || undefined,
@@ -27,11 +31,15 @@ export default async function PropertiesPage({ searchParams }) {
 			priceMin: params.priceMin || undefined,
 			priceMax: params.priceMax || undefined,
 			status: params.status || undefined,
+			page,
+			pageSize: PAGE_SIZE,
 		}),
 		getPagePermissions(user.role, "properties"),
 		listPropertyFilterOptions(),
 		isAgent ? Promise.resolve([]) : listAssignableUsers(),
 	]);
+
+	const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
 	return (
 		<div>
@@ -63,6 +71,14 @@ export default async function PropertiesPage({ searchParams }) {
 				canEdit={permissions.can_edit}
 				canDelete={permissions.can_delete}
 				currentUserId={user.id}
+			/>
+			<Pagination
+				page={page}
+				totalPages={totalPages}
+				totalCount={totalCount}
+				pageSize={PAGE_SIZE}
+				basePath="/admin/properties"
+				searchParams={params}
 			/>
 		</div>
 	);

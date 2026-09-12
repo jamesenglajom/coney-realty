@@ -1,6 +1,6 @@
 import { requirePermission, getPagePermissions } from "@/features/auth/permissions";
-import { listMediaFolder } from "@/features/media/storage";
-import { getMediaUrl, MEDIA_FOLDERS } from "@/features/media/publicUrls";
+import { listMediaAction } from "@/features/media/actions";
+import { MEDIA_FOLDERS } from "@/features/media/publicUrls";
 import MediaLibraryClient from "@/features/media/components/MediaLibraryClient";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
@@ -8,18 +8,18 @@ export const metadata = {
 	title: "Media",
 };
 
-const DEFAULT_FOLDER = MEDIA_FOLDERS[0];
+const PAGE_SIZE = 24;
 
-export default async function MediaLibraryPage() {
+export default async function MediaLibraryPage({ searchParams }) {
+	const params = await searchParams;
 	const user = await requirePermission("media", "view");
-	const [permissions, files] = await Promise.all([
-		getPagePermissions(user.role, "media"),
-		listMediaFolder(DEFAULT_FOLDER),
-	]);
+	const folder = MEDIA_FOLDERS.includes(params.folder) ? params.folder : MEDIA_FOLDERS[0];
+	const page = Math.max(1, Number(params.page) || 1);
 
-	const initialFiles = files
-		.map((file) => ({ name: file.name, url: getMediaUrl(`${DEFAULT_FOLDER}/${file.name}`), updatedAt: file.updated_at }))
-		.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+	const [permissions, { files, totalCount }] = await Promise.all([
+		getPagePermissions(user.role, "media"),
+		listMediaAction(folder, { page, pageSize: PAGE_SIZE }),
+	]);
 
 	return (
 		<div>
@@ -28,8 +28,11 @@ export default async function MediaLibraryPage() {
 				description="Upload and manage the photos used across properties, testimonials, and the leaderboard."
 			/>
 			<MediaLibraryClient
-				initialFolder={DEFAULT_FOLDER}
-				initialFiles={initialFiles}
+				folder={folder}
+				page={page}
+				pageSize={PAGE_SIZE}
+				totalCount={totalCount}
+				initialFiles={files}
 				canUpload={permissions.can_create}
 				canDelete={permissions.can_delete}
 			/>

@@ -19,6 +19,9 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 		const params = new URLSearchParams(searchParams.toString());
 		if (value) params.set(key, value);
 		else params.delete(key);
+		// A changed filter can land past however many pages it now matches —
+		// always back to page 1 for a fresh filter.
+		params.delete("page");
 		router.replace(`${pathname}?${params.toString()}`);
 	}
 

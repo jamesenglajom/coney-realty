@@ -1,11 +1,14 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Upload, Trash2, Copy, Check, ImageOff } from "lucide-react";
 import { toast } from "sonner";
-import { listMediaAction, uploadMediaAction, deleteMediaAction } from "../actions";
+import { uploadMediaAction, deleteMediaAction } from "../actions";
 import { MEDIA_FOLDERS } from "../publicUrls";
+import Pagination from "@/components/ui/Pagination";
 
 const FOLDER_LABELS = {
 	properties: "Properties",
@@ -38,25 +41,31 @@ function CopyUrlButton({ url }) {
 	);
 }
 
-export default function MediaLibraryClient({ initialFolder, initialFiles, canUpload, canDelete }) {
-	const [folder, setFolder] = useState(initialFolder);
+// Folder and page both live in the URL (?folder=&page=), matching every
+// other admin list's filters — so switching folders or pages is a real
+// navigation the server re-renders from fresh, rather than client state
+// that could drift from what a Pagination link (a plain <Link>) expects to
+// find there. `files` mirrors the `initialFiles` prop the server hands down
+// on each such render, kept in its own state only so a delete can remove a
+// tile immediately without waiting on a full round-trip.
+export default function MediaLibraryClient({ folder, page, pageSize, totalCount, initialFiles, canUpload, canDelete }) {
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 	const [files, setFiles] = useState(initialFiles);
 	const [isPending, startTransition] = useTransition();
 	const [isUploading, setIsUploading] = useState(false);
 	const fileInputRef = useRef(null);
 
-	function switchFolder(nextFolder) {
-		if (nextFolder === folder) return;
-		setFolder(nextFolder);
-		startTransition(async () => {
-			const result = await listMediaAction(nextFolder);
-			setFiles(result);
-		});
-	}
+	useEffect(() => {
+		setFiles(initialFiles);
+	}, [initialFiles]);
 
-	async function refresh() {
-		const result = await listMediaAction(folder);
-		setFiles(result);
+	function hrefForFolder(nextFolder) {
+		const params = new URLSearchParams(searchParams.toString());
+		params.set("folder", nextFolder);
+		params.delete("page");
+		return `${pathname}?${params.toString()}`;
 	}
 
 	async function handleFileSelect(event) {
@@ -79,11 +88,11 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 
 		if (result.uploaded.length > 0) {
 			toast.success(`Uploaded ${result.uploaded.length} image${result.uploaded.length === 1 ? "" : "s"}.`);
+			router.refresh();
 		}
 		if (result.failed.length > 0) {
 			toast.error(`${result.failed.length} file(s) skipped — only .webp is accepted.`);
 		}
-		if (result.uploaded.length > 0) await refresh();
 	}
 
 	function handleDelete(file) {
@@ -98,6 +107,7 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 			}
 			toast.success("Deleted.");
 			setFiles((current) => current.filter((f) => f.name !== file.name));
+			router.refresh();
 		});
 	}
 
@@ -106,10 +116,9 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex flex-wrap gap-2">
 					{MEDIA_FOLDERS.map((f) => (
-						<button
+						<Link
 							key={f}
-							type="button"
-							onClick={() => switchFolder(f)}
+							href={hrefForFolder(f)}
 							className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
 								f === folder
 									? "bg-theme-blue text-white dark:bg-theme-gold dark:text-theme-blue"
@@ -117,7 +126,7 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 							}`}
 						>
 							{FOLDER_LABELS[f]}
-						</button>
+						</Link>
 					))}
 				</div>
 
@@ -179,6 +188,15 @@ export default function MediaLibraryClient({ initialFolder, initialFiles, canUpl
 					</div>
 				)}
 			</div>
+
+			<Pagination
+				page={page}
+				totalPages={Math.max(1, Math.ceil(totalCount / pageSize))}
+				totalCount={totalCount}
+				pageSize={pageSize}
+				basePath={pathname}
+				searchParams={{ folder, ...Object.fromEntries(searchParams.entries()) }}
+			/>
 		</div>
 	);
 }

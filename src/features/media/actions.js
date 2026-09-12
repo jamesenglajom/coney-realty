@@ -28,19 +28,32 @@ function buildStorageFilename(originalName) {
 
 // Used by both the /admin/media library page and every picker modal
 // embedded in another form — browsing the library is a "view" on the
-// media page regardless of which feature's form opened it.
-export async function listMediaAction(folder) {
+// media page regardless of which feature's form opened it. Storage's own
+// list() has no cheap "total count" alongside a page of results, so this
+// fetches the full (folder-sized, never huge) listing and searches/paginates
+// in JS — { page } is opt-in: called with no second argument, this still
+// returns the full array, unchanged from before (a handful of call sites
+// genuinely want everything, not a page of it).
+export async function listMediaAction(folder, { page, pageSize = 24, search } = {}) {
 	await requirePermission("media", "view");
 	assertFolder(folder);
 
 	const files = await listMediaFolder(folder);
-	return files
+	let mapped = files
 		.map((file) => ({
 			name: file.name,
 			url: getMediaUrl(`${folder}/${file.name}`),
 			updatedAt: file.updated_at,
 		}))
 		.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+	const needle = search?.trim().toLowerCase();
+	if (needle) mapped = mapped.filter((file) => file.name.toLowerCase().includes(needle));
+
+	if (!page) return mapped;
+
+	const from = (page - 1) * pageSize;
+	return { files: mapped.slice(from, from + pageSize), totalCount: mapped.length };
 }
 
 // Bulk upload — accepts a FormData with `folder` and one or more `files`

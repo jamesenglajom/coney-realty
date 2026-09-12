@@ -1,16 +1,22 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function listBlogs() {
+export async function listBlogs({ page = 1, pageSize = 20 } = {}) {
 	const supabase = createAdminClient();
-	const { data, error } = await supabase
+	const from = (page - 1) * pageSize;
+	const to = from + pageSize - 1;
+
+	const { data, error, count } = await supabase
 		.from("blogs")
-		.select("id, title, slug, status, created_at, author:author_id(full_name, email), property:property_id(title)")
+		.select("id, title, slug, status, created_at, author:author_id(full_name, email), property:property_id(title)", {
+			count: "exact",
+		})
 		.is("deleted_at", null)
-		.order("created_at", { ascending: false });
+		.order("created_at", { ascending: false })
+		.range(from, to);
 
 	if (error) throw new Error(error.message);
-	return data;
+	return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 
 export async function getBlogById(id) {
