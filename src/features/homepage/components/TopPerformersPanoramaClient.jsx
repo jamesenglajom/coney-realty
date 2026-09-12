@@ -143,6 +143,7 @@ export default function TopPerformersPanoramaClient({ entries, rest = [], headin
 
 	return (
 		<section
+			id="leaderboard"
 			aria-label="Top performers panorama"
 			className="border-t border-theme-gray/15 py-20 dark:border-border-dark sm:py-28"
 		>
