@@ -469,31 +469,44 @@ alter table public.viewing_request_properties enable row level security;
 -- service-role insert.
 
 -- ---------------------------------------------------------------------------
--- site_settings — single-row table holding public-site contact details
--- (address / phone / email) an SAdmin or Admin edits from admin Settings,
--- rendered in the public footer. The boolean primary key + check constraint
--- is a singleton guard: there can only ever be the one row (id = true).
+-- brand_settings — single-row table holding the whole site's brand identity:
+-- name, logo/favicon/home-banner image URLs, the 4 core theme colors, and
+-- public contact details (address/phone/email). SAdmin-only (see the
+-- "brand" permissions page below), edited from /admin/brand, rendered
+-- everywhere the brand shows up (root layout's favicon/color override,
+-- admin sidebar, login page, public header/footer/hero). Supersedes the
+-- older site_settings table — its 3 contact columns were carried over here.
+-- The boolean primary key + check constraint is a singleton guard: there
+-- can only ever be the one row (id = true).
 -- ---------------------------------------------------------------------------
-create table if not exists public.site_settings (
+create table if not exists public.brand_settings (
   id boolean primary key default true,
+  site_name text not null default 'ConeyRealty',
+  logo_url text,
+  favicon_url text,
+  banner_url text,
+  color_blue text not null default '#0c2241',
+  color_gold text not null default '#b6aa84',
+  color_gold_light text not null default '#f4f2eb',
+  color_gray text not null default '#6b7280',
   address text,
   contact_number text,
   contact_email text,
   updated_at timestamptz not null default now(),
   updated_by uuid references public.users (id) on delete set null,
-  constraint site_settings_singleton check (id)
+  constraint brand_settings_singleton check (id)
 );
 
-insert into public.site_settings (id) values (true) on conflict (id) do nothing;
+insert into public.brand_settings (id) values (true) on conflict (id) do nothing;
 
-alter table public.site_settings enable row level security;
--- Deny-by-default: the footer reads this through the admin client in a
--- server-only query (same convention as the rest of the homepage queries),
--- and the write goes through a Server Action gated to SAdmin/Admin.
+alter table public.brand_settings enable row level security;
+-- Deny-by-default: every read (root layout, header/footer/hero, admin
+-- sidebar) goes through the admin client in a server-only query, and the
+-- write goes through a Server Action gated to SAdmin only.
 
-drop trigger if exists set_site_settings_updated_at on public.site_settings;
-create trigger set_site_settings_updated_at
-  before update on public.site_settings
+drop trigger if exists set_brand_settings_updated_at on public.brand_settings;
+create trigger set_brand_settings_updated_at
+  before update on public.brand_settings
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------

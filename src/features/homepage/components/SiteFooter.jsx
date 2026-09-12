@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getSiteSettings } from "@/features/system/queries";
+import { getBrandSettings } from "@/features/brand/queries";
 
 const EXPLORE_LINKS = [
 	{ href: "/#search", label: "Search homes" },
@@ -17,9 +17,6 @@ const GET_STARTED_LINKS = [
 	{ href: "/blog", label: "Blog" },
 	{ href: "/schedule-viewing", label: "Schedule a viewing" },
 ];
-
-const FALLBACK_ADDRESS = "123 Cedar Row, Austin, TX 78701";
-const FALLBACK_CONTACT_NUMBER = "+1 (512) 555-0100";
 
 function FooterColumn({ title, links }) {
 	return (
@@ -44,10 +41,8 @@ function FooterColumn({ title, links }) {
 }
 
 export default async function SiteFooter() {
-	const site = await getSiteSettings();
-	const address = site.address || FALLBACK_ADDRESS;
-	const contactNumber = site.contactNumber || FALLBACK_CONTACT_NUMBER;
-	const telHref = `tel:${contactNumber.replace(/[^\d+]/g, "")}`;
+	const brand = await getBrandSettings();
+	const telHref = brand.contactNumber ? `tel:${brand.contactNumber.replace(/[^\d+]/g, "")}` : null;
 
 	return (
 		<footer className="border-t border-theme-gray/15 dark:border-border-dark">
@@ -57,44 +52,43 @@ export default async function SiteFooter() {
 						href="/#top"
 						className="flex items-center gap-2 font-display text-xl font-semibold text-theme-blue dark:text-white"
 					>
-						<Image
-							src="/logo/conyrealty-logo.jpg"
-							alt="ConeyRealty"
-							width={28}
-							height={28}
-							className="rounded-lg"
-						/>
-						ConeyRealty
+						<Image src={brand.logoUrl} alt={brand.siteName} width={28} height={28} unoptimized className="rounded-lg object-contain" />
+						{brand.siteName}
 					</Link>
 					<p className="mt-4 max-w-[280px] text-sm text-txt-muted dark:text-txt-muted-dark">
 						A real estate platform built around people. Search homes, meet the agent, skip the scrape-able
 						listing feeds.
 					</p>
-					<address className="mt-4 whitespace-pre-line text-sm not-italic text-txt-muted dark:text-txt-muted-dark">
-						{address}
-						<br />
-						<a href={telHref} className="hover:text-theme-blue dark:hover:text-white">
-							{contactNumber}
-						</a>
-						{site.contactEmail ? (
-							<>
-								<br />
-								<a
-									href={`mailto:${site.contactEmail}`}
-									className="hover:text-theme-blue dark:hover:text-white"
-								>
-									{site.contactEmail}
+					{brand.address || brand.contactNumber || brand.contactEmail ? (
+						<address className="mt-4 whitespace-pre-line text-sm not-italic text-txt-muted dark:text-txt-muted-dark">
+							{brand.address ? (
+								<>
+									{brand.address}
+									<br />
+								</>
+							) : null}
+							{brand.contactNumber ? (
+								<>
+									<a href={telHref} className="hover:text-theme-blue dark:hover:text-white">
+										{brand.contactNumber}
+									</a>
+									<br />
+								</>
+							) : null}
+							{brand.contactEmail ? (
+								<a href={`mailto:${brand.contactEmail}`} className="hover:text-theme-blue dark:hover:text-white">
+									{brand.contactEmail}
 								</a>
-							</>
-						) : null}
-					</address>
+							) : null}
+						</address>
+					) : null}
 				</div>
 				<FooterColumn title="Explore" links={EXPLORE_LINKS} />
 				<FooterColumn title="Get started" links={GET_STARTED_LINKS} />
 			</div>
 			<div className="border-t border-theme-gray/15 dark:border-border-dark">
 				<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-txt-muted dark:text-txt-muted-dark sm:flex-row sm:px-8">
-					<p>© 2026 ConeyRealty. All rights reserved.</p>
+					<p>© 2026 {brand.siteName}. All rights reserved.</p>
 					<p>Equal Housing Opportunity</p>
 				</div>
 			</div>

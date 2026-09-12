@@ -1,5 +1,3 @@
-export const HERO_IMAGE = "/images/hero-team.webp";
-
 export const PRICE_BANDS = [
 	{ label: "Any price", min: 0, max: Infinity },
 	{ label: "Under ₱5M", min: 0, max: 5000000 },

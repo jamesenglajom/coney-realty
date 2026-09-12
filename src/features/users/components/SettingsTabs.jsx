@@ -7,7 +7,6 @@ export default function SettingsTabs({
 	changePasswordSlot,
 	changeEmailSlot,
 	permissionsSlot,
-	siteSlot,
 	systemSlot,
 }) {
 	const tabs = [
@@ -15,7 +14,6 @@ export default function SettingsTabs({
 		{ key: "email", label: "Change email" },
 		{ key: "password", label: "Change password" },
 		...(permissionsSlot ? [{ key: "permissions", label: "Permissions" }] : []),
-		...(siteSlot ? [{ key: "site", label: "Site" }] : []),
 		...(systemSlot ? [{ key: "system", label: "System" }] : []),
 	];
 	const [activeTab, setActiveTab] = useState(tabs[0].key);
@@ -43,7 +41,6 @@ export default function SettingsTabs({
 			{activeTab === "email" ? changeEmailSlot : null}
 			{activeTab === "password" ? changePasswordSlot : null}
 			{activeTab === "permissions" ? permissionsSlot : null}
-			{activeTab === "site" ? siteSlot : null}
 			{activeTab === "system" ? systemSlot : null}
 		</div>
 	);

@@ -1,17 +1,17 @@
 import Image from "next/image";
-import { HERO_IMAGE } from "@/features/homepage/data";
 import { listPublishedCityStates } from "@/features/homepage/queries";
+import { getBrandSettings } from "@/features/brand/queries";
 import Eyebrow from "./ui/Eyebrow";
 import HomeSearchForm from "./HomeSearchForm";
 
 export default async function HeroSearch() {
-	const cityStates = await listPublishedCityStates();
+	const [cityStates, brand] = await Promise.all([listPublishedCityStates(), getBrandSettings()]);
 
 	return (
 		<section id="top" className="relative isolate overflow-hidden">
 			<div className="absolute inset-0 -z-20 overflow-hidden">
 				<Image
-					src={HERO_IMAGE}
+					src={brand.bannerUrl}
 					alt=""
 					fill
 					priority

@@ -17,7 +17,7 @@ function isItemActive(href, pathname) {
 	return pathname === relativeHref || pathname.startsWith(`${relativeHref}/`);
 }
 
-const AdminShell = ({ user, permissions, children }) => {
+const AdminShell = ({ user, permissions, siteName = "ConeyRealty", logoUrl = "/logo/conyrealty-logo.jpg", children }) => {
 	const pathname = usePathname();
 	const [isSidebarOpen, setSidebarOpen] = useState(false);
 	const [isCollapsed, setCollapsed] = useState(false);
@@ -80,14 +80,15 @@ const AdminShell = ({ user, permissions, children }) => {
 							<X size={22} strokeWidth={2.5} />
 						</button>
 						<Image
-							src="/logo/conyrealty-logo.jpg"
-							alt="ConeyRealty"
+							src={logoUrl}
+							alt={siteName}
 							width={36}
 							height={36}
-							className="h-9 w-9 shrink-0 rounded-xl ring-1 ring-white/10"
+							unoptimized
+							className="h-9 w-9 shrink-0 rounded-xl object-contain ring-1 ring-white/10"
 						/>
 						<div className={`min-w-0 ${hideWhenCollapsed}`}>
-							<p className="truncate text-[15px] font-bold tracking-tight text-white">ConeyRealty</p>
+							<p className="truncate text-[15px] font-bold tracking-tight text-white">{siteName}</p>
 							<p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-theme-gold-light/45">Admin</p>
 						</div>
 					</div>

@@ -13,14 +13,26 @@
 	color-scheme: light;
 	--background: #ffffff;
 	--foreground: #171717;
+
+	/* Brand palette "factory" defaults — a SAdmin can override these
+	   per-request (see src/features/brand) via a small inline <style> block
+	   the root layout renders from brand_settings. Indirected through
+	   @theme inline below (same trick this file already uses for
+	   --background/--foreground) so theme-blue/gold/etc. utility classes
+	   actually re-resolve when these change, instead of being baked into
+	   the generated CSS at build time. */
+	--brand-blue: #0c2241;
+	--brand-gold: #b6aa84;
+	--brand-gold-light: #f4f2eb;
+	--brand-gray: #6b7280;
 }
 
 
 @theme {
-  --color-theme-blue: #0c2241;
-  --color-theme-gold: #b6aa84;
-  --color-theme-gold-light: #f4f2eb;
-  --color-theme-gray: #6b7280;
+  /* theme-blue/gold/gold-light/gray live in the @theme inline block below
+     instead (indirected through the --brand-* custom properties above) so
+     they can be overridden at runtime — everything else in this block
+     stays a compile-time constant. */
 
   /* A deliberately darker navy, used only as a gradient endpoint (the admin
      sidebar) — never on its own. theme-blue itself stays the flat, literal
@@ -150,6 +162,10 @@
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-theme-blue: var(--brand-blue);
+	--color-theme-gold: var(--brand-gold);
+	--color-theme-gold-light: var(--brand-gold-light);
+	--color-theme-gray: var(--brand-gray);
 	--font-sans: var(--font-geist-sans);
 	--font-mono: var(--font-geist-mono);
 }

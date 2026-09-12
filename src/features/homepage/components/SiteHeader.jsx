@@ -3,6 +3,7 @@ import Image from "next/image";
 import StickyHeaderShell from "./StickyHeaderShell";
 import MobileMenu from "./MobileMenu";
 import Button from "@/components/ui/Button";
+import { getBrandSettings } from "@/features/brand/queries";
 
 const NAV_LINKS = [
 	{ href: "/properties", label: "Properties" },
@@ -12,7 +13,9 @@ const NAV_LINKS = [
 	{ href: "/#insight", label: "Insight" },
 ];
 
-export default function SiteHeader() {
+export default async function SiteHeader() {
+	const brand = await getBrandSettings();
+
 	return (
 		<StickyHeaderShell>
 			<div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
@@ -20,14 +23,8 @@ export default function SiteHeader() {
 					href="/#top"
 					className="flex items-center gap-2 font-display text-xl font-semibold text-theme-blue dark:text-white"
 				>
-					<Image
-						src="/logo/conyrealty-logo.jpg"
-						alt="ConeyRealty"
-						width={28}
-						height={28}
-						className="rounded-lg"
-					/>
-					<span className="hidden md:inline">ConeyRealty</span>
+					<Image src={brand.logoUrl} alt={brand.siteName} width={28} height={28} unoptimized className="rounded-lg object-contain" />
+					<span className="hidden md:inline">{brand.siteName}</span>
 				</Link>
 
 				<ul className="hidden items-center gap-7 md:flex">

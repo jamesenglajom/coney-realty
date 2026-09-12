@@ -11,6 +11,7 @@ export const PAGES = [
 	"testimonials",
 	"propertyTypes",
 	"media",
+	"brand",
 ];
 export const EDITABLE_ROLES = ["Admin", "Manager", "Agent"];
 export const PERMISSION_ACTIONS = ["view", "create", "edit", "delete"];

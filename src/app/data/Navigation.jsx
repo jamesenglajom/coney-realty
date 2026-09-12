@@ -15,6 +15,7 @@ import {
   ListChecks,
   Image as ImageIcon,
   BellRing,
+  Palette,
 } from "lucide-react";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -97,6 +98,12 @@ export const navigationGroups = [
   {
     label: "Settings",
     items: [
+      {
+        name: "Brand",
+        icon: Palette,
+        href: `${BASE_URL}/admin/brand`,
+        pageKey: "brand",
+      },
       {
         name: "Settings",
         icon: Settings,

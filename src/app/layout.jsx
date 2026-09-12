@@ -1,6 +1,15 @@
 import { Geist, Geist_Mono, Montserrat, Inter } from "next/font/google";
 import Script from "next/script";
+import { getBrandSettings } from "@/features/brand/queries";
 import "./globals.css";
+
+const FAVICON_MIME_BY_EXTENSION = {
+	ico: "image/x-icon",
+	png: "image/png",
+	svg: "image/svg+xml",
+	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
+};
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -42,11 +51,15 @@ export const metadata = {
 		"Browse house and lot and land listings in Davao City by location, budget, and type, then schedule a viewing online.",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+	const brand = await getBrandSettings();
+	const faviconExtension = brand.faviconUrl.split(".").pop()?.toLowerCase();
+	const faviconType = FAVICON_MIME_BY_EXTENSION[faviconExtension];
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
-				<link rel="icon" href="/logo/conyrealty-logo.jpg" type="image/jpeg" />
+				<link rel="icon" href={brand.faviconUrl} type={faviconType} />
 				{/* Dark-mode no-flash script, as an external file (public/no-flash-theme.js)
 				    rather than inline dangerouslySetInnerHTML content — React 19 only
 				    exempts src-based scripts from its "script tag rendered as a
@@ -55,6 +68,19 @@ export default function RootLayout({ children }) {
 				    still guarantees this runs before hydration/paint, so there's no
 				    dark-mode flash either way. */}
 				<Script src="/no-flash-theme.js" strategy="beforeInteractive" />
+				{/* SAdmin-configurable brand palette (src/features/brand) —
+				    overrides the --brand-* custom properties globals.css's
+				    @theme inline block indirects theme-blue/gold/gold-light/gray
+				    through, so every bg-theme-blue/text-theme-gold/etc. utility
+				    across the whole app repaints from this one place. Always
+				    rendered (getBrandSettings() already falls back to the
+				    original hardcoded hex values), so this is a no-op until a
+				    SAdmin actually customizes a color. */}
+				<style
+					dangerouslySetInnerHTML={{
+						__html: `:root{--brand-blue:${brand.colorBlue};--brand-gold:${brand.colorGold};--brand-gold-light:${brand.colorGoldLight};--brand-gray:${brand.colorGray};}`,
+					}}
+				/>
 			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} antialiased`}
