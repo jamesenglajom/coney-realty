@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImageOff } from "lucide-react";
+import { ImageOff, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { createBlogSchema, updateBlogSchema, BLOG_STATUSES } from "../schemas";
 import { createBlogAction, updateBlogAction } from "../actions";
@@ -15,10 +15,7 @@ import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
 import Button from "@/components/ui/Button";
-
-function isHttpUrl(value) {
-	return /^https?:\/\//.test(value ?? "");
-}
+import MediaPickerModal from "@/features/media/components/MediaPickerModal";
 
 function slugify(value) {
 	return value
@@ -32,7 +29,7 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [serverError, setServerError] = useState("");
-	const [coverLoadFailed, setCoverLoadFailed] = useState(false);
+	const [pickerOpen, setPickerOpen] = useState(false);
 	const isEdit = mode === "edit";
 
 	const {
@@ -68,7 +65,6 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 	});
 
 	const coverImageUrlValue = watch("coverImageUrl");
-	const showCoverPreview = isHttpUrl(coverImageUrlValue) && !coverLoadFailed;
 
 	// Auto-derive the slug from the title as the user types, until they
 	// manually edit the slug field themselves — then it's theirs to control.
@@ -162,39 +158,32 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 			</div>
 
 			<div>
-				<Label htmlFor="coverImageUrl">Cover image URL</Label>
-				<div className="flex items-start gap-3">
-					<div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-theme-gray/10 dark:bg-white/5">
-						{showCoverPreview ? (
-							<Image
-								src={coverImageUrlValue}
-								alt=""
-								fill
-								unoptimized
-								sizes="96px"
-								className="object-cover"
-								onError={() => setCoverLoadFailed(true)}
-								onLoad={() => setCoverLoadFailed(false)}
-							/>
+				<Label>Cover image</Label>
+				<div className="flex items-center gap-3">
+					<span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-theme-gray/10 dark:bg-white/5">
+						{coverImageUrlValue ? (
+							<Image src={coverImageUrlValue} alt="" fill unoptimized sizes="96px" className="object-cover" />
 						) : (
-							<div className="flex h-full w-full items-center justify-center text-txt-muted dark:text-txt-muted-dark">
+							<span className="flex h-full w-full items-center justify-center text-txt-muted dark:text-txt-muted-dark">
 								<ImageOff className="h-5 w-5" aria-hidden="true" />
-							</div>
+							</span>
 						)}
-					</div>
-					<div className="flex-1">
-						<Input
-							id="coverImageUrl"
-							type="text"
-							placeholder="https://…"
-							{...register("coverImageUrl", { onChange: () => setCoverLoadFailed(false) })}
-						/>
-						{coverLoadFailed ? (
-							<p className="mt-1.5 text-xs text-danger dark:text-danger-dark">Couldn&apos;t load an image from that URL.</p>
-						) : null}
-						<FieldError>{errors.coverImageUrl?.message}</FieldError>
-					</div>
+					</span>
+					<Button type="button" variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>
+						<ImagePlus className="h-4 w-4" aria-hidden="true" />
+						{coverImageUrlValue ? "Change photo" : "Choose photo"}
+					</Button>
+					{coverImageUrlValue ? (
+						<button
+							type="button"
+							onClick={() => setValue("coverImageUrl", "", { shouldDirty: true })}
+							className="text-xs text-txt-muted hover:text-danger dark:text-txt-muted-dark"
+						>
+							Remove
+						</button>
+					) : null}
 				</div>
+				<FieldError>{errors.coverImageUrl?.message}</FieldError>
 			</div>
 
 			<div>
@@ -219,6 +208,13 @@ export default function BlogForm({ mode, blog, authors, properties, currentUserI
 					Cancel
 				</Button>
 			</div>
+
+			<MediaPickerModal
+				open={pickerOpen}
+				onClose={() => setPickerOpen(false)}
+				folders={["blogs"]}
+				onSelect={([url]) => setValue("coverImageUrl", url, { shouldValidate: true, shouldDirty: true })}
+			/>
 		</form>
 	);
 }

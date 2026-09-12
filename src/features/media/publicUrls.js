@@ -15,7 +15,7 @@ export const MEDIA_BUCKET = "media";
 // testimonials, leaderboard) uses agent-half-body only. The Storage folder
 // and its files are untouched; re-add "agent-headshots" here to bring it
 // back into the media page and pickers.
-export const MEDIA_FOLDERS = ["properties", "agent-half-body"];
+export const MEDIA_FOLDERS = ["properties", "agent-half-body", "blogs"];
 
 export function getMediaUrl(path) {
 	return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;

@@ -12,6 +12,7 @@ const FOLDER_LABELS = {
 	properties: "Properties",
 	"agent-headshots": "Agent headshots",
 	"agent-half-body": "Agent half-body",
+	blogs: "Blog covers",
 };
 
 const PAGE_SIZE = 24;
