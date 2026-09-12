@@ -10,6 +10,7 @@ import { formatPrice } from "@/features/homepage/data";
 import { scheduleViewingSchema } from "../schemas";
 import { submitViewingRequestAction } from "../actions";
 import { getStoredReferringAgentId } from "../referral";
+import { useRecaptcha } from "@/features/recaptcha/useRecaptcha";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import Select from "@/components/ui/Select";
@@ -32,6 +33,7 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 	const [isPending, startTransition] = useTransition();
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [filterText, setFilterText] = useState("");
+	const { getToken } = useRecaptcha();
 
 	const {
 		register,
@@ -77,10 +79,18 @@ export default function ScheduleViewingForm({ propertyOptions, preselectedIds })
 
 	function onSubmit(values) {
 		startTransition(async () => {
-			const result = await submitViewingRequestAction({
-				...values,
-				referringAgentId: getStoredReferringAgentId() ?? "",
-			});
+			let recaptchaToken;
+			try {
+				recaptchaToken = await getToken("schedule_viewing");
+			} catch (error) {
+				toast.error(error.message);
+				return;
+			}
+
+			const result = await submitViewingRequestAction(
+				{ ...values, referringAgentId: getStoredReferringAgentId() ?? "" },
+				recaptchaToken,
+			);
 			if (result?.error) {
 				toast.error(result.error);
 				return;

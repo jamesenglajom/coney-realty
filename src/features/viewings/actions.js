@@ -3,12 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { requireUser, getPagePermissions, requirePermission } from "@/features/auth/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { verifyRecaptcha } from "@/features/recaptcha/verify";
 import { scheduleViewingSchema, updateViewingStatusSchema } from "./schemas";
 
 // Public, unauthenticated action — fired from the "Schedule a viewing" form.
 // Insert-only and can't read anything back, same trust model as the old
-// recordAgentContactAction it replaces.
-export async function submitViewingRequestAction(values) {
+// recordAgentContactAction it replaces. `recaptchaToken` comes from the
+// client's useRecaptcha().getToken("schedule_viewing") call, checked before
+// anything else — a bot can't get past this by skipping straight to
+// zod-valid values.
+export async function submitViewingRequestAction(values, recaptchaToken) {
+	const verification = await verifyRecaptcha(recaptchaToken, { action: "schedule_viewing" });
+	if (!verification.success) {
+		return { error: "We couldn't verify this submission. Please refresh the page and try again." };
+	}
+
 	const parsed = scheduleViewingSchema.safeParse(values);
 	if (!parsed.success) {
 		return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
