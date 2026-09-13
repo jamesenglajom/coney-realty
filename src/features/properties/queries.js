@@ -142,14 +142,17 @@ export async function getPropertyBySlug(slug) {
 }
 
 // Powers the agent dashboard: counts by status among their assigned
-// properties, plus sold count/volume for the current calendar month and
-// lifetime, using `sold_at` (set by updatePropertyAction on the
-// draft/published -> sold transition).
+// properties, plus two facts about their own book rather than a "sales
+// closed" claim: a property can have several assigned agents (see
+// AssignedAgentsField), so crediting one agent with "sold this month/
+// lifetime" whenever any of their assigned listings sells is misleading —
+// it's not necessarily their sale. Portfolio value and new-this-month are
+// both just facts about what's assigned to them, not attribution claims.
 export async function getAgentPropertyStats(agentId) {
 	const supabase = createAdminClient();
 	const { data, error } = await supabase
 		.from("user_property")
-		.select("properties(id, price, status, sold_at, deleted_at)")
+		.select("properties(id, price, status, created_at, deleted_at)")
 		.eq("user_id", agentId);
 
 	if (error) throw new Error(error.message);
@@ -157,10 +160,8 @@ export async function getAgentPropertyStats(agentId) {
 	const properties = (data ?? []).map((row) => row.properties).filter((property) => property && !property.deleted_at);
 
 	const byStatus = { draft: 0, published: 0, on_hold: 0, sold: 0, archived: 0 };
-	let lifetimeSoldCount = 0;
-	let lifetimeSoldVolume = 0;
-	let monthCount = 0;
-	let monthVolume = 0;
+	let portfolioValue = 0;
+	let newThisMonth = 0;
 
 	const now = new Date();
 	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -168,22 +169,20 @@ export async function getAgentPropertyStats(agentId) {
 	for (const property of properties) {
 		if (byStatus[property.status] !== undefined) byStatus[property.status] += 1;
 
-		if (property.status === "sold") {
-			const price = Number(property.price) || 0;
-			lifetimeSoldCount += 1;
-			lifetimeSoldVolume += price;
-			if (property.sold_at && new Date(property.sold_at) >= monthStart) {
-				monthCount += 1;
-				monthVolume += price;
-			}
+		if (property.status === "published" || property.status === "on_hold") {
+			portfolioValue += Number(property.price) || 0;
+		}
+
+		if (property.created_at && new Date(property.created_at) >= monthStart) {
+			newThisMonth += 1;
 		}
 	}
 
 	return {
 		totalAssigned: properties.length,
 		byStatus,
-		thisMonth: { count: monthCount, volume: monthVolume },
-		lifetime: { count: lifetimeSoldCount, volume: lifetimeSoldVolume },
+		portfolioValue,
+		newThisMonth,
 	};
 }
 

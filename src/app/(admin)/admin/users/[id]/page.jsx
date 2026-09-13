@@ -122,20 +122,24 @@ export default async function UserPreviewPage({ params }) {
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{stats.totalAssigned}</dd>
 							</div>
 							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
-								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Sold (lifetime)</dt>
+								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Published</dt>
 								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
-									{stats.lifetime.count}
+									{stats.byStatus.published}
+								</dd>
+							</div>
+							{/* Portfolio value/new-this-month rather than a "sold" count —
+							    a property can have several assigned agents (see
+							    AssignedAgentsField), so crediting this one person with a
+							    sale count would overstate their individual attribution. */}
+							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
+								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Portfolio value</dt>
+								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
+									{priceFormatter.format(stats.portfolioValue)}
 								</dd>
 							</div>
 							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
-								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Sold (this month)</dt>
-								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{stats.thisMonth.count}</dd>
-							</div>
-							<div className="rounded-2xl border border-theme-gold-light/70 p-3 dark:border-border-dark">
-								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">Lifetime volume</dt>
-								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">
-									{priceFormatter.format(stats.lifetime.volume)}
-								</dd>
+								<dt className="text-xs text-txt-muted dark:text-txt-muted-dark">New this month</dt>
+								<dd className="mt-1 text-lg font-semibold text-theme-blue dark:text-white">{stats.newThisMonth}</dd>
 							</div>
 						</dl>
 					) : null}

@@ -49,17 +49,17 @@ async function AgentDashboard({ userId }) {
 				<KpiTile label="Assigned listings" value={stats.totalAssigned} icon={Building2} tone="blue" />
 				<KpiTile label="Published" value={stats.byStatus.published} icon={CheckCircle2} tone="success" />
 				<KpiTile
-					label="Sold (this month)"
-					value={stats.thisMonth.count}
-					sublabel={priceFormatter.format(stats.thisMonth.volume)}
-					icon={TrendingUp}
+					label="Portfolio value"
+					value={priceFormatter.format(stats.portfolioValue)}
+					sublabel="Published + on-hold listings"
+					icon={Wallet}
 					tone="gold"
 				/>
 				<KpiTile
-					label="Sold (lifetime)"
-					value={stats.lifetime.count}
-					sublabel={priceFormatter.format(stats.lifetime.volume)}
-					icon={Wallet}
+					label="New this month"
+					value={stats.newThisMonth}
+					sublabel="Listings added to your book"
+					icon={TrendingUp}
 					tone="warning"
 				/>
 			</div>

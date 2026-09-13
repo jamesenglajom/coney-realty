@@ -104,6 +104,10 @@ export async function getAdminDashboardStats() {
 		byType,
 		byRole,
 		lifetime: { count: lifetimeSoldCount, volume: lifetimeSoldVolume },
+		// `months` always ends on the current calendar month (see its
+		// construction above) — company-wide, not attributed to any one
+		// agent, unlike the per-agent stats in getAgentPropertyStats.
+		thisMonthSold: { count: months[months.length - 1].count, volume: months[months.length - 1].volume },
 		monthlyTrend: months,
 		propertiesTrend: toCumulative(newPropertiesByMonth),
 		publishedTrend: toCumulative(newPublishedByMonth),

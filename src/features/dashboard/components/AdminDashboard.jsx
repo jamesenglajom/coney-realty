@@ -1,4 +1,4 @@
-import { Building2, CheckCircle2, Users, Wallet } from "lucide-react";
+import { Building2, CheckCircle2, TrendingUp, Users, Wallet } from "lucide-react";
 import { PROPERTY_TYPES, PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
 import { USER_ROLES } from "@/features/users/schemas";
 import { getRolePermissions } from "@/features/auth/permissions";
@@ -101,7 +101,7 @@ export default async function AdminDashboard({ userId, role }) {
 		<div>
 			<PageHeader title="Dashboard" description="Overview across all properties and users." />
 
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
 				<KpiTrendCard
 					label="Total properties"
 					value={stats.totalProperties.toLocaleString()}
@@ -128,6 +128,19 @@ export default async function AdminDashboard({ userId, role }) {
 					href="/admin/users"
 					series={stats.usersTrend}
 					unit="users"
+				/>
+				{/* Company-wide, unlike the Agent dashboard's own KPIs — every sold
+				    property counts once here regardless of how many agents are
+				    assigned to it, so there's no per-agent attribution ambiguity. */}
+				<KpiTrendCard
+					label="Sold (this month)"
+					value={stats.thisMonthSold.count.toLocaleString()}
+					sublabel={priceFormatter.format(stats.thisMonthSold.volume)}
+					icon={TrendingUp}
+					tone="orange"
+					href="/admin/properties?status=sold"
+					series={stats.monthlyTrend}
+					unit="sales"
 				/>
 				<KpiTrendCard
 					label="Sold (lifetime)"
