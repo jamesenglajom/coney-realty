@@ -3,6 +3,7 @@ import { listPublishedCityStates } from "@/features/homepage/queries";
 import { getBrandSettings } from "@/features/brand/queries";
 import Eyebrow from "./ui/Eyebrow";
 import HomeSearchForm from "./HomeSearchForm";
+import CodeSearchModal from "./CodeSearchModal";
 
 export default async function HeroSearch() {
 	const [cityStates, brand] = await Promise.all([listPublishedCityStates(), getBrandSettings()]);
@@ -35,9 +36,12 @@ export default async function HeroSearch() {
 
 				<div id="search">
 					<HomeSearchForm cityStates={cityStates} defaultLocation="" defaultType="" defaultPrice="0" />
-					<p className="mt-3 text-xs text-white/70">
-						Every result links to a real listing — book a viewing in a couple of clicks.
-					</p>
+					<div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+						<p className="text-xs text-white/70">
+							Every result links to a real listing — book a viewing in a couple of clicks.
+						</p>
+						<CodeSearchModal />
+					</div>
 				</div>
 			</div>
 		</section>

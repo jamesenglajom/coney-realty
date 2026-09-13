@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { FILTERABLE_PROPERTY_TYPES, PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "../schemas";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 
-export default function PropertiesFilterBar({ cities, districts, zoneTypes, agents, showAgentFilter }) {
+export default function PropertiesFilterBar({ cities, districts, zoneTypes, agents, showAgentFilter, showSearch }) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
 	const [priceMin, setPriceMin] = useState(searchParams.get("priceMin") ?? "");
 	const [priceMax, setPriceMax] = useState(searchParams.get("priceMax") ?? "");
+	const [search, setSearch] = useState(searchParams.get("search") ?? "");
 
 	function updateParam(key, value) {
 		const params = new URLSearchParams(searchParams.toString());
@@ -43,6 +44,14 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [priceMax]);
 
+	useEffect(() => {
+		const current = searchParams.get("search") ?? "";
+		if (search === current) return undefined;
+		const timeout = setTimeout(() => updateParam("search", search), 400);
+		return () => clearTimeout(timeout);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [search]);
+
 	const hasFilters = [
 		"city",
 		"district",
@@ -52,16 +61,33 @@ export default function PropertiesFilterBar({ cities, districts, zoneTypes, agen
 		"agentId",
 		"priceMin",
 		"priceMax",
+		"search",
 	].some((key) => searchParams.get(key));
 
 	function clearFilters() {
 		setPriceMin("");
 		setPriceMax("");
+		setSearch("");
 		router.replace(pathname);
 	}
 
 	return (
 		<div className="mb-4 rounded-2xl border border-theme-gold-light/70 bg-white p-4 dark:border-border-dark dark:bg-surface-dark">
+			{showSearch ? (
+				<div className="relative mb-3">
+					<Search
+						className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-txt-muted dark:text-txt-muted-dark"
+						aria-hidden="true"
+					/>
+					<input
+						type="text"
+						placeholder="Search by title, screen name, or code name…"
+						value={search}
+						onChange={(event) => setSearch(event.target.value)}
+						className="w-full rounded-xl border border-theme-gray/30 bg-white py-2.5 pl-9 pr-3.5 text-sm text-txt-primary outline-none transition-colors focus:border-theme-blue dark:border-border-dark dark:bg-surface-dark-raised dark:text-txt-primary-dark dark:focus:border-theme-gold"
+					/>
+				</div>
+			) : null}
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
 				<Select value={searchParams.get("city") ?? ""} onChange={(event) => updateParam("city", event.target.value)}>
 					<option value="">All cities</option>

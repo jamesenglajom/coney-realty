@@ -15,7 +15,10 @@ function mapPropertyRow(property) {
 	return { ...rest, assignedAgents };
 }
 
-function buildPropertiesQuery(supabase, { agentId, city, district, propertyType, zoneType, priceMin, priceMax, status }) {
+function buildPropertiesQuery(
+	supabase,
+	{ agentId, city, district, propertyType, zoneType, priceMin, priceMax, status, search },
+) {
 	let query = supabase
 		.from("properties")
 		.select(
@@ -35,6 +38,14 @@ function buildPropertiesQuery(supabase, { agentId, city, district, propertyType,
 	if (priceMin) query = query.gte("price", priceMin);
 	if (priceMax) query = query.lte("price", priceMax);
 	if (status) query = query.eq("status", status);
+	if (search?.trim()) {
+		// Same %_ escaping as listUsers/listUsersPaginated's own .or() search —
+		// those are the ILIKE wildcard characters, so a literal "%" or "_" in
+		// the typed search term needs escaping or it'd be read as a pattern.
+		const escaped = search.trim().replace(/[%_]/g, (match) => `\\${match}`);
+		const needle = `%${escaped}%`;
+		query = query.or(`title.ilike.${needle},screen_name.ilike.${needle},code_name.ilike.${needle}`);
+	}
 
 	return query;
 }

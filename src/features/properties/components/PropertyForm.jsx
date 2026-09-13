@@ -14,7 +14,12 @@ import {
 	PROPERTY_STATUS_LABELS,
 	PAYMENT_TYPES,
 } from "../schemas";
-import { createPropertyAction, updatePropertyAction, reverseGeocodeAction } from "../actions";
+import {
+	createPropertyAction,
+	updatePropertyAction,
+	reverseGeocodeAction,
+	checkCodeNameAvailabilityAction,
+} from "../actions";
 import { omitPaths, pickPaths, deepMerge, flattenToPairs, buildFromPairs } from "@/features/propertyTypes/fieldPaths";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -166,7 +171,37 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 	const selectedPropertyType = watch("propertyType");
 	const activeFields = fieldSetsByType[selectedPropertyType] ?? [];
 
+	// Live duplicate-check as the admin types, same pattern as the users
+	// form's email check — code_name is uniquely constrained at the DB level
+	// (see properties_code_name_unique_idx), so this just surfaces the
+	// conflict before submit instead of after a failed save.
+	const codeNameValue = watch("codeName");
+	const [duplicateCodeName, setDuplicateCodeName] = useState(null);
+
+	useEffect(() => {
+		if (!codeNameValue?.trim()) {
+			setDuplicateCodeName(null);
+			return undefined;
+		}
+
+		let cancelled = false;
+		const timeout = setTimeout(async () => {
+			const result = await checkCodeNameAvailabilityAction(codeNameValue, isEdit ? property.id : undefined);
+			if (!cancelled) setDuplicateCodeName(result.exists ? result : null);
+		}, 400);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timeout);
+		};
+	}, [codeNameValue, isEdit, property?.id]);
+
 	function onSubmit(values) {
+		if (duplicateCodeName) {
+			setServerError(`That code name is already used by "${duplicateCodeName.title}".`);
+			return;
+		}
+
 		setServerError("");
 
 		const additionalFields = buildFromPairs(values.additionalFieldPairs);
@@ -229,8 +264,14 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 				<Label htmlFor="codeName">Code name (optional)</Label>
 				<Input id="codeName" type="text" placeholder="Internal reference code" {...register("codeName")} />
 				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-					Internal reference only — never shown on the public site.
+					Must be unique. Never shown on the listing itself, but buyers can jump straight to this property
+					using it via the public site&apos;s &quot;search by code&quot; option.
 				</p>
+				{duplicateCodeName ? (
+					<p className="mt-1.5 text-xs font-medium text-danger dark:text-danger-dark">
+						Already used by &quot;{duplicateCodeName.title}&quot;.
+					</p>
+				) : null}
 				<FieldError>{errors.codeName?.message}</FieldError>
 			</div>
 
@@ -418,7 +459,7 @@ export default function PropertyForm({ mode, property, assignableUsers, fieldSet
 			{serverError ? <FieldError>{serverError}</FieldError> : null}
 
 			<div className="flex gap-2 pt-2">
-				<Button type="submit" disabled={isPending}>
+				<Button type="submit" disabled={isPending || Boolean(duplicateCodeName)}>
 					{isPending ? "Saving…" : isEdit ? "Save changes" : "Create property"}
 				</Button>
 				<Button type="button" variant="ghost" onClick={() => router.push("/admin/properties")}>

@@ -267,3 +267,22 @@ export const getPublicPropertyBySlug = cache(async function getPublicPropertyByS
 		agents,
 	};
 });
+
+// Backs the public "search by code" lookup (see features/homepage/actions.js)
+// — just enough to redirect to the matching PDP, same visibility rule as
+// getPublicPropertyBySlug (a sold/draft/archived code finds nothing, same as
+// if it didn't exist). Not cache()'d: unlike a slug (one lookup per page
+// load), this is a one-off per form submission, not worth memoizing.
+export async function getPublishedPropertySlugByCodeName(codeName) {
+	const supabase = createAdminClient();
+	const { data, error } = await supabase
+		.from("properties")
+		.select("slug")
+		.eq("code_name", codeName)
+		.in("status", ["published", "on_hold"])
+		.is("deleted_at", null)
+		.maybeSingle();
+
+	if (error) throw new Error(error.message);
+	return data?.slug ?? null;
+}

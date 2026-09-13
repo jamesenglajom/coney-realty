@@ -142,8 +142,38 @@ async function syncAssignments(supabase, propertyId, userIds) {
 	return insertError ?? null;
 }
 
-function slugConflictMessage(error) {
-	return error.code === "23505" ? "That slug is already in use." : error.message;
+// A 23505 (unique_violation) here can come from either the slug or the
+// code_name unique index (see properties_code_name_unique_idx) — inspect
+// which column PostgREST actually names rather than assuming it's always
+// the slug, now that both are uniquely constrained.
+function uniqueConstraintMessage(error) {
+	if (error.code !== "23505") return error.message;
+	const detail = `${error.message ?? ""} ${error.details ?? ""}`;
+	if (detail.includes("code_name")) return "That code name is already in use.";
+	return "That slug is already in use.";
+}
+
+// Live duplicate-check for the property form's Code name field, same idea as
+// checkEmailAvailabilityAction on the user form — lets the admin see "that
+// code is taken" before submitting, not just after a failed insert. Gated by
+// requireUser() only (read-only lookup, not a mutation), same bar as
+// reverseGeocodeAction above, since this is called from both the create and
+// edit forms. `excludeId` lets an edit ignore the property's own current
+// code_name.
+export async function checkCodeNameAvailabilityAction(codeName, excludeId) {
+	await requireUser();
+
+	const trimmed = codeName?.trim();
+	if (!trimmed) return { exists: false };
+
+	const supabase = createAdminClient();
+	let query = supabase.from("properties").select("id, title").eq("code_name", trimmed).is("deleted_at", null);
+	if (excludeId) query = query.neq("id", excludeId);
+
+	const { data } = await query.maybeSingle();
+	if (!data) return { exists: false };
+
+	return { exists: true, title: data.title };
 }
 
 export async function createPropertyAction(values) {
@@ -166,7 +196,7 @@ export async function createPropertyAction(values) {
 		.single();
 
 	if (error) {
-		return { error: slugConflictMessage(error) };
+		return { error: uniqueConstraintMessage(error) };
 	}
 
 	const assignError = await syncAssignments(supabase, created.id, parsed.data.assignedUserIds);
@@ -213,7 +243,7 @@ export async function updatePropertyAction(values) {
 		.select("id");
 
 	if (error) {
-		return { error: slugConflictMessage(error) };
+		return { error: uniqueConstraintMessage(error) };
 	}
 	if (!updatedRows || updatedRows.length === 0) {
 		return { error: "Update didn't apply — the property may have been deleted. Please refresh and try again." };

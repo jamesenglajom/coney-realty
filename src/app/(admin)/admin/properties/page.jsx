@@ -31,6 +31,7 @@ export default async function PropertiesPage({ searchParams }) {
 			priceMin: params.priceMin || undefined,
 			priceMax: params.priceMax || undefined,
 			status: params.status || undefined,
+			search: params.search || undefined,
 			page,
 			pageSize: PAGE_SIZE,
 		}),
@@ -65,6 +66,7 @@ export default async function PropertiesPage({ searchParams }) {
 				zoneTypes={filterOptions.zoneTypes}
 				agents={assignableUsers.filter((assignableUser) => assignableUser.role === "Agent")}
 				showAgentFilter={!isAgent}
+				showSearch={!isAgent}
 			/>
 			<PropertiesTable
 				properties={properties}
