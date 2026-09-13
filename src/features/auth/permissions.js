@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const ACTION_TO_COLUMN = {
 	view: "can_view",
@@ -20,14 +21,24 @@ export const getCurrentUser = cache(async function getCurrentUser() {
 
 	if (!authUser) return null;
 
-	const { data: profile } = await supabase
+	// user_info reads go through the admin client everywhere else in this
+	// codebase (see features/users/queries.js) since RLS denies it by
+	// default — the session client got the plain `users` columns fine, but
+	// would silently come back with a null user_info embed here. Safe to
+	// bypass RLS for this one row: authUser.id comes from the verified
+	// session, not client-supplied input, so this only ever reads the
+	// caller's own profile.
+	const { data: profile } = await createAdminClient()
 		.from("users")
-		.select("id, email, full_name, role")
+		.select("id, email, full_name, role, user_info(avatar_url)")
 		.eq("id", authUser.id)
 		.is("deleted_at", null)
 		.maybeSingle();
 
-	return profile ?? null;
+	if (!profile) return null;
+
+	const { user_info, ...rest } = profile;
+	return { ...rest, avatarUrl: user_info?.avatar_url ?? "" };
 });
 
 export async function requireUser() {

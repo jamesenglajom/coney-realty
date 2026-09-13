@@ -164,9 +164,15 @@ const AdminShell = ({ user, permissions, siteName = "ConeyRealty", logoUrl = "/l
 							className={`flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-white/[0.06] ${isCollapsed ? "lg:flex-col lg:gap-2" : ""}`}
 						>
 							<Link href="/admin/settings" title="My profile" className="flex min-w-0 flex-1 items-center gap-3">
-								<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-theme-gold text-[13px] font-bold text-theme-blue">
-									{(user.full_name || user.email)[0]?.toUpperCase()}
-								</div>
+								{user.avatarUrl ? (
+									<div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
+										<Image src={user.avatarUrl} alt="" fill sizes="36px" unoptimized className="object-cover" />
+									</div>
+								) : (
+									<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-theme-gold text-[13px] font-bold text-theme-blue">
+										{(user.full_name || user.email)[0]?.toUpperCase()}
+									</div>
+								)}
 								<div className={`min-w-0 flex-1 overflow-hidden ${hideWhenCollapsed}`}>
 									<p className="truncate text-[13px] font-semibold text-white">{user.full_name || user.email}</p>
 									<p className="truncate text-[11px] text-theme-gold-light/45">{user.role}</p>
