@@ -10,6 +10,8 @@ function assertFolder(folder) {
 	if (!MEDIA_FOLDERS.includes(folder)) throw new Error("Unknown media folder.");
 }
 
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+
 // Keeps the uploader's own filename (lowercased, non-alphanumerics
 // collapsed to hyphens) for recognizability when browsing the library,
 // plus a short random suffix so two different uploads named "IMG_0001"
@@ -75,6 +77,10 @@ export async function uploadMediaAction(formData) {
 	for (const file of files) {
 		if (file.type !== "image/webp") {
 			failed.push({ name: file.name, reason: "Not a .webp file" });
+			continue;
+		}
+		if (file.size > MAX_UPLOAD_BYTES) {
+			failed.push({ name: file.name, reason: "Larger than 2MB" });
 			continue;
 		}
 		try {

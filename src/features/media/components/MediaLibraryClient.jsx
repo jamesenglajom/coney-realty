@@ -92,7 +92,8 @@ export default function MediaLibraryClient({ folder, page, pageSize, totalCount,
 			router.refresh();
 		}
 		if (result.failed.length > 0) {
-			toast.error(`${result.failed.length} file(s) skipped — only .webp is accepted.`);
+			const reasons = [...new Set(result.failed.map((file) => file.reason))].join(", ");
+			toast.error(`${result.failed.length} file(s) skipped — ${reasons}. Only .webp under 2MB is accepted.`);
 		}
 	}
 
@@ -148,7 +149,7 @@ export default function MediaLibraryClient({ folder, page, pageSize, totalCount,
 				) : null}
 			</div>
 			<p className="mt-2 text-xs text-txt-muted dark:text-txt-muted-dark">
-				.webp only — any filename. Pick multiple files at once for a bulk upload.
+				.webp only, up to 2MB each — any filename. Pick multiple files at once for a bulk upload.
 			</p>
 
 			<div className={`mt-6 transition-opacity ${isPending ? "opacity-50" : ""}`}>

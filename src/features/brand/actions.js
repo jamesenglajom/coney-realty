@@ -11,11 +11,12 @@ import { brandSettingsSchema } from "./schemas";
 // entirely and writes to a fixed path per slot instead — a re-upload just
 // overwrites (upsert: true) whatever was there. Formats are wider than the
 // media library's webp-only rule since a favicon in particular needs to
-// stay .ico/.png/.svg, not get forced into .webp.
+// stay .ico/.png/.svg, not get forced into .webp. Sizes are capped at 2MB
+// across all three slots, matching the general media library's limit.
 const IMAGE_SLOTS = {
-	logo: { mimes: ["image/webp", "image/png", "image/jpeg", "image/svg+xml"], maxBytes: 4 * 1024 * 1024 },
-	favicon: { mimes: ["image/x-icon", "image/vnd.microsoft.icon", "image/png", "image/svg+xml"], maxBytes: 1024 * 1024 },
-	banner: { mimes: ["image/webp", "image/jpeg", "image/png"], maxBytes: 8 * 1024 * 1024 },
+	logo: { mimes: ["image/webp", "image/png", "image/jpeg", "image/svg+xml"], maxBytes: 2 * 1024 * 1024 },
+	favicon: { mimes: ["image/x-icon", "image/vnd.microsoft.icon", "image/png", "image/svg+xml"], maxBytes: 2 * 1024 * 1024 },
+	banner: { mimes: ["image/webp", "image/jpeg", "image/png"], maxBytes: 2 * 1024 * 1024 },
 };
 
 const EXTENSION_BY_MIME = {

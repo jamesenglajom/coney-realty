@@ -79,14 +79,14 @@ export default function BrandSettingsForm({ brand }) {
 						name="logo"
 						currentUrl={brand.logoUrl}
 						accept="image/webp,image/png,image/jpeg,image/svg+xml"
-						hint="Shown in the admin sidebar, login page, and public header/footer. WebP, PNG, JPEG, or SVG — up to 4MB."
+						hint="Shown in the admin sidebar, login page, and public header/footer. WebP, PNG, JPEG, or SVG — up to 2MB."
 					/>
 					<BrandImageField
 						label="Favicon"
 						name="favicon"
 						currentUrl={brand.faviconUrl}
 						accept="image/x-icon,image/png,image/svg+xml"
-						hint="The browser-tab icon. ICO, PNG, or SVG — up to 1MB."
+						hint="The browser-tab icon. ICO, PNG, or SVG — up to 2MB."
 						previewClassName="h-11 w-11"
 					/>
 					<BrandImageField
@@ -94,7 +94,7 @@ export default function BrandSettingsForm({ brand }) {
 						name="banner"
 						currentUrl={brand.bannerUrl}
 						accept="image/webp,image/jpeg,image/png"
-						hint="The full-width photo behind the homepage search. WebP, JPEG, or PNG — up to 8MB."
+						hint="The full-width photo behind the homepage search. WebP, JPEG, or PNG — up to 2MB."
 						previewClassName="h-16 w-28"
 					/>
 				</div>
