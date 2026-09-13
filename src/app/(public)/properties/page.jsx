@@ -63,7 +63,7 @@ export default async function PublicPropertiesPage({ searchParams }) {
 					<>
 						<ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 							{properties.map((property) => (
-								<PropertyCard key={property.id} property={property} />
+								<PropertyCard key={property.id} property={property} agentId={currentUser?.id} />
 							))}
 						</ul>
 

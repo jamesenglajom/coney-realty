@@ -6,7 +6,8 @@ import { getCurrentUser, getPagePermissions } from "@/features/auth/permissions"
 import { getPublicPropertyBySlug } from "@/features/homepage/queries";
 import { getAvatarForSeed, getPropertyImageForSeed, formatPrice } from "@/features/homepage/data";
 import PropertyPhotoGallery from "@/features/properties/components/PropertyPhotoGallery";
-import GetMyUrlButton from "@/features/viewings/components/GetMyUrlButton";
+import BookmarkButton from "@/features/bookmarks/components/BookmarkButton";
+import ShareButton from "@/features/bookmarks/components/ShareButton";
 import Button from "@/components/ui/Button";
 
 export async function generateMetadata({ params }) {
@@ -98,7 +99,15 @@ export default async function PublicPropertyPage({ params }) {
 								Edit listing
 							</Button>
 						) : null}
-						{currentUser ? <GetMyUrlButton userId={currentUser.id} /> : null}
+						<BookmarkButton propertyId={property.id} variant="ghost" />
+						{currentUser ? (
+							<ShareButton
+								path={`/property/${property.slug}`}
+								title={property.name}
+								agentId={currentUser.id}
+								variant="ghost"
+							/>
+						) : null}
 					</div>
 				</div>
 			</div>

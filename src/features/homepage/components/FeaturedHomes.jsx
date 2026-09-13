@@ -3,6 +3,12 @@ import SectionHeading from "./ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import PropertyCard from "./PropertyCard";
 
+// Deliberately doesn't fetch getCurrentUser() (unlike /properties and the
+// PDP, which the agent-gated Share button was actually requested for) —
+// that reads the session cookie, which would force this entire homepage
+// section from static/ISR into fully dynamic rendering on every request,
+// for a feature this section wasn't asked for. Its cards still get the
+// Bookmark button (no session needed), just no Share button.
 export default async function FeaturedHomes() {
 	const properties = await listFeaturedProperties(6);
 

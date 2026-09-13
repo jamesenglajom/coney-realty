@@ -2,24 +2,56 @@ import Link from "next/link";
 import { Bed, Bath, Car, Ruler } from "lucide-react";
 import { formatPrice } from "@/features/homepage/data";
 import PropertyCoverImage from "@/features/properties/components/PropertyCoverImage";
+import BookmarkButton from "@/features/bookmarks/components/BookmarkButton";
+import ShareButton from "@/features/bookmarks/components/ShareButton";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
-export default function PropertyCard({ property }) {
+const STATUS_LABELS = { sold: "Sold" };
+
+// `property.status` is only ever present on the saved-properties page (see
+// features/bookmarks/queries.js) — every other caller (PLP, featured
+// section) already only ever hands this a published/on_hold property, so
+// `isUnavailable` never trips there. A bookmarked property that's since
+// sold/gone to draft/been archived still shows (that's the point of a saved
+// list surviving status changes), just without a working link to a PDP that
+// itself 404s for anything other than published/on_hold.
+// `agentId` — the signed-in staff viewer's own id, passed down from a
+// Server Component page's getCurrentUser() — gates the Share button
+// entirely: a guest sees no share button at all, only a signed-in agent/
+// admin gets one, and it's the one that rides ?agent=<id> along (see
+// ShareButton). Bookmarking has nothing to do with staff attribution, so it
+// stays available to everyone regardless of agentId.
+export default function PropertyCard({ property, agentId }) {
 	const hasBedsBaths = property.beds != null || property.baths != null;
+	const isUnavailable = Boolean(property.status) && !["published", "on_hold"].includes(property.status);
+	const href = `/property/${property.slug}`;
+
+	const cover = (
+		<PropertyCoverImage
+			imageUrl={property.imageUrl}
+			seed={property.id}
+			alt={`${property.name}${property.city ? ` in ${property.city}` : ""}`}
+			badge={property.type}
+			className={`aspect-[4/3] ${isUnavailable ? "opacity-60 grayscale" : ""}`}
+		/>
+	);
 
 	return (
-		<li className="overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark">
-			<Link href={`/property/${property.slug}`}>
-				<PropertyCoverImage
-					imageUrl={property.imageUrl}
-					seed={property.id}
-					alt={`${property.name}${property.city ? ` in ${property.city}` : ""}`}
-					badge={property.type}
-				/>
-			</Link>
+		<li className="relative overflow-hidden rounded-3xl border border-theme-gray/15 bg-white shadow-lg transition-shadow hover:shadow-2xl dark:border-border-dark dark:bg-surface-dark">
+			<div className="absolute right-3 top-3 z-10 flex gap-2">
+				<BookmarkButton propertyId={property.id} />
+				{!isUnavailable && agentId ? <ShareButton path={href} title={property.name} agentId={agentId} /> : null}
+			</div>
+
+			{isUnavailable ? cover : <Link href={href}>{cover}</Link>}
+
 			<div className="p-5">
-				{property.isOnHold ? (
+				{isUnavailable ? (
+					<Badge tone="neutral" className="mb-2">
+						{STATUS_LABELS[property.status] ?? "No longer listed"}
+					</Badge>
+				) : property.isOnHold ? (
 					<Badge tone="warning" className="mb-2">
 						On Hold
 					</Badge>
@@ -28,9 +60,7 @@ export default function PropertyCard({ property }) {
 					{formatPrice(property.price)}
 				</p>
 				<h3 className="mt-1 text-lg font-semibold text-txt-secondary dark:text-txt-secondary-dark">
-					<Link href={`/property/${property.slug}`} className="hover:underline">
-						{property.name}
-					</Link>
+					{isUnavailable ? property.name : <Link href={href} className="hover:underline">{property.name}</Link>}
 				</h3>
 				{hasBedsBaths ? (
 					<div className="mt-4 flex flex-wrap gap-5 text-sm text-txt-secondary dark:text-txt-secondary-dark">
@@ -61,15 +91,11 @@ export default function PropertyCard({ property }) {
 						</span>
 					</div>
 				) : null}
-				<Button
-					href={`/property/${property.slug}`}
-					variant="ghost"
-					size="sm"
-					shape="rounded"
-					className="mt-5 w-full"
-				>
-					View Property
-				</Button>
+				{isUnavailable ? null : (
+					<Button href={href} variant="ghost" size="sm" shape="rounded" className="mt-5 w-full">
+						View Property
+					</Button>
+				)}
 			</div>
 		</li>
 	);

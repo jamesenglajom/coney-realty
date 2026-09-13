@@ -3,6 +3,7 @@ import Image from "next/image";
 import StickyHeaderShell from "./StickyHeaderShell";
 import MobileMenu from "./MobileMenu";
 import Button from "@/components/ui/Button";
+import SavedLink from "@/features/bookmarks/components/SavedLink";
 import { getBrandSettings } from "@/features/brand/queries";
 
 const NAV_LINKS = [
@@ -40,7 +41,11 @@ export default async function SiteHeader() {
 					))}
 				</ul>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-4">
+					<SavedLink
+						showLabel={false}
+						className="hidden text-txt-secondary hover:text-theme-blue md:inline-flex dark:text-txt-secondary-dark dark:hover:text-white"
+					/>
 					<Button href="/schedule-viewing" variant="primary" className="hidden md:inline-flex">
 						Schedule a viewing
 					</Button>
@@ -56,6 +61,9 @@ export default async function SiteHeader() {
 									</Link>
 								</li>
 							))}
+							<li>
+								<SavedLink className="rounded-lg px-2 py-3 text-sm font-medium text-txt-secondary hover:bg-theme-gold-light dark:text-txt-secondary-dark dark:hover:bg-white/5" />
+							</li>
 							<li>
 								<Button href="/schedule-viewing" variant="primary" className="mt-2 w-full">
 									Schedule a viewing
