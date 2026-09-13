@@ -28,7 +28,7 @@ const avatarUrlField = z
 // an admin-typed temp password: email local-part + "12345". Communicated to
 // the user out of band (the create/reset actions surface it in the response
 // so the admin can relay it) — they're expected to change it via the
-// Settings > Change Password tab afterward.
+// Account > Change Password tab afterward.
 export function computeDefaultPassword(email) {
 	const localPart = String(email).split("@")[0];
 	return `${localPart}12345`;
@@ -56,7 +56,7 @@ export const updateUserSchema = z.object({
 // The Server Action always derives the target row from the caller's own
 // session (requireUser()), never from client-supplied input, and nobody can
 // promote themselves through this form. Email lives in its own
-// changeEmailSchema/action (Settings > Change email) so each Settings tab
+// changeEmailSchema/action (Account > Change email) so each Account tab
 // stays single-purpose.
 export const updateOwnProfileSchema = z.object({
 	fullName: z.string().trim().min(1, "Full name is required"),

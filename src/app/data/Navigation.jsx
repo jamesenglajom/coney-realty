@@ -32,7 +32,7 @@ export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:30
 //     group disappears from an Agent's sidebar (see AdminShell's group
 //     filter, which drops a group once every item in it is hidden).
 //   - Administration: people + site-wide config — Users needs Admin/SAdmin,
-//     Brand is SAdmin-only, Settings is alwaysVisible (personal account
+//     Brand is SAdmin-only, Account is alwaysVisible (personal account
 //     tabs live there for every role too).
 export const navigationGroups = [
   {
@@ -125,10 +125,10 @@ export const navigationGroups = [
         pageKey: "brand",
       },
       {
-        name: "Settings",
+        name: "Account",
         icon: Settings,
         href: `${BASE_URL}/admin/settings`,
-        // Settings now doubles as everyone's personal account page (change
+        // Doubles as everyone's personal account page (change
         // email/password/profile), not just the SAdmin permissions matrix —
         // always shown regardless of the "settings" page's view permission.
         alwaysVisible: true,

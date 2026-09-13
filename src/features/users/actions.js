@@ -101,8 +101,8 @@ export async function updateUserAction(values) {
 	const supabase = createAdminClient();
 
 	// A SAdmin account is never editable through this admin flow (by anyone,
-	// including another SAdmin) — self-service for that account happens via
-	// Settings instead. Checked server-side too, not just hidden in the UI.
+	// including another SAdmin) — self-service happens via the Account page
+	// instead. Checked server-side too, not just hidden in the UI.
 	const { data: target, error: targetError } = await supabase
 		.from("users")
 		.select("role")
@@ -156,7 +156,7 @@ export async function updateOwnProfileAction(values) {
 	return { success: true };
 }
 
-// Self-service email change (Settings > Change email). user_property rows
+// Self-service email change (Account > Change email). user_property rows
 // are keyed by user id, never email, so this never touches a user's
 // property assignments. Since the account's password is derived from the
 // email (computeDefaultPassword), changing the email re-derives and resets

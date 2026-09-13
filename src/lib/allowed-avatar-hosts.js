@@ -1,4 +1,4 @@
-// Free image hosts users can paste an Avatar URL from (see Settings >
+// Free image hosts users can paste an Avatar URL from (see Account >
 // Profile). Kept as a single source of truth: next.config.ts turns this
 // into `images.remotePatterns` (so next/image will actually fetch/optimize
 // it), and the avatar Zod schemas (src/features/users/schemas.js) validate

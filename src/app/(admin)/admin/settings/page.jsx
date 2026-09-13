@@ -11,7 +11,7 @@ import ChangeEmailForm from "@/features/users/components/ChangeEmailForm";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 export const metadata = {
-	title: "Settings",
+	title: "Account",
 };
 
 // No requirePermission() gate here — none of these tabs are RBAC-controlled
@@ -29,7 +29,7 @@ export default async function SettingsPage() {
 
 	return (
 		<div>
-			<PageHeader title="Settings" description="Manage your account and (for super admins) system parameters." />
+			<PageHeader title="Account" description="Manage your account and (for super admins) system parameters." />
 
 			<SettingsTabs
 				profileSlot={<ProfileForm user={user} />}

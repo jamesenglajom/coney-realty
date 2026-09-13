@@ -52,7 +52,7 @@ function buildCrumbs(pathname) {
 	}
 
 	if (pathname.startsWith("/admin/settings") || pathname.startsWith("/admin/profile")) {
-		return [{ label: "Settings", href: "/admin/settings" }];
+		return [{ label: "Account", href: "/admin/settings" }];
 	}
 
 	const lastSegment = pathname.split("/").filter(Boolean).pop() ?? "";
