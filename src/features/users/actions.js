@@ -5,13 +5,13 @@ import { requirePermission, requireUser } from "@/features/auth/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getUserByEmail } from "./queries";
+import { generateTempPassword } from "./password";
 import {
 	createUserSchema,
 	updateUserSchema,
 	updateOwnProfileSchema,
 	changePasswordSchema,
 	changeEmailSchema,
-	computeDefaultPassword,
 } from "./schemas";
 
 // Live duplicate-check for the create-user form — lets an admin see "this
@@ -47,12 +47,16 @@ export async function createUserAction(values) {
 	}
 
 	const supabase = createAdminClient();
-	const password = computeDefaultPassword(email);
+	const password = generateTempPassword();
 
 	const { data: created, error: authError } = await supabase.auth.admin.createUser({
 		email,
 		password,
 		email_confirm: true,
+		// Locks the account to the Account > Change Password tab (see
+		// src/proxy.js) until they set their own — see generateTempPassword's
+		// own comment for why this replaced a deterministic default password.
+		app_metadata: { must_change_password: true },
 	});
 
 	if (authError) {
@@ -158,10 +162,9 @@ export async function updateOwnProfileAction(values) {
 
 // Self-service email change (Account > Change email). user_property rows
 // are keyed by user id, never email, so this never touches a user's
-// property assignments. Since the account's password is derived from the
-// email (computeDefaultPassword), changing the email re-derives and resets
-// the password to match — the old password stops working the moment the
-// email changes, so the returned `password` must be shown to the user.
+// property assignments. Password is independent of the account's email now
+// (a random one, not derived from it — see generateTempPassword), so
+// changing the email no longer needs to touch the password at all.
 export async function changeOwnEmailAction(values) {
 	const currentUser = await requireUser();
 
@@ -176,11 +179,9 @@ export async function changeOwnEmailAction(values) {
 	}
 
 	const supabase = createAdminClient();
-	const password = computeDefaultPassword(newEmail);
 
 	const { error: authError } = await supabase.auth.admin.updateUserById(currentUser.id, {
 		email: newEmail,
-		password,
 		email_confirm: true,
 	});
 	if (authError) return { error: authError.message };
@@ -190,13 +191,14 @@ export async function changeOwnEmailAction(values) {
 
 	revalidatePath("/admin/settings");
 	revalidatePath("/admin", "layout");
-	return { success: true, password };
+	return { success: true };
 }
 
 // Admin-initiated reset for a user who's lost access (they contact the
-// admin, the admin clicks Reset Password) — sets the account back to the
-// same deterministic default used at creation, which the returned `password`
-// lets the admin relay to them.
+// admin, the admin clicks Reset Password) — sets a new random password
+// (see generateTempPassword) and re-locks the account to the Account >
+// Change Password tab, same as a brand-new account. The returned `password`
+// lets the admin relay it to them.
 export async function resetUserPasswordAction(userId) {
 	await requirePermission("users", "edit");
 
@@ -212,8 +214,11 @@ export async function resetUserPasswordAction(userId) {
 	if (!targetUser) return { error: "User not found." };
 	if (targetUser.role === "SAdmin") return { error: "SAdmin accounts can't be reset here." };
 
-	const password = computeDefaultPassword(targetUser.email);
-	const { error } = await supabase.auth.admin.updateUserById(userId, { password });
+	const password = generateTempPassword();
+	const { error } = await supabase.auth.admin.updateUserById(userId, {
+		password,
+		app_metadata: { must_change_password: true },
+	});
 	if (error) return { error: error.message };
 
 	return { success: true, password };
@@ -240,6 +245,15 @@ export async function changeOwnPasswordAction(values) {
 
 	const { error: updateError } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
 	if (updateError) return { error: updateError.message };
+
+	// Only the admin API can clear app_metadata (the session-bound client
+	// above can only touch user_metadata) — lifts the forced-change lock
+	// (src/proxy.js) now that they've set their own password.
+	if (currentUser.mustChangePassword) {
+		await createAdminClient().auth.admin.updateUserById(currentUser.id, {
+			app_metadata: { must_change_password: false },
+		});
+	}
 
 	return { success: true };
 }

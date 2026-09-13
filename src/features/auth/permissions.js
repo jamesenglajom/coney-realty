@@ -38,7 +38,14 @@ export const getCurrentUser = cache(async function getCurrentUser() {
 	if (!profile) return null;
 
 	const { user_info, ...rest } = profile;
-	return { ...rest, avatarUrl: user_info?.avatar_url ?? "" };
+	return {
+		...rest,
+		avatarUrl: user_info?.avatar_url ?? "",
+		// Set on new/reset accounts (see features/users/actions.js) — mirrors
+		// the same flag src/proxy.js reads off the JWT to lock the account to
+		// the Account > Change Password tab until they set their own password.
+		mustChangePassword: Boolean(authUser.app_metadata?.must_change_password),
+	};
 });
 
 export async function requireUser() {

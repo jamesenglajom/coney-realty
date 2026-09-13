@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ImagePlus } from "lucide-react";
-import { createUserSchema, updateUserSchema, computeDefaultPassword } from "../schemas";
+import { createUserSchema, updateUserSchema } from "../schemas";
 import { createUserAction, updateUserAction, checkEmailAvailabilityAction } from "../actions";
 import MediaPickerModal from "@/features/media/components/MediaPickerModal";
 import Input from "@/components/ui/Input";
@@ -87,7 +87,7 @@ export default function UserForm({ mode, user, assignableRoles }) {
 			}
 
 			if (!isEdit && result?.password) {
-				toast.success(`User created. Default password: ${result.password}`, { duration: 15000 });
+				toast.success(`User created. Temporary password: ${result.password}`, { duration: 20000 });
 			} else {
 				toast.success("User updated.");
 			}
@@ -104,8 +104,8 @@ export default function UserForm({ mode, user, assignableRoles }) {
 					<Label htmlFor="email">Email</Label>
 					<Input id="email" type="email" autoComplete="off" {...register("email")} />
 					<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-						Default password will be:{" "}
-						<span className="font-mono">{emailValue ? computeDefaultPassword(emailValue) : "—"}</span>
+						A random temporary password is generated on save and shown once — the user must change it
+						before using the rest of the admin.
 					</p>
 					{duplicate ? (
 						<p className="mt-1.5 text-xs font-medium text-danger dark:text-danger-dark">

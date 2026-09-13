@@ -33,6 +33,17 @@ export async function proxy(request) {
 		return NextResponse.redirect(new URL("/admin", request.url));
 	}
 
+	// New/reset accounts (see features/users/actions.js) carry this flag on
+	// the JWT's app_metadata until the account holder sets their own password
+	// via the Account > Change Password tab (features/users/actions.js's
+	// changeOwnPasswordAction clears it) — locks every other admin route
+	// until then, so a leaked temp password can't be used to browse the app.
+	const FORCE_PASSWORD_CHANGE_PATH = "/admin/settings";
+	const mustChangePassword = Boolean(user?.app_metadata?.must_change_password);
+	if (mustChangePassword && request.nextUrl.pathname !== FORCE_PASSWORD_CHANGE_PATH) {
+		return NextResponse.redirect(new URL(FORCE_PASSWORD_CHANGE_PATH, request.url));
+	}
+
 	return response;
 }
 

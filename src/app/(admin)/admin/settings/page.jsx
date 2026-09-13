@@ -24,14 +24,25 @@ export default async function SettingsPage() {
 	const currentUser = await requireUser();
 	const user = await getUserById(currentUser.id);
 	const isSAdmin = currentUser.role === "SAdmin";
-	const permissions = isSAdmin ? await listPermissions() : [];
-	const lastKeepAlivePing = isSAdmin ? await getLastKeepAlivePing() : null;
+	// src/proxy.js already locks every other /admin/* route to this page
+	// while this is true — SettingsTabs also hides the other tabs here so
+	// there's nowhere to wander off to on this page either.
+	const mustChangePassword = currentUser.mustChangePassword;
+	const permissions = isSAdmin && !mustChangePassword ? await listPermissions() : [];
+	const lastKeepAlivePing = isSAdmin && !mustChangePassword ? await getLastKeepAlivePing() : null;
 
 	return (
 		<div>
 			<PageHeader title="Account" description="Manage your account and (for super admins) system parameters." />
 
+			{mustChangePassword ? (
+				<p className="mb-6 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning dark:border-warning-dark/30 dark:bg-warning-dark/10 dark:text-warning-dark">
+					You&apos;re signed in with a temporary password. Set your own password below to continue.
+				</p>
+			) : null}
+
 			<SettingsTabs
+				forcePasswordChange={mustChangePassword}
 				profileSlot={<ProfileForm user={user} />}
 				changeEmailSlot={<ChangeEmailForm currentEmail={user.email} />}
 				changePasswordSlot={<ChangePasswordForm />}

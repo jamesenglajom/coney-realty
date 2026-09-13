@@ -24,16 +24,6 @@ const avatarUrlField = z
 		{ message: `Must be an https:// image URL from one of: ${ALLOWED_AVATAR_HOSTS.join(", ")}` },
 	);
 
-// New accounts (and password resets) get a deterministic default rather than
-// an admin-typed temp password: email local-part + "12345". Communicated to
-// the user out of band (the create/reset actions surface it in the response
-// so the admin can relay it) — they're expected to change it via the
-// Account > Change Password tab afterward.
-export function computeDefaultPassword(email) {
-	const localPart = String(email).split("@")[0];
-	return `${localPart}12345`;
-}
-
 export const createUserSchema = z.object({
 	email: z.string().trim().min(1, "Email is required").email("Enter a valid email address"),
 	fullName: z.string().trim().min(1, "Full name is required"),

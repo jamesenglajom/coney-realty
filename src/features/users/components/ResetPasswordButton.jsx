@@ -9,7 +9,11 @@ export default function ResetPasswordButton({ userId, userName }) {
 	const [isPending, startTransition] = useTransition();
 
 	function handleReset() {
-		if (!window.confirm(`Reset ${userName}'s password to the default? They'll need to be told the new password.`)) {
+		if (
+			!window.confirm(
+				`Reset ${userName}'s password to a new random one? They'll need to be told the new password and will have to change it before using the rest of the admin.`,
+			)
+		) {
 			return;
 		}
 
@@ -18,7 +22,7 @@ export default function ResetPasswordButton({ userId, userName }) {
 			if (result?.error) {
 				toast.error(result.error);
 			} else {
-				toast.success(`Password reset. New password: ${result.password}`, { duration: 15000 });
+				toast.success(`Password reset. New password: ${result.password}`, { duration: 20000 });
 			}
 		});
 	}

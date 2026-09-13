@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { changeEmailSchema, computeDefaultPassword } from "../schemas";
+import { changeEmailSchema } from "../schemas";
 import { changeOwnEmailAction } from "../actions";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
@@ -19,14 +19,11 @@ export default function ChangeEmailForm({ currentEmail }) {
 	const {
 		register,
 		handleSubmit,
-		watch,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(changeEmailSchema),
 		defaultValues: { newEmail: "" },
 	});
-
-	const newEmailValue = watch("newEmail");
 
 	function onSubmit(values) {
 		startTransition(async () => {
@@ -37,7 +34,7 @@ export default function ChangeEmailForm({ currentEmail }) {
 				return;
 			}
 
-			toast.success(`Email updated. Your password also reset to: ${result.password}`, { duration: 20000 });
+			toast.success("Email updated. Your password is unchanged.");
 			router.refresh();
 		});
 	}
@@ -53,8 +50,7 @@ export default function ChangeEmailForm({ currentEmail }) {
 				<Label htmlFor="newEmail">New email</Label>
 				<Input id="newEmail" type="email" autoComplete="off" {...register("newEmail")} />
 				<p className="mt-1.5 text-xs text-txt-muted dark:text-txt-muted-dark">
-					Your password will reset to match:{" "}
-					<span className="font-mono">{newEmailValue ? computeDefaultPassword(newEmailValue) : "—"}</span>
+					Your password stays the same — only the sign-in email changes.
 				</p>
 				<FieldError>{errors.newEmail?.message}</FieldError>
 			</div>
