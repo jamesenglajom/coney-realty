@@ -83,7 +83,7 @@ export async function updateViewingRequestStatusAction(id, status) {
 		// Referral attribution isn't role-scoped (see submitViewingRequestAction
 		// above — anyone's ?agent= link can be the one credited), so whoever's
 		// id is actually on the request can update its status regardless of
-		// role, same as MyReferredViewingRequests already shows it to them.
+		// role, same as the My Referrals page/widget already shows it to them.
 		const { data: request } = await supabase
 			.from("viewing_requests")
 			.select("referring_agent_id")

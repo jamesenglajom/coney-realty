@@ -1,10 +1,14 @@
+import { Building2, CheckCircle2, TrendingUp, Wallet } from "lucide-react";
 import { requireUser } from "@/features/auth/permissions";
 import { getAgentPropertyStats } from "@/features/properties/queries";
-import { PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
+import { PROPERTY_STATUSES, PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
+import { listViewingRequestsForAgent } from "@/features/viewings/queries";
 import AdminDashboard from "@/features/dashboard/components/AdminDashboard";
 import KpiTile from "@/features/dashboard/components/KpiTile";
+import ChartPanel from "@/features/dashboard/components/ChartPanel";
+import BarChart from "@/features/dashboard/components/BarChart";
 import DashboardCalendar from "@/features/dashboard/components/DashboardCalendar";
-import MyReferredViewingRequests from "@/features/viewings/components/MyReferredViewingRequests";
+import { MyReferralsWidget } from "@/features/dashboard/components/DashboardWidgets";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
@@ -13,46 +17,65 @@ const priceFormatter = new Intl.NumberFormat("en-PH", {
 	maximumFractionDigits: 0,
 });
 
+// Same status palette AdminDashboard's own "Properties by status" chart uses
+// (see features/dashboard/components/AdminDashboard.jsx) — kept as its own
+// small copy here rather than a shared import, since it's a 5-entry lookup
+// object, not a real abstraction worth wiring a cross-file dependency for.
+const STATUS_COLOR_CLASSES = {
+	draft: "bg-chart-status-draft dark:bg-chart-status-draft-dark",
+	published: "bg-chart-status-published dark:bg-chart-status-published-dark",
+	on_hold: "bg-chart-status-onhold dark:bg-chart-status-onhold-dark",
+	sold: "bg-chart-status-sold dark:bg-chart-status-sold-dark",
+	archived: "bg-chart-status-archived dark:bg-chart-status-archived-dark",
+};
+
 async function AgentDashboard({ userId }) {
-	const stats = await getAgentPropertyStats(userId);
+	const [stats, myReferrals] = await Promise.all([
+		getAgentPropertyStats(userId),
+		listViewingRequestsForAgent(userId),
+	]);
+
+	const statusData = PROPERTY_STATUSES.map((status) => ({
+		label: (PROPERTY_STATUS_LABELS[status] ?? status).replace(/_/g, " "),
+		value: stats.byStatus[status] ?? 0,
+		colorClassName: STATUS_COLOR_CLASSES[status],
+	}));
 
 	return (
 		<div>
 			<PageHeader title="My dashboard" description="Stats for the properties assigned to you." />
 
-			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-				<KpiTile label="Assigned listings" value={stats.totalAssigned} />
-				<KpiTile label="Published" value={stats.byStatus.published} />
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<KpiTile label="Assigned listings" value={stats.totalAssigned} icon={Building2} tone="blue" />
+				<KpiTile label="Published" value={stats.byStatus.published} icon={CheckCircle2} tone="success" />
 				<KpiTile
 					label="Sold (this month)"
 					value={stats.thisMonth.count}
 					sublabel={priceFormatter.format(stats.thisMonth.volume)}
+					icon={TrendingUp}
+					tone="gold"
 				/>
 				<KpiTile
 					label="Sold (lifetime)"
 					value={stats.lifetime.count}
 					sublabel={priceFormatter.format(stats.lifetime.volume)}
+					icon={Wallet}
+					tone="warning"
 				/>
 			</div>
 
-			<div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
-				<div className="grid grid-cols-2 gap-4 sm:grid-cols-5 lg:self-start">
-					{Object.entries(stats.byStatus).map(([status, count]) => (
-						<div
-							key={status}
-							className="rounded-2xl border border-theme-gold-light/70 p-4 text-center dark:border-border-dark"
-						>
-							<p className="text-xs font-semibold uppercase tracking-wider text-txt-muted dark:text-txt-muted-dark">
-								{(PROPERTY_STATUS_LABELS[status] ?? status).replace(/_/g, " ")}
-							</p>
-							<p className="mt-1 text-lg font-bold text-theme-blue dark:text-white">{count}</p>
-						</div>
-					))}
+			<div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+				<div className="lg:col-span-3">
+					<ChartPanel title="My listings by status">
+						<BarChart data={statusData} />
+					</ChartPanel>
 				</div>
 				<DashboardCalendar />
 			</div>
 
-			<MyReferredViewingRequests userId={userId} />
+			<div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<MyReferralsWidget requests={myReferrals} />
+			</div>
 		</div>
 	);
 }

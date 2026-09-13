@@ -51,7 +51,8 @@ export const navigationGroups = [
         // Every role can refer a visitor via their own ?agent= link (see
         // features/viewings/referral.js) and should be able to see/act on
         // it regardless of whether their role has the "viewings" page
-        // permission — same as MyReferredViewingRequests on the dashboard.
+        // permission — same as the "My referrals" dashboard widget
+        // (DashboardWidgets.jsx's MyReferralsWidget).
         alwaysVisible: true,
       },
     ],

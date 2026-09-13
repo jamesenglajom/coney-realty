@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Building2, Trophy, Quote, CalendarCheck, ImageOff } from "lucide-react";
+import { Building2, Trophy, Quote, CalendarCheck, BellRing, ImageOff } from "lucide-react";
 import DashboardWidgetCard from "./DashboardWidgetCard";
 import { PROPERTY_STATUS_LABELS } from "@/features/properties/schemas";
 
@@ -212,6 +212,52 @@ export function ViewingsWidget({ requests }) {
 									{dateFormatter.format(new Date(request.preferred_date))}
 								</span>
 							) : null}
+							<span
+								className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${VIEWING_STATUS_PILL_CLASSES[request.status] ?? ""}`}
+							>
+								{request.status}
+							</span>
+						</li>
+					))}
+				</ul>
+			)}
+		</DashboardWidgetCard>
+	);
+}
+
+// Scoped to just this user's own referred viewing requests (see
+// listViewingRequestsForAgent) — shown on every role's dashboard since
+// referral attribution isn't role-scoped, linking through to the full
+// /admin/my-referrals list rather than duplicating that table inline here.
+export function MyReferralsWidget({ requests }) {
+	const pendingCount = requests.filter((request) => request.status === "pending").length;
+	const recent = requests.slice(0, 3);
+
+	return (
+		<DashboardWidgetCard
+			icon={BellRing}
+			title="My referrals"
+			subtitle={`${requests.length} total`}
+			href="/admin/my-referrals"
+			linkLabel="View my referrals"
+		>
+			{pendingCount > 0 ? (
+				<div className="mb-3.5 flex gap-2">
+					<span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${VIEWING_STATUS_PILL_CLASSES.pending}`}>
+						{pendingCount} pending
+					</span>
+				</div>
+			) : null}
+
+			{recent.length === 0 ? (
+				<p className="text-xs text-txt-muted dark:text-txt-muted-dark">No referrals yet.</p>
+			) : (
+				<ul className="space-y-2.5">
+					{recent.map((request) => (
+						<li key={request.id} className="flex items-center gap-2.5">
+							<p className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-txt-primary dark:text-txt-primary-dark">
+								{request.visitor_name}
+							</p>
 							<span
 								className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${VIEWING_STATUS_PILL_CLASSES[request.status] ?? ""}`}
 							>

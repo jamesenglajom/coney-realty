@@ -5,16 +5,15 @@ import { getRolePermissions } from "@/features/auth/permissions";
 import { listProperties } from "@/features/properties/queries";
 import { listLeaderboardEntries } from "@/features/leaderboard/queries";
 import { listTestimonials } from "@/features/testimonials/queries";
-import { listViewingRequests } from "@/features/viewings/queries";
+import { listViewingRequests, listViewingRequestsForAgent } from "@/features/viewings/queries";
 import { getAdminDashboardStats, getTopAgentsByListings } from "../queries";
 import BarChart from "./BarChart";
 import TrendChart from "./TrendChart";
 import DonutChart from "./DonutChart";
 import KpiTrendCard from "./KpiTrendCard";
 import ChartPanel from "./ChartPanel";
-import { PropertiesWidget, LeaderboardWidget, TestimonialsWidget, ViewingsWidget } from "./DashboardWidgets";
+import { PropertiesWidget, LeaderboardWidget, TestimonialsWidget, ViewingsWidget, MyReferralsWidget } from "./DashboardWidgets";
 import DashboardCalendar from "./DashboardCalendar";
-import MyReferredViewingRequests from "@/features/viewings/components/MyReferredViewingRequests";
 import PageHeader from "@/app/components/admin/page-header/PageHeader";
 
 const priceFormatter = new Intl.NumberFormat("en-PH", {
@@ -63,11 +62,12 @@ export default async function AdminDashboard({ userId, role }) {
 	const canViewTestimonials = Boolean(permissions?.testimonials?.can_view);
 	const canViewViewings = Boolean(permissions?.viewings?.can_view);
 
-	const [recentProperties, leaderboardEntries, testimonials, viewingRequests] = await Promise.all([
+	const [recentProperties, leaderboardEntries, testimonials, viewingRequests, myReferrals] = await Promise.all([
 		canViewProperties ? listProperties() : Promise.resolve([]),
 		canViewLeaderboard ? listLeaderboardEntries() : Promise.resolve([]),
 		canViewTestimonials ? listTestimonials() : Promise.resolve([]),
 		canViewViewings ? listViewingRequests() : Promise.resolve([]),
+		listViewingRequestsForAgent(userId),
 	]);
 
 	const statusData = PROPERTY_STATUSES.map((status) => ({
@@ -152,6 +152,7 @@ export default async function AdminDashboard({ userId, role }) {
 				{canViewLeaderboard ? <LeaderboardWidget entries={leaderboardEntries} /> : null}
 				{canViewTestimonials ? <TestimonialsWidget testimonials={testimonials} /> : null}
 				{canViewViewings ? <ViewingsWidget requests={viewingRequests} /> : null}
+				<MyReferralsWidget requests={myReferrals} />
 			</div>
 
 			{agentData.length > 0 ? (
@@ -187,8 +188,6 @@ export default async function AdminDashboard({ userId, role }) {
 					<BarChart data={roleData} />
 				</ChartPanel>
 			</div>
-
-			<MyReferredViewingRequests userId={userId} />
 		</div>
 	);
 }

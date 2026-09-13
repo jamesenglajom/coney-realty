@@ -12,8 +12,8 @@ export const metadata = {
 // permission — requireUser() only, no requirePermission(). Referral
 // attribution (?agent=<id>, see features/viewings/referral.js) isn't
 // role-scoped, so whoever's id ends up on a request should be able to see
-// (and act on) it here, the same list MyReferredViewingRequests already
-// shows inline on the dashboard, just as its own page.
+// (and act on) it here — the full list behind the "My referrals" dashboard
+// widget's (DashboardWidgets.jsx) "View my referrals" link.
 export default async function MyReferralsPage() {
 	const user = await requireUser();
 	const requests = await listViewingRequestsForAgent(user.id);
